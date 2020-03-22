@@ -1,0 +1,1428 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<!-- Apple devices fullscreen -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<!-- Apple devices fullscreen -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<link href="__PUBLIC__/static/css/main.css" rel="stylesheet" type="text/css">
+	<link href="__PUBLIC__/static/css/page.css" rel="stylesheet" type="text/css">
+	<link href="__PUBLIC__/static/font/css/font-awesome.min.css" rel="stylesheet" />
+	<!--[if IE 7]>
+	<link rel="stylesheet" href="__PUBLIC__/static/font/css/font-awesome-ie7.min.css">
+	<![endif]-->
+	<link href="__PUBLIC__/static/js/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+	<link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css"/>
+	<style type="text/css">html, body { overflow: visible;}</style>
+	<script type="text/javascript" src="__PUBLIC__/static/js/jquery.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/layer/layer.js"></script><!-- 弹窗js 参考文档 http://layer.layui.com/-->
+	<script type="text/javascript" src="__PUBLIC__/static/js/admin.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/flexigrid.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/jquery.validation.min.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/perfect-scrollbar.min.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/static/js/jquery.mousewheel.js"></script>
+	<script src="__PUBLIC__/js/myFormValidate.js"></script>
+	<script src="__PUBLIC__/js/myAjax2.js"></script>
+	<script src="__PUBLIC__/js/global.js"></script>
+	<!--<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=pnPqe5t8sFyrN5h7xEUSs8wflrN8ccSg"></script>-->
+	<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=89NCsWnif6i5gM80Fz12Ly003o5rZ3Ga"></script>
+	<script src="__ROOT__/public/static/js/layer/layDate-v5.0.9/laydate/laydate.js"></script>
+	<!--加载鼠标绘制工具-->
+	<script type="text/javascript" src="https://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<link rel="stylesheet" href="https://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+
+	<script type="text/javascript" src="https://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<script type="text/javascript" src="https://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+
+</head>
+
+<style>
+	ul.group-list {
+		width: 96%;min-width: 1000px; margin: auto 5px;list-style: disc outside none;
+	}
+	.err{color:#F00; display:none;}
+	ul.group-list li {
+		white-space: nowrap;float: left;
+		width: 150px; height: 25px;
+		padding: 3px 5px;list-style-type: none;
+		list-style-position: outside;border: 0px;margin: 0px;
+	}
+	.row .table-bordered td .btn,.row .table-bordered td img{
+		vertical-align: middle;
+	}
+	.row .table-bordered td{
+		padding: 8px;
+		line-height: 1.42857143;
+	}
+	.table-bordered{
+		width: 100%
+	}
+	.table-bordered tr td{
+		border: 1px solid #f4f4f4;
+	}
+	.btn-success {
+		color: #fff;background-color: #449d44;border-color: #398439 solid 1px;
+	}
+	.btn {
+		display: inline-block;
+		padding: 6px 12px;
+		margin-bottom: 0;
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 1.42857143;
+		text-align: center;
+		white-space: nowrap;
+		vertical-align: middle;
+		-ms-touch-action: manipulation;
+		touch-action: manipulation;
+		cursor: pointer;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		background-image: none;
+		border: 1px solid transparent;
+		border-radius: 4px;
+	}
+	.col-xs-8 {
+		width: 66.66666667%;
+	}
+	.col-xs-4 {
+		width: 33.33333333%;
+	}
+	.col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+		float: left;
+	}
+	.row .tab-pane h4{
+		padding: 10px 0;
+	}
+	.row .tab-pane h4 input{
+		vertical-align: middle;
+	}
+	.table-striped>tbody>tr:nth-of-type(odd) {
+		background-color: #f9f9f9;
+	}
+	.ncap-form-default .title{
+		border-bottom: 0
+	}
+	.ncap-form-default dl.row, .ncap-form-all dd.opt{
+		/*border-color: #F0F0F0;*/
+		border: none;
+	}
+	.ncap-form-default dl.row:hover, .ncap-form-all dd.opt:hover{
+		border: none;box-shadow: inherit;
+	}
+	.addprine{display: inline; }
+	.alisth{margin-top: 10px}
+	.p_plus strong{cursor: pointer;margin-left: 4px;}
+	* {
+		margin: 0px;
+		padding: 0px;
+	}
+
+	#main {
+		height: 553px;
+		width: 800px;
+		border: 1px solid #5688CB;
+		border-top: 0px;
+		clear: both;
+	}
+
+	#tooles {
+		height: 23px;
+		background: #5688CB;
+		position: relative;
+		z-index: 100;
+		color:white;
+	}
+
+	#bside_left {
+		width: 140px;
+		height: 510px;
+		padding: 10px 0px 10px 10px;
+		float: left;
+		overflow: auto;
+	}
+
+	#cur_city, #no_value {
+		height: 20px;
+		position: absolute;
+		top: 3px;
+		left: 10px;
+	}
+
+	#cur_city .change_city {
+		margin-left: 5px;
+		cursor: pointer;
+	}
+
+
+	#level {
+		margin-left: 20px;
+	}
+
+
+	.logo_img {
+		width: 172px;
+		height: 23px;
+	}
+
+	.search {
+		width: 280px;
+		height: 53px;
+
+		float: left;
+
+		margin-right: 30px;
+	}
+
+	.search_t {
+		width: 200px;
+		height: 18px;
+
+		padding: 3px;
+		margin-top: 13px;
+		line-height: 20px;
+	}
+
+	.search_c {
+		width: 220px;
+		height: 40px;
+		float: left;
+	}
+
+	.btn_get, .btn_active {
+		width: 49px;
+		height: 24px;
+		line-height: 24px;
+		font-size: 14px;
+		float: left;
+		background: url(./img/btn.png);
+		margin-top: 14px;
+		text-align: center;
+		cursor: pointer;
+	}
+
+	.btn_active {
+		background: url(./img/btn.png) -49px 0px;
+	}
+
+	.poi {
+		width: 570px;
+		height: 41;
+		padding-top: 12px;
+		position: relative;
+	}
+
+	.poi_note {
+		width: 63px;
+		line-height: 26px;
+		float: left;
+	}
+
+	#poi_cur {
+		width: 160px;
+		height: 22px;
+		margin-right: 10px;
+		margin-top: 3px;
+		line-height: 26px;
+
+		float: left;
+		text-align: center;
+	}
+
+	#addr_cur {
+		width: 240px;
+		height: 22px;
+		margin-right: 5px;
+		margin-top: 3px;
+		line-height: 26px;
+
+		float: left;
+		text-align: center;
+	}
+
+	.btn_copy {
+		width: 49px;
+		height: 24px;
+		background: url(./img/btn_cpoy.png) 0px 0px;
+		float: left;
+	}
+
+	.already {
+		width: 52px;
+		line-height: 26px;
+		padding-left: 5px;
+		float: left;
+		color: red;
+		display: none;
+	}
+
+	.info_list {
+		margin-bottom: 5px;
+		cleat: both;
+		cursor: pointer;
+	}
+
+	#txt_pannel {
+		height: 500px;
+	}
+
+	#city2 {
+		width: 356px;
+		height: 433px;
+		padding: 10px;
+		border: 2px solid #D6D6D6;
+		position: absolute;
+		left: 44px;
+		top: 20px;
+		z-index: 999;
+		background: #fff;
+		overflow: auto;
+		color: black;
+	}
+
+	#city2 .city_class {
+		font-size: 12px;
+		background: #fff;
+	}
+
+	#city2 .city_container {
+		margin-top: 10px;
+		margin-bottom: 10px;
+		background: #fff;
+	}
+
+	#city2 .city_container_left {
+		width: 48px;
+		float: left;
+	}
+
+	#city2 .city_container_right {
+		width: 289px;
+		float: left;
+	}
+
+	#city2 .close {
+		width: 20px;
+		height: 20px;
+		display: inline-block;
+		float: right;
+		font-size: 20px;
+		font-weight: normal;
+		cursor: pointer;
+	}
+
+	#city2 .city_name {
+		line-height: 20px;
+		margin-left: 5px;
+		color: #2F82C4;
+		cursor: pointer;
+		display: inline-block;
+		font-size: 12px;
+	}
+
+	#curCity {
+		margin-right: 5px;
+	}
+
+	.hide {
+		display: none;
+	}
+
+	#bside_rgiht {
+		width: 631px;
+		height: 530px;
+		margin-left: 10px;
+		border-left: 1px solid #5688CB;
+		float: left;
+		font-size: 12px;
+	}
+
+	#container {
+		width: 621px;
+		height: 520px;
+		border: 5px solid #fff;
+	}
+
+	#no_value{
+		color:red;
+		position: relative;
+		width:200px;
+	}
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title">
+			<a class="back" href="javascript:history.back();" title="返回列表">
+				<i class="fa fa-arrow-circle-o-left"></i>
+			</a>
+			<div class="subject">
+				<h3>区县代理合伙人管理 - 编辑区县代理合伙人</h3>
+				<!--<h5>网站系统编辑区县代理合伙人</h5>-->
+			</div>
+			<ul class="tab-base nc-row">
+				<li><a class="current" onclick="$('#tab_store').show();$('#tab_info').hide();$(this).parent().parent().find('a').removeClass('current');$(this).addClass('current');"><span>账号信息</span></a></li>
+				<!--<li><a onclick="$('#tab_info').show();$('#tab_store').hide();$(this).parent().parent().find('a').removeClass('current');$(this).addClass('current');"><span>个人信息</span></a></li>-->
+			</ul>
+		</div>
+	</div>
+	<form class="form-horizontal" method="post" id="store_info">
+		<div class="ncap-form-default" id="tab_store" style="overflow: auto">
+			<dl class="row">
+				<dt class="tit">
+					<label>区县代理合伙人账号</label>
+				</dt>
+				<dd class="opt">
+					<input class="input-txt valid" value="{$store.seller_name}" readonly="" type="text">
+					<p class="notic">区县代理合伙人账号不可修改。</p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="member_passwd">修改登录密码</label>
+				</dt>
+				<dd class="opt">
+					<input type="password" value="{$store.password}" id="password" name="store[password]" class="input-txt" />
+					<span class="err"></span>
+					<p class="notic">用以登录区县代理合伙中心密码</p>
+				</dd>
+			</dl>
+
+		<!--	<dl class="row">
+				<dt class="tit">
+					<label>入驻时间</label>
+				</dt>
+				<dd class="opt">
+				/*	<input class="input-txt valid" value="{$store.store_time|date='Y-m-d H:i:s',###}" readonly="" type="text">*/
+					<p class="notic">入驻时间不可修改。</p>
+				</dd>
+			</dl>-->
+			<!--<dl class="row">
+				<dt  class="tit">所属区县代理推荐人</dt>
+				<dd class="opt">
+					<select id="tui_store_county_id" name="store[tui_store_county_id]">
+						<option value="0">选择区县代理推荐人</option>
+						<volist name="storecounty" id="vo">
+							<option value="{$vo.store_id}"<if condition="$vo[store_id] eq $store[tui_store_county_id]">selected</if>>{$vo.store_name}({$vo.company_district})</option>
+						</volist>
+					</select>
+					<p class="notic" style="color:#ec5151;">如果有区县代理推荐人，可以添加绑定推荐人，没有可以不选择；</p>
+					<p class="notic" style="color:#ec5151;">此推荐绑定关系成立后，以后此推荐人将可以拿取该区县代理门店每笔成交订单额的相应比例</p>
+				</dd>
+			</dl>-->
+
+			<dl class="row">
+	          <dt class="tit">所属城市</dt>
+	          <dd class="opt">
+	            <input style="width:130px !important;" class="input-txt valid" value="{$store.company_province_name.name}" readonly="" type="text">
+	            <input style="width:130px !important;" class="input-txt valid" value="{$store.company_city_name.name}" readonly="" type="text">
+	            <p class="notic">所属省级不可修改。</p>
+	          </dd>
+	      	</dl>
+	      	<dl class="row">
+				<dt class="tit">
+					<label>店铺名称</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.store_name}" name="store[store_name]" class="input-txt">
+					<span class="err" id="err_goods_remark" style="color:#F00; display:none;"></span>
+					<p class="notic">店铺名称不可修改。</p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="user_name"><em>*</em>店铺配送id号</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.sfid}" name="sfid" class="input-txt">
+					<span class="err" id="sfid" style="color:#F00; display:none;"></span>
+					<p class="notic">配送id号。</p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="user_name"><em>*</em>联系人姓名</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.user_name}" name="store[user_name]" class="input-txt">
+					<span class="err" id="err_user_name" style="color:#F00; display:none;"></span>
+					<p class="notic">联系人姓名。</p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="store_phone"><em>*</em>联系手机号码</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="store[store_phone]" id="store_phone" value="{$store.store_phone}" class="input-txt">
+					<span class="err"></span>
+					<p class="notic">手机号</p>
+				</dd>
+			</dl>
+
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="store_name"><em>*</em>工作时间</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.store_time}" id="store_time" name="store[store_time]" class="input-txt" />
+					---	<input type="text" value="{$store.store_end_time}" id="store_end_time" name="store[store_end_time]" class="input-txt" />
+					<span class="err"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+
+
+			<!--<dl class="row">-->
+				<!--<dt class="tit">-->
+					<!--<label>门店地址</label>-->
+				<!--</dt>-->
+				<!--<dd class="opt">-->
+					<!--<input readonly="" type="text" value="{$store.store_address}" name="store[store_address]" class="input-txt">-->
+					<!--<span class="err" style="color:#F00; display:none;"></span>-->
+					<!--<p class="notic">门店地址不可修改。</p>-->
+				<!--</dd>-->
+			<!--</dl>-->
+
+			<dl class="row">
+				<dt class="tit">
+					<label>状态</label>
+				</dt>
+				<dd class="opt">
+					<div class="onoff">
+						<label for="store_state1" onclick="$('#close_reason').hide();" class="cb-enable <if condition='$store[store_state] eq 1'>selected</if>">开启</label>
+						<label for="store_state0" onclick="$('#close_reason').show();" class="cb-disable <if condition='$store[store_state] eq 0'>selected</if>">关闭</label>
+						<input id="store_state1" name="store[store_state]" <if condition="$store[store_state] eq 1">checked="checked"</if> value="1" type="radio">
+						<input id="store_state0" name="store[store_state]" <if condition="$store[store_state] eq 0">checked="checked"</if> value="0" type="radio">
+					</div>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+			<dl class="row" id="close_reason" <if condition="$store[store_state]  eq 1">style="display:none;"</if>>
+				<dt class="tit">关闭原因</dt>
+				<dd class="opt">
+					<textarea class="input-txt" name="store[store_close_info]">{$store.store_close_info}</textarea>
+					<span class="err"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit"><em>*</em>服务区域坐标：</dt>
+				<dd class="opt">
+					<input class="lnglat" style="display:block;width:100%;" type="text" class="w150 text" name="store[lnglat]" value='{$store.lnglat}' readonly/><span></span>
+					<p class="notic" style="color:red;">注：如果需要添加服务区域可添加，没有可不圈画添加</p>
+				</dd>
+			</dl>
+			<!--之前腾讯地图-->
+			<div style="margin:0 auto;position:relative;">
+				<div >
+					<div >
+						<div class="poi">
+							<div class="poi_note">门店坐标：</div>
+							<input class="store_lnglat" type="text" id="poi_cur" value="{$store.store_lnglat}" name="store[store_lnglat]" value="" readonly/>
+
+						</div>
+						<div class="poi">
+
+							<div class="poi_note">门店地址：</div>
+							<input class="store_address" type="text" id="addr_cur" value="{$store.store_address}" name="store[store_address]" value="" />
+						</div>
+						<div class="search">
+							<div class="search_c">
+								<!--<input id="areasearch" style="height:24px;" type="text" class="search_t" onKeyPress="if(event.keyCode==13) {btnSearch.click();return false;}" placeholder="输入服务区域地址搜索"/></div>-->
+								<input name="searchaddress"  style="height:24px;" type="text" class="search_t"  placeholder="输入服务区域地址搜索"/>
+							</div>
+							<div id="btn_search" class="btn_get addresssearch">搜索</div>
+						</div>
+					</div>
+					<div id="main">
+						<div id="tooles">
+							<div id="cur_city">
+								<!--<strong>北京市</strong>-->
+								<span class="change_city">
+								<!--[<span style="text-decoration:underline;">更换城市</span>]-->
+								<span id="level">当前缩放等级：10</span>
+							</span>
+								<div id="city2" class="hide">
+									<h3 class="city_class">热门城市<span class="close">X</span></h3>
+									<div class="city_container">
+										<span class="city_name">北京</span>
+										<span class="city_name">深圳</span>
+										<span class="city_name">上海</span>
+										<span class="city_name">香港</span>
+										<span class="city_name">澳门</span>
+										<span class="city_name">广州</span>
+										<span class="city_name">天津</span>
+										<span class="city_name">重庆</span>
+										<span class="city_name">杭州</span>
+										<span class="city_name">成都</span>
+										<span class="city_name">武汉</span>
+										<span class="city_name">青岛</span>
+									</div>
+									<h3 class="city_class">全国城市</h3>
+									<div class="city_container">
+										<div class="city_container_left">直辖市</div>
+										<div class="city_container_right">
+											<span class="city_name">北京</span>
+											<span class="city_name">上海</span>
+											<span class="city_name">天津</span>
+											<span class="city_name">重庆</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">内蒙古</span></div>
+										<div class="city_container_right">
+											<span class="city_name">呼和浩特</span>
+											<span class="city_name">包头</span>
+											<span class="city_name">乌海</span>
+											<span class="city_name">赤峰</span>
+											<span class="city_name">通辽</span>
+											<span class="city_name">鄂尔多斯</span>
+											<span class="city_name">呼伦贝尔</span>
+											<span class="city_name">巴彦淖尔</span>
+											<span class="city_name">乌兰察布</span>
+											<span class="city_name">兴安盟</span>
+											<span class="city_name">锡林郭勒盟</span>
+											<span class="city_name">阿拉善盟</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">山西</span></div>
+										<div class="city_container_right">
+											<span class="city_name">太原</span>
+											<span class="city_name">大同</span>
+											<span class="city_name">阳泉</span>
+											<span class="city_name">长治</span>
+											<span class="city_name">晋城</span>
+											<span class="city_name">朔州</span>
+											<span class="city_name">晋中</span>
+											<span class="city_name">运城</span>
+											<span class="city_name">忻州</span>
+											<span class="city_name">临汾</span>
+											<span class="city_name">吕梁</span>
+
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">陕西</span></div>
+										<div class="city_container_right">
+											<span class="city_name">西安</span>
+											<span class="city_name">铜川</span>
+											<span class="city_name">宝鸡</span>
+											<span class="city_name">咸阳</span>
+											<span class="city_name">渭南</span>
+											<span class="city_name">延安</span>
+											<span class="city_name">汉中</span>
+											<span class="city_name">榆林</span>
+											<span class="city_name">安康</span>
+											<span class="city_name">商洛</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">河北</span></div>
+										<div class="city_container_right">
+											<span class="city_name">石家庄</span>
+											<span class="city_name">唐山</span>
+											<span class="city_name">秦皇岛</span>
+											<span class="city_name">邯郸</span>
+											<span class="city_name">邢台</span>
+											<span class="city_name">保定</span>
+											<span class="city_name">张家口</span>
+											<span class="city_name">承德</span>
+											<span class="city_name">沧州</span>
+											<span class="city_name">廊坊</span>
+											<span class="city_name">衡水</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">辽宁</span></div>
+										<div class="city_container_right">
+											<span class="city_name">沈阳</span>
+											<span class="city_name">大连</span>
+											<span class="city_name">鞍山</span>
+											<span class="city_name">抚顺</span>
+											<span class="city_name">本溪</span>
+											<span class="city_name">丹东</span>
+											<span class="city_name">锦州</span>
+											<span class="city_name">营口</span>
+											<span class="city_name">阜新</span>
+											<span class="city_name">辽阳</span>
+											<span class="city_name">盘锦</span>
+											<span class="city_name">铁岭</span>
+											<span class="city_name">朝阳</span>
+											<span class="city_name">葫芦岛</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">吉林</span></div>
+										<div class="city_container_right">
+											<span class="city_name">长春</span>
+											<span class="city_name">吉林</span>
+											<span class="city_name">四平</span>
+											<span class="city_name">辽源</span>
+											<span class="city_name">通化</span>
+											<span class="city_name">白山</span>
+											<span class="city_name">松原</span>
+											<span class="city_name">白城</span>
+											<span class="city_name">延边</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">黑龙江</span></div>
+										<div class="city_container_right">
+											<span class="city_name">哈尔滨</span>
+											<span class="city_name">齐齐哈尔</span>
+											<span class="city_name">鸡西</span>
+											<span class="city_name">鹤岗</span>
+											<span class="city_name">双鸭山</span>
+											<span class="city_name">大庆</span>
+											<span class="city_name">伊春</span>
+											<span class="city_name">牡丹江</span>
+											<span class="city_name">佳木斯</span>
+											<span class="city_name">七台河</span>
+											<span class="city_name">黑河</span>
+											<span class="city_name">绥化</span>
+											<span class="city_name">大兴安岭</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">江苏</span></div>
+										<div class="city_container_right">
+											<span class="city_name">南京</span>
+											<span class="city_name">无锡</span>
+											<span class="city_name">徐州</span>
+											<span class="city_name">常州</span>
+											<span class="city_name">苏州</span>
+											<span class="city_name">南通</span>
+											<span class="city_name">连云港</span>
+											<span class="city_name">淮安</span>
+											<span class="city_name">盐城</span>
+											<span class="city_name">扬州</span>
+											<span class="city_name">镇江</span>
+											<span class="city_name">泰州</span>
+											<span class="city_name">宿迁</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">安徽</span></div>
+										<div class="city_container_right">
+											<span class="city_name">合肥</span>
+											<span class="city_name">蚌埠</span>
+											<span class="city_name">芜湖</span>
+											<span class="city_name">淮南</span>
+											<span class="city_name">马鞍山</span>
+											<span class="city_name">淮北</span>
+											<span class="city_name">铜陵</span>
+											<span class="city_name">安庆</span>
+											<span class="city_name">黄山</span>
+											<span class="city_name">阜阳</span>
+											<span class="city_name">宿州</span>
+											<span class="city_name">滁州</span>
+											<span class="city_name">六安</span>
+											<span class="city_name">宣城</span>
+											<span class="city_name">池州</span>
+											<span class="city_name">亳州</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">山东</span></div>
+										<div class="city_container_right">
+											<span class="city_name">济南</span>
+											<span class="city_name">青岛</span>
+											<span class="city_name">淄博</span>
+											<span class="city_name">枣庄</span>
+											<span class="city_name">东营</span>
+											<span class="city_name">潍坊</span>
+											<span class="city_name">烟台</span>
+											<span class="city_name">威海</span>
+											<span class="city_name">济宁</span>
+											<span class="city_name">泰安</span>
+											<span class="city_name">日照</span>
+											<span class="city_name">莱芜</span>
+											<span class="city_name">临沂</span>
+											<span class="city_name">德州</span>
+											<span class="city_name">聊城</span>
+											<span class="city_name">滨州</span>
+											<span class="city_name">菏泽</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">浙江</span></div>
+										<div class="city_container_right">
+											<span class="city_name">杭州</span>
+											<span class="city_name">宁波</span>
+											<span class="city_name">温州</span>
+											<span class="city_name">嘉兴</span>
+											<span class="city_name">绍兴</span>
+											<span class="city_name">金华</span>
+											<span class="city_name">衢州</span>
+											<span class="city_name">舟山</span>
+											<span class="city_name">台州</span>
+											<span class="city_name">丽水</span>
+											<span class="city_name">湖州</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">江西</span></div>
+										<div class="city_container_right">
+											<span class="city_name">南昌</span>
+											<span class="city_name">景德镇</span>
+											<span class="city_name">萍乡</span>
+											<span class="city_name">九江</span>
+											<span class="city_name">新余</span>
+											<span class="city_name">鹰潭</span>
+											<span class="city_name">赣州</span>
+											<span class="city_name">吉安</span>
+											<span class="city_name">宜春</span>
+											<span class="city_name">抚州</span>
+											<span class="city_name">上饶</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">福建</span></div>
+										<div class="city_container_right">
+											<span class="city_name">福州</span>
+											<span class="city_name">厦门</span>
+											<span class="city_name">莆田</span>
+											<span class="city_name">三明</span>
+											<span class="city_name">泉州</span>
+											<span class="city_name">漳州</span>
+											<span class="city_name">南平</span>
+											<span class="city_name">龙岩</span>
+											<span class="city_name">宁德</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">湖南</span></div>
+										<div class="city_container_right">
+											<span class="city_name">长沙</span>
+											<span class="city_name">株洲</span>
+											<span class="city_name">湘潭</span>
+											<span class="city_name">衡阳</span>
+											<span class="city_name">邵阳</span>
+											<span class="city_name">岳阳</span>
+											<span class="city_name">常德</span>
+											<span class="city_name">张家界</span>
+											<span class="city_name">益阳</span>
+											<span class="city_name">郴州</span>
+											<span class="city_name">永州</span>
+											<span class="city_name">怀化</span>
+											<span class="city_name">娄底</span>
+											<span class="city_name">湘西</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">湖北</span></div>
+										<div class="city_container_right">
+											<span class="city_name">武汉</span>
+											<span class="city_name">黄石</span>
+											<span class="city_name">襄樊</span>
+											<span class="city_name">十堰</span>
+											<span class="city_name">宜昌</span>
+											<span class="city_name">荆门</span>
+											<span class="city_name">鄂州</span>
+											<span class="city_name">孝感</span>
+											<span class="city_name">荆州</span>
+											<span class="city_name">黄冈</span>
+											<span class="city_name">咸宁</span>
+											<span class="city_name">随州</span>
+											<span class="city_name">恩施</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">河南</span></div>
+										<div class="city_container_right">
+											<span class="city_name">郑州</span>
+											<span class="city_name">开封</span>
+											<span class="city_name">洛阳</span>
+											<span class="city_name">平顶山</span>
+											<span class="city_name">焦作</span>
+											<span class="city_name">鹤壁</span>
+											<span class="city_name">新乡</span>
+											<span class="city_name">安阳</span>
+											<span class="city_name">濮阳</span>
+											<span class="city_name">许昌</span>
+											<span class="city_name">漯河</span>
+											<span class="city_name">三门峡</span>
+											<span class="city_name">南阳</span>
+											<span class="city_name">商丘</span>
+											<span class="city_name">信阳</span>
+											<span class="city_name">周口</span>
+											<span class="city_name">驻马店</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">海南</span></div>
+										<div class="city_container_right">
+											<span class="city_name">海口</span>
+											<span class="city_name">三亚</span>
+											<span class="city_name">三沙</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">广东</span></div>
+										<div class="city_container_right">
+											<span class="city_name">广州</span>
+											<span class="city_name">深圳</span>
+											<span class="city_name">珠海</span>
+											<span class="city_name">汕头</span>
+											<span class="city_name">韶关</span>
+											<span class="city_name">佛山</span>
+											<span class="city_name">江门</span>
+											<span class="city_name">湛江</span>
+											<span class="city_name">茂名</span>
+											<span class="city_name">东沙群岛</span>
+											<span class="city_name">肇庆</span>
+											<span class="city_name">惠州</span>
+											<span class="city_name">梅州</span>
+											<span class="city_name">汕尾</span>
+											<span class="city_name">河源</span>
+											<span class="city_name">阳江</span>
+											<span class="city_name">清远</span>
+											<span class="city_name">东莞</span>
+											<span class="city_name">中山</span>
+											<span class="city_name">潮州</span>
+											<span class="city_name">揭阳</span>
+											<span class="city_name">云浮</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">广西</span></div>
+										<div class="city_container_right">
+											<span class="city_name">南宁</span>
+											<span class="city_name">柳州</span>
+											<span class="city_name">桂林</span>
+											<span class="city_name">梧州</span>
+											<span class="city_name">北海</span>
+											<span class="city_name">防城港</span>
+											<span class="city_name">钦州</span>
+											<span class="city_name">贵港</span>
+											<span class="city_name">玉林</span>
+											<span class="city_name">百色</span>
+											<span class="city_name">贺州</span>
+											<span class="city_name">河池</span>
+											<span class="city_name">来宾</span>
+											<span class="city_name">崇左</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">贵州</span></div>
+										<div class="city_container_right">
+											<span class="city_name">贵阳</span>
+											<span class="city_name">遵义</span>
+											<span class="city_name">安顺</span>
+											<span class="city_name">铜仁</span>
+											<span class="city_name">毕节</span>
+											<span class="city_name">六盘水</span>
+											<span class="city_name">黔西南</span>
+											<span class="city_name">黔东南</span>
+											<span class="city_name">黔南</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">四川</span></div>
+										<div class="city_container_right">
+											<span class="city_name">成都</span>
+											<span class="city_name">自贡</span>
+											<span class="city_name">攀枝花</span>
+											<span class="city_name">泸州</span>
+											<span class="city_name">德阳</span>
+											<span class="city_name">绵阳</span>
+											<span class="city_name">广元</span>
+											<span class="city_name">遂宁</span>
+											<span class="city_name">内江</span>
+											<span class="city_name">乐山</span>
+											<span class="city_name">南充</span>
+											<span class="city_name">宜宾</span>
+											<span class="city_name">广安</span>
+											<span class="city_name">达州</span>
+											<span class="city_name">眉山</span>
+											<span class="city_name">雅安</span>
+											<span class="city_name">巴中</span>
+											<span class="city_name">资阳</span>
+											<span class="city_name">阿坝</span>
+											<span class="city_name">甘孜</span>
+											<span class="city_name">凉山</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">云南</span></div>
+										<div class="city_container_right">
+											<span class="city_name">昆明</span>
+											<span class="city_name">保山</span>
+											<span class="city_name">昭通</span>
+											<span class="city_name">丽江</span>
+											<span class="city_name">普洱</span>
+											<span class="city_name">临沧</span>
+											<span class="city_name">曲靖</span>
+											<span class="city_name">玉溪</span>
+											<span class="city_name">文山</span>
+											<span class="city_name">西双版纳</span>
+											<span class="city_name">楚雄</span>
+											<span class="city_name">红河</span>
+											<span class="city_name">德宏</span>
+											<span class="city_name">大理</span>
+											<span class="city_name">怒江</span>
+											<span class="city_name">迪庆</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">甘肃</span></div>
+										<div class="city_container_right">
+											<span class="city_name">兰州</span>
+											<span class="city_name">嘉峪关</span>
+											<span class="city_name">金昌</span>
+											<span class="city_name">白银</span>
+											<span class="city_name">天水</span>
+											<span class="city_name">酒泉</span>
+											<span class="city_name">张掖</span>
+											<span class="city_name">武威</span>
+											<span class="city_name">定西</span>
+											<span class="city_name">陇南</span>
+											<span class="city_name">平凉</span>
+											<span class="city_name">庆阳</span>
+											<span class="city_name">临夏</span>
+											<span class="city_name">甘南</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">宁夏</span></div>
+										<div class="city_container_right">
+											<span class="city_name">银川</span>
+											<span class="city_name">石嘴山</span>
+											<span class="city_name">吴忠</span>
+											<span class="city_name">固原</span>
+											<span class="city_name">中卫</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">青海</span></div>
+										<div class="city_container_right">
+											<span class="city_name">西宁</span>
+											<span class="city_name">玉树</span>
+											<span class="city_name">果洛</span>
+											<span class="city_name">海东</span>
+											<span class="city_name">海西</span>
+											<span class="city_name">黄南</span>
+											<span class="city_name">海北</span>
+											<span class="city_name">海南</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">西藏</span></div>
+										<div class="city_container_right">
+											<span class="city_name">拉萨</span>
+											<span class="city_name">那曲</span>
+											<span class="city_name">昌都</span>
+											<span class="city_name">山南</span>
+											<span class="city_name">日喀则</span>
+											<span class="city_name">阿里</span>
+											<span class="city_name">林芝</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+									<div class="city_container">
+										<div class="city_container_left"><span class="style_color">新疆</span></div>
+										<div class="city_container_right">
+											<span class="city_name">乌鲁木齐</span>
+											<span class="city_name">克拉玛依</span>
+											<span class="city_name">吐鲁番</span>
+											<span class="city_name">哈密</span>
+											<span class="city_name">博尔塔拉</span>
+											<span class="city_name">巴音郭楞</span>
+											<span class="city_name">克孜勒苏</span>
+											<span class="city_name">和田</span>
+											<span class="city_name">阿克苏</span>
+											<span class="city_name">喀什</span>
+											<span class="city_name">塔城</span>
+											<span class="city_name">伊犁</span>
+											<span class="city_name">昌吉</span>
+											<span class="city_name">阿勒泰</span>
+										</div>
+									</div>
+									<div style="clear:both"></div>
+								</div>
+							</div>
+						</div>
+						<div id="bside_left">
+							<div id="txt_pannel">
+								<h3>功能简介：</h3>
+								<p>1、支持地址 精确/模糊 查询；</p>
+								<p>2、支持POI点坐标显示；</p>
+								<p>3、坐标鼠标跟随显示；</p>
+								<h3>使用说明：</h3>
+								<p>在搜索框搜索关键词后，地图上会显示相应poi点，同时左侧显示对应该点的信息，点击某点或某信息，右上角会显示相应该点的坐标和地址。</p>
+							</div>
+						</div>
+						<div id="bside_rgiht">
+							<!--<div id="container"></div>-->
+							<div id="container" style="overflow:hidden;zoom:1;position:relative;">
+								<div id="map" style="height:100%;-webkit-transition: all 0.5s ease-in-out;transition: all 0.5s ease-in-out;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="bot">
+				<a style="margin-top: 20px;" href="JavaScript:void(0);" onclick="actsubmit();" class="ncap-btn-big ncap-btn-green">确认提交</a>
+			</div>
+		</div>
+
+
+
+		<input type="hidden" name="store[district]" value="{$store.district}">
+		<input type="hidden" name="store[user_id]" value="{$store.user_id}">
+		<input type="hidden" name="store[store_id]" value="{$store.store_id}">
+	</form>
+</div>
+<script type="text/javascript">
+    //初始化数据显示所画区域
+    $(function() {
+        $.ajax({
+            type : "post",
+            url:"{:U('Storesub/datalnglat')}",
+            dataType:'json',
+            success: function(data) {
+                if(data.status == 1) {
+                    console.log(data.lnglat,"/////qqqq");
+                    let path={name:"photo",overlay:null,returnValue:false};
+
+                    path.overlay=data.lnglat;
+
+                    overlaycomplete(path);
+                    return;
+                }else {
+                    layer.alert(data.msg, {icon: 2});
+                }
+            }
+        })
+    });
+    laydate.render({
+        elem: '#store_time'
+        ,type: 'time'
+    });
+    laydate.render({
+        elem: '#store_end_time',
+        type: 'time',
+    });
+
+    //根据输入的服务地址获取经纬度并定位在地图上
+    $('.addresssearch').click(function() {
+        var address = $(this).siblings('.search_c').children('input').val();
+        var data = {
+            'address':address,
+        }
+        $.ajax({
+            type : "post",
+            url:"{:U('Storesub/areasearch')}",
+            data:data,
+            dataType:'json',
+            success: function(data) {
+                if(data.status == 1) {
+                    // 创建地址解析器实例
+                    var myGeo = new BMap.Geocoder();
+                    // 将地址解析结果显示在地图上,并调整地图视野
+                    myGeo.getPoint(data.addresslnglat, function(point){
+                        console.log(point,"point......")
+                        if (point) {
+                            map.centerAndZoom(point, 16);
+                            map.addOverlay(new BMap.Marker(point));
+                        }else{
+                            alert("您选择地址没有解析到结果!");
+                        }
+                    }, "杭州市");
+                }else {
+                    layer.alert(data.msg, {icon: 2});
+                }
+            }
+        })
+    });
+
+    var flag = true;
+    function actsubmit(){
+        if($('input[name=seller_name]').val() == ''){
+            layer.msg("店主卖家账号不能为空", {icon: 2,time: 2000});
+            return;
+        }
+        if($('input[name=password]').val() == ''){
+            layer.msg("登陆密码不能为空", {icon: 2,time: 2000});
+            return;
+        }
+        if($("#province option:selected").val() == 0){
+            layer.msg("请选择所属省份", {icon: 2,time: 2000});
+            return;
+        }
+        if($("#city option:selected").val() == 0){
+            layer.msg("请选择所属市级", {icon: 2,time: 2000});
+            return;
+        }
+        if($("#district option:selected").val() == 0 || $("#district option:selected").val() == '选择区域' || $("#district option:selected").val() == undefined){
+            layer.msg("请选择所属区县", {icon: 2,time: 2000});
+            return;
+        }
+        if($('input[name=store_name]').val() == ''){
+            layer.msg("店铺名称不能为空", {icon: 2,time: 2000});
+            return;
+        }
+        if($('input[name=store_address]').val() == ''){
+            layer.msg("门店地址不能为空", {icon: 2,time: 2000});
+            return;
+        }
+       /* if($('input[name=store_time]').val() == ''){
+            layer.msg("上班时间不能为空", {icon: 2,time: 2000});
+            return;
+        }
+        if($('input[name=store_end_time]').val() == ''){
+            layer.msg("下班时间不能为空", {icon: 2,time: 2000});
+            return;
+        }*/
+
+        if(flag){
+            $('#store_info').submit();
+        }
+    }
+
+    function store_check(){
+        $.ajax({
+            type:'post',
+            url:"{:U('Storesub/store_check')}",
+            dataType:'json',
+            data:{store_name:$('input[name=store_name]').val(),seller_name:$('input[name=seller_name]').val(),user_name:$('input[name=user_name]').val()},
+            success:function(res){
+                if(res.status != '1'){
+                    layer.msg(res.msg, {icon: 2,time: 2000});
+                    flag = false;
+                    return;
+                }else{
+                    flag = true;
+                }
+            }
+        });
+    }
+
+    // 现在百度地图API功能
+    var map = new BMap.Map('map');
+    var poi = new BMap.Point(119.95,30.05);
+    map.centerAndZoom(poi, 16);//设置中心点坐标和地图级别
+    map.enableScrollWheelZoom(); //启用鼠标滚动对地图放大缩小
+
+    var geoc = new BMap.Geocoder();
+    map.addEventListener("click", function(e){
+        //通过点击百度地图，可以获取到对应的point, 由point的lng、lat属性就可以获取对应的经度纬度
+        var pt = e.point;
+        geoc.getLocation(pt, function(rs){
+            //addressComponents对象可以获取到详细的地址信息
+            var addComp = rs.addressComponents;
+            var site = addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber;
+            $('.store_address').attr('value',site);
+            //将对应的HTML元素设置值
+            var lng_lat = pt.lng+','+pt.lat;
+            $('.store_lnglat').attr('value',lng_lat);
+            // $("#site").val(site);
+            // $("#longitude").val(pt.lng);
+            // $("#latitude").val(pt.lat);
+        });
+    });
+
+
+
+    //鼠标绘制完成回调方法   获取各个点的经纬度
+    var overlays = [];
+
+
+    var overlaycomplete = function(e){
+        var overlays = [];
+        console.log(e,"qqq");
+        console.log(e.overlay,"//////");
+        var path=null;
+        if(e.returnValue){
+            console.log(e.overlay);
+            path = e.overlay.getPath();//Array<Point> 返回多边型的点数组
+        }else{
+            path=e.overlay;
+            console.log(path,"/////////");
+            for (var i =0; i < path.length; i++) {
+                polylinePointsArray=[];
+                for(var j=0;j< path[i].length;j++){
+                    var point=new BMap.Point(path[i][j].lng,path[i][j].lat);
+                    console.log(point);
+                    polylinePointsArray.push(point );
+
+                    var polyline = new BMap.Polygon(polylinePointsArray,styleOptions);
+                    map.addOverlay(polyline);
+                }
+            }
+
+        }
+        console.log(path,"......")
+        var lng = [];
+        var lat = [];
+        for(var i=0;i<path.length;i++){
+            lng.push(path[i].lng);
+            lat.push(path[i].lat);
+            // console.log("lng:"+path[i].lng+"\n lat:"+path[i].lat);
+        }
+        var data = {
+            'lng':lng,
+            'lat':lat,
+        }
+        console.log(data);
+        $.ajax({
+            type : "post",
+            url:"{:U('Storesub/ajaxlnglat')}",
+            data:data,
+            dataType:'json',
+            success: function(data) {
+                if(data.status == 1) {
+                    $('.lnglat').attr('value',data.lnglat);
+                    //console.log(data.lnglat);return;
+                }else {
+                    layer.alert(data.msg, {icon: 2});return;
+                }
+            }
+        });
+    };
+
+    var styleOptions = {
+        strokeColor:"red",    //边线颜色。
+        fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.5,       //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.1,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    }
+    //实例化鼠标绘制工具
+    var drawingManager = new BMapLib.DrawingManager(map, {
+        isOpen: false, //是否开启绘制模式
+        enableDrawingTool: true, //是否显示工具栏
+        drawingMode:BMAP_DRAWING_POLYGON,//绘制模式  多边形
+        drawingToolOptions: {
+            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+            offset: new BMap.Size(5, 5), //偏离值
+            drawingModes:[
+                BMAP_DRAWING_POLYGON
+            ]
+        },
+        polygonOptions: styleOptions //多边形的样式
+    });
+
+    console.log(drawingManager.addEventListener,"........QQ");
+    //添加鼠标绘制工具监听事件，用于获取绘制结果
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+    function clearAll() {
+        for(var i = 0; i < overlays.length; i++){
+            map.removeOverlay(overlays[i]);
+        }
+        overlays.length = 0
+    }
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+
+		// 加载默认选中
+		var province_id = $('#province').val();
+		if(province_id != 0)
+			$('#province').trigger('change');
+		// 加载默认选中
+		<if condition='$apply[company_district] gt 0'>
+				set_area('{$apply[company_city]}','{$apply[company_district]}');
+		</if>
+
+
+	});
+	/**
+	 * 获取地区
+	 */
+	function set_area(parent_id,selected){
+		if(parent_id <= 0){
+			return;
+		}
+		console.log(parent_id+selected);
+		$('#district').empty().css('display','inline');
+		var url = '/index.php?m=Home&c=Api&a=getRegion&level=3&parent_id='+ parent_id+"&selected="+selected;
+		$.ajax({
+			type : "GET",
+			url  : url,
+			error: function(request) {
+				alert("服务器繁忙, 请联系管理员!");
+				return;
+			},
+			success: function(v) {
+				v = '<option>选择区域</option>'+ v;
+				$('#district').empty().html(v);
+			}
+		});
+	}
+	var flag = true;
+	function actsubmit(){
+		if($('input[name=store_name]').val() == ''){
+			layer.msg("店铺名称不能为空", {icon: 2,time: 2000});
+			return;
+		}
+        if($('input[name=password]').val() == ''){
+            layer.msg("密码不能为空", {icon: 2,time: 2000});
+            return;
+        }
+		if(flag){
+			$('#store_info').submit();
+		}else{
+			layer.msg("请检查店铺名称和卖家账号", {icon: 2,time: 2000});
+		}
+	}
+
+	var tmp_type = '';
+	function upload_img(cert_type){
+		tmp_type = cert_type;
+		GetUploadify(1,'store','cert','callback');
+	}
+
+	function callback(img_str){
+		$('#'+tmp_type).attr('src',img_str);
+		$('input[name='+tmp_type+']').val(img_str);
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>标签配置- 参数管理</h3>
+                <h5>网站系统标签管理</h5>
+            </div>
+        </div>
+    </div>
+    <form class="form-horizontal" id="addEditSmsTemplate" method="post">
+        <input type="hidden" name="id" value="{$item.id}">
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">
+                    <label for="ac_name"><em>*</em>标签名称</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" placeholder="名称" class="input-txt" id="name" name="name" value="{$item.name}">
+                    <span class="err" id="err_name" style="color:#F00; display:none;"></span>
+                    <p class="notic"></p>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label for="record_no">标签分类</label>
+                </dt>
+                <dd class="opt">
+
+                    <select name="level" id="level_id"  class="small form-control">
+                        <option value="0">请选择星级</option>
+                        <foreach name="level_list" item="v" key="k" >
+                            <option value="{$v['id']}" <if condition="$v['id'] eq $item['level']">selected="selected"</if> >
+                            {$v['name']}
+                            </option>
+                        </foreach>
+                    </select>
+
+                    <!--<select name="cat_id_2" id="cat_id_2" onChange="get_category(this.value,'cat_id_3','0');getCategoryBindList(this.value)" onclick="get_category(this.value,'cat_id_3','0');getCategoryBindList(this.value)" class="small form-control">-->
+                    <!--<option value="0">请选择服务类目分类</option>-->
+                    <!--</select>-->
+
+                    <!--<select name="cat_id_3" id="cat_id_3" class="small form-control" >-->
+                    <!--<option value="0">请选择服务类目分类</option>-->
+                    <!--</select>  -->
+
+                    <span class="err" id="err_cat_id" style="color:#F00; display:none;"></span>
+                </dd>
+            </dl>
+
+            <dl class="row">
+                <dt class="tit">
+                    <label for="ac_sort">排序</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" placeholder="排序" name="sort" value="{$item.sort}" maxlength="3" class="input-txt">
+                    <span class="err" id="err_sort" style="color:#F00; display:none;"></span>
+                    <p class="notic"></p>
+                </dd>
+            </dl>
+
+
+            <div class="bot"><a href="JavaScript:void(0);" onclick="checkForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a></div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    // 判断输入框是否为空
+    function checkForm(){
+
+        var name = $("#name").val();
+        var level_id = $("#level_id").val();
+        if($.trim(name) == '') {
+            $("#err_value").show();
+            return false;
+        }
+        if($.trim(level_id) == '') {
+            $("#err_value").show();
+            return false;
+        }
+
+
+        $('#addEditSmsTemplate').submit();
+    }
+</script>
+</body>
+</html>

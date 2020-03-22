@@ -1,0 +1,174 @@
+<include file="public/layout" />
+<style>
+    .ncm-goods-gift {
+        text-align: left;
+    }
+    .ncm-goods-gift ul {
+        display: inline-block;
+        font-size: 0;
+        vertical-align: middle;
+    }
+    .ncm-goods-gift li {
+        display: inline-block;
+        letter-spacing: normal;
+        margin-right: 4px;
+        vertical-align: top;
+        word-spacing: normal;
+    }
+    .ncm-goods-gift li a {
+        background-color: #fff;
+        display: table-cell;
+        height: 30px;
+        line-height: 0;
+        overflow: hidden;
+        text-align: center;
+        vertical-align: middle;
+        width: 30px;
+    }
+    .ncm-goods-gift li a img {
+        max-height: 30px;
+        max-width: 30px;
+    }
+
+    .ncap-order-style .ncap-order-details{
+        margin:20px auto;
+    }
+</style>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back(-1)" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>品牌商代金券订单</h3>
+                <h5>品牌商代金券交易订单查询及管理</h5>
+            </div>
+            <!--<div class="subject" style="width:62%">-->
+            <!--<a href="{:U('Order/order_print',array('order_id'=>$order['order_id']))}" style="float:right" class="ncap-btn-big ncap-btn-green" ><i class="fa fa-print"></i>打印订单</a>-->
+            <!--</div>-->
+        </div>
+
+
+    </div>
+    <div class="ncap-order-style">
+        <div class="titile">
+            <h3></h3>
+        </div>
+
+
+        <div class="ncap-order-details">
+
+            <div class="tabs-panels">
+                <div class="misc-info">
+                    <h3>订单信息</h3>
+                    <dl>
+                        <!--<dt>订单 ID:</dt>-->
+                        <!--<dd>{$order.order_id}</dd>-->
+                        <dt>订单号：</dt>
+                        <dd>{$order.order_sn}</dd>
+                        <dt>所属品牌商：</dt>
+                        <dd>{$order.seller_name.seller_name}</dd>
+                    </dl>
+                    <dl>
+                        <!--<dt>E-Mail:</dt>-->
+                        <!--<dd>{$order.email}</dd>-->
+                        <!--<dt>电话:</dt>-->
+                        <!--<dd>{$order.mobile}</dd>-->
+                        <dt>实付金额：</dt>
+                        <dd>{$order.order_amount}（单位：元）</dd>
+                    </dl>
+                    <dl>
+                        <dt>订单状态：</dt>
+                        <dd>{$order[order_status]}</dd>
+                        <dt>下单时间：</dt>
+                        <dd>{$order.add_time|date='Y-m-d H:i',###}</dd>
+                        <dt>支付时间：</dt>
+                        <dd><if condition="$order.pay_time neq 0">{$order.pay_time|date='Y-m-d H:i',###}<else/>N</if></dd>
+                    </dl>
+
+                    <dl>
+                        <dt>支付方式：</dt>
+                        <dd>{$order.pay_name|default='微信支付'}</dd>
+                    </dl>
+                </div>
+
+                <div class="goods-info">
+                    <h4>代金券信息</h4>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th colspan="2">代金券名称</th>
+                            <th>面额</th>
+                            <th>使用截止日期</th>
+                            <!--<th>单品价格</th>-->
+                            <!--<th>会员折扣价</th>-->
+                            <th>单品小计（数量）</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="order.couponlist" id="good">
+                            <tr>
+                                <td class="w30">
+                                    <div class="goods-thumb">
+                                        <a href="javascript:;" target="_blank">
+                                            <img alt="" src="{$good['id']|goods_thum_images=200,200}" />
+                                        </a>
+                                    </div>
+                                </td>
+
+                                <td style="text-align: center;">
+                                    <a href="javascript:;" target="_blank">
+                                        {$good.name}
+                                    </a>
+                                    <br/>
+                                </td>
+
+                                <td class="w80">{$good.money}</td>
+                                <td class="w60">{$good.use_end_time|date='Y-m-d H:i',###}</td>
+                                <td class="w100">{$good.order_number}</td>
+                                <!--<td class="w60">{$good.member_goods_price}</td>-->
+                                <!--<td class="w80">{$good.goods_total}</td>-->
+                            </tr>
+                        </volist>
+                    </table>
+                </div>
+                <div class="total-amount contact-info">
+                    <h3>订单总金额：<strong class="red_common">￥{$order.order_amount}元</strong></h3>
+                </div>
+
+                <!--<div class="goods-info">-->
+                    <!--<h4>操作记录</h4>-->
+                    <!--<table>-->
+                        <!--<thead>-->
+                        <!--<tr>-->
+                            <!--<th>操作者</th>-->
+                            <!--<th>操作时间</th>-->
+                            <!--<th>订单状态</th>-->
+                            <!--<th>付款状态</th>-->
+                            <!--<th>发货状态</th>-->
+                            <!--<th>描述</th>-->
+                            <!--<th>备注</th>-->
+                        <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                        <!--<volist name="action_log" id="log">-->
+                            <!--<tr>-->
+                                <!--<td class="text-center">{$users[$log[action_user]]}</td>-->
+                                <!--<td class="text-center">{$log.log_time|date='Y-m-d H:i:s',###}</td>-->
+                                <!--<td class="text-center">{$order_status[$log[order_status]]}</td>-->
+                                <!--<td class="text-center">{$pay_status[$log[pay_status]]}<if condition="$order['pay_code'] eq 'code'"><span style="color: red">(货到付款)</span></if></td>-->
+                                <!--<td class="text-center">{$shipping_status[$log[shipping_status]]}</td>-->
+                                <!--<td class="text-center">{$log.status_desc}</td>-->
+                                <!--<td class="text-center">{$log.action_note}</td>-->
+                            <!--</tr>-->
+                        <!--</volist>-->
+                    <!--</table>-->
+                <!--</div>-->
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+</script>
+</body>
+</html>

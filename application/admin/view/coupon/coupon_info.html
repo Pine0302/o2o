@@ -1,0 +1,378 @@
+<include file="public/layout" />
+<script src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<style>
+  ul.group-list {
+    width: 96%;min-width: 1000px; margin: auto 5px;list-style: disc outside none;
+  }
+  .err{color:#F00; display:none;}
+  ul.group-list li {
+    white-space: nowrap;float: left;
+    width: 150px; height: 25px;
+    padding: 3px 5px;list-style-type: none;
+    list-style-position: outside;border: 0px;margin: 0px;
+  }
+  .row .table-bordered td .btn,.row .table-bordered td img{
+    vertical-align: middle;
+  }
+  .row .table-bordered td{
+    padding: 8px;
+    line-height: 1.42857143;
+  }
+  .table-bordered{
+    width: 100%
+  }
+  .table-bordered tr td{
+    border: 1px solid #f4f4f4;
+  }
+  .btn-success {
+    color: #fff;background-color: #449d44;border-color: #398439 solid 1px;
+  }
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+  .col-xs-8 {
+    width: 66%;
+  }
+  .col-xs-4 {
+    width: 33%;
+  }
+  .col-xs-4, .col-xs-8 {
+    float: left;
+  }
+  .row .tab-pane h4{
+    padding: 10px 0;
+  }
+  .row .tab-pane h4 input{
+    vertical-align: middle;
+  }
+  .table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+  }
+  .ncap-form-default .title{
+    border-bottom: 0
+  }
+  .ncap-form-default dl.row, .ncap-form-all dd.opt{
+    /*border-color: #F0F0F0;*/
+    border: none;
+  }
+  .ncap-form-default dl.row:hover, .ncap-form-all dd.opt:hover{
+    border: none;box-shadow: inherit;
+  }
+  .addprine{display: inline; }
+  .alisth{margin-top: 10px}
+  .p_plus strong{cursor: pointer;margin-left: 4px;}
+  .freight_template {
+    font-size: 14px;
+    display: inline-block;
+    padding: 0px 10px;
+  }
+  .err{color:#F00; display:none;}
+
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+
+  <div class="fixed-bar">
+    <div class="item-title">
+      <a class="back" href="{:U('Coupon/index')}" title="返回列表">
+        <i class="fa fa-arrow-circle-o-left"></i>
+      </a>
+      <div class="subject">
+        <h3>优惠券 - 添加\编辑优惠券</h3>
+        <h5>添加\查看\编辑优惠券</h5>
+      </div>
+      <ul class="tab-base nc-row">
+        <li><a href="javascript:void(0);" data-index='1' class="tab current"><span>通用信息</span></a></li>
+        <li><a href="javascript:void(0);" data-index='2' class="tab"><span>适用分类</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <form id="store_info" method="post">
+    <div class="ncap-form-default tab_div_1">
+      <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>优惠券名称</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" name="name" class="readonly txt" value="{$coupon.name}" >
+          <span class="err"></span>
+          <p class="notic">请填写优惠券名称</p>
+        </dd>
+      </dl>
+
+   <!--   <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>优惠券单价</label>
+        </dt>
+        <dd class="opt">
+        /*  <input type="text" name="coupon_price" class="readonly txt" value="{$coupon.coupon_price}" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" onkeyup="this.value=this.value.replace(/[^\d.]/g,'')">*/
+          <span class="err"></span>
+          <p class="notic">优惠券单价,单位：元</p>
+        </dd>
+      </dl>-->
+
+      <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>优惠券额度</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" name="money" class="readonly txt" value="{$coupon.money}" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" onkeyup="this.value=this.value.replace(/[^\d.]/g,'')">
+          <span class="err"></span>
+          <p class="notic">1.优惠券可抵扣金额,单位：元</p>
+          <p class="notic">2.优惠券折扣百分比,如8折券则为80</p>
+        </dd>
+      </dl>
+
+      <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>消费金额</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" name="condition" class="readonly txt" value="{$coupon.condition|default=0}" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" onkeyup="this.value=this.value.replace(/[^\d.]/g,'')">
+          <span class="err"></span>
+          <p class="notic">订单需满足的最低消费金额(必需为整数)才能使用，(默认为0则无限制,选择折扣券则此选项无效)</p>
+        </dd>
+      </dl>
+
+      <style>
+        .ncsc-form-radio-list li, .ncsc-form-checkbox-list li {
+          font-size: 12px;
+          vertical-align: top;
+          letter-spacing: normal;
+          word-spacing: normal;
+          display: inline-block;
+          margin-right: 30px;
+        }
+      </style>
+
+
+      <dl class="row">
+        <dt class="tit"><label><em>*</em>优惠券类型</label></dt>
+        <dd class="opt">
+          <ul class="ncsc-form-radio-list">
+
+            <li>
+              <label><input name="type" type="radio" value="1" <if condition="$coupon['type'] eq 1">checked</if>> 满减券</label>
+            </li>
+
+            <li>
+              <label><input name="type" type="radio" value="2" <if condition="$coupon['type'] eq 2">checked</if>> 折扣券</label>
+            </li>
+
+          <!--  <li>
+              <label><input name="type" type="radio" value="3" <if condition="$coupon['type'] eq 3">checked</if>> 买一赠一券</label>
+            </li>-->
+
+            <!--<li>-->
+              <!--<label><input name="type" type="radio" value="1" <if condition="$coupon['type'] eq 1">checked</if>>指定发放</label>-->
+            <!--</li>-->
+
+            <!--<li>-->
+              <!--<label><input name="type" type="radio" value="2" <if condition="$coupon['type'] eq 2">checked</if>>免费领取</label>-->
+            <!--</li>-->
+
+            <!--<li>-->
+              <!--<label><input name="type" type="radio" value="3" <if condition="$coupon['type'] eq 3">checked</if>>线下发放</label>-->
+            <!--</li>-->
+
+          </ul>
+          <p class="hint"></p>
+        </dd>
+      </dl>
+
+    <!--  <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>可发放总数</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" name="createnum" class="readonly txt" value="{$coupon.createnum|default=0}" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" onkeyup="this.value=this.value.replace(/[^\d.]/g,'')">
+          <span class="err"></span>
+          <p class="notic">发放数量限制，(默认为0则无限制)</p>
+        </dd>
+      </dl>-->
+
+      <input type="hidden" name="createnum" class="readonly txt" value="{$coupon.createnum|default=0}" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" onkeyup="this.value=this.value.replace(/[^\d.]/g,'')">
+
+      <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>使用起始日期</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" class="input-txt" id="start_time" name="use_start_time"  value="{$coupon.use_start_time|date='Y-m-d',###}"/>
+          <span class="err"></span>
+          <p class="notic">使用起始日期</p>
+        </dd>
+      </dl>
+
+      <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>使用结束日期</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" class="input-txt" id="end_time" name="use_end_time"  value="{$coupon.use_end_time|date='Y-m-d',###}"/>
+          <span class="err"></span>
+          <p class="notic">使用结束日期</p>
+        </dd>
+      </dl>
+
+     <!-- <dl class="row">
+        <dt class="tit">
+          <label>优惠券描述</label>
+        </dt>
+        <dd class="opt">
+          <textarea rows="6" name="coupon_info" class="readonly tarea">{$coupon.coupon_info}</textarea>
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>-->
+
+
+      <dl class="row">
+        <dt class="tit">
+          <label>使用场景(请用 " / "  隔开不同条目)</label>
+        </dt>
+        <dd class="opt">
+          <textarea rows="6" name="secen" class="readonly tarea">{$coupon.secen}</textarea>
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+
+      <dl class="row">
+        <dt class="tit">
+          <label>使用说明(请用 " / "  隔开不同条目)</label>
+        </dt>
+        <dd class="opt">
+          <textarea rows="6" name="instruction" class="readonly tarea">{$coupon.instruction}</textarea>
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+
+   <!--   <dl class="row">
+        <dt class="tit">
+          <label><em>*</em>状态</label>
+        </dt>
+        <dd class="opt">
+         	<label for="tstate_1"><input type="radio" value="1" id="tstate_1" name="status" checked="checked"> 有效     </label>
+            <label for="tstate_2"><input type="radio" value="2" id="tstate_2" name="status" >失效  </label>
+            <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+-->
+
+    </div>
+
+
+    <!--积分折扣-->
+    <div class="ncap-form-default tab_div_2" style="display:none;">
+      <dl class="row">
+        <dt class="tit">
+          <label>商品分类</label>
+        </dt>
+        <dd class="opt">
+          <volist name="category" id="vo">
+            <div class="alisth" style="font-size: 15px">
+              <label><input name="category[]" type="checkbox" <if condition="$vo['is_choose']==1"> checked </if>  value="{$vo['id']}" />&nbsp&nbsp&nbsp {$vo['name']} </label>
+            </div>
+          </volist>
+        </dd>
+      </dl>
+    </div>
+
+    <input type="hidden" value="1" name="status" />
+
+    <div class="bot">
+      <a href="JavaScript:void(0);" class="ncap-btn-big ncap-btn-green" onclick="actsubmit()">确认提交</a>
+      <input type="hidden" name="id" value="{$coupon.id}">
+    </div>
+
+
+
+  </form>
+</div>
+
+<script type="text/javascript">
+    var flag = true;
+    function actsubmit(){
+
+        if(!$('input[name=name]').val()){
+        	layer.msg("优惠券名称不能为空", {icon: 2,time: 2000});
+        	return;
+        }
+        if(!$('input[name=money]').val()){
+            layer.msg("优惠券面额不能为空", {icon: 2,time: 2000});
+            return;
+        }
+
+        if(flag){
+            $('#store_info').submit();
+        }
+    }
+
+
+
+
+
+    $(document).ready(function(){
+        $('#start_time').layDate();
+        $('#end_time').layDate();
+
+
+        $('input[type="radio"]:checked').trigger('click');
+        // $('#send_start_time').layDate();
+        // $('#send_end_time').layDate();
+        //
+        // $('#use_start_time').layDate();
+        // $('#use_end_time').layDate();
+        //
+        // $("#prom_type").trigger('change');
+        // $('input[name=expression]').val("{$info.expression}");
+    })
+
+
+    $('input[type="radio"]').click(function(){
+        if($(this).val() == 0){
+            $('.timed').hide();
+        }else{
+            $('.timed').show();
+        }
+    })
+
+    //插件切换列表
+    $('.tab-base').find('.tab').click(function(){
+        $('.tab-base').find('.tab').each(function(){
+            $(this).removeClass('current');
+        });
+        $(this).addClass('current');
+        var tab_index = $(this).data('index');
+        console.log(tab_index);
+        $(".tab_div_1, .tab_div_2").hide();
+        $(".tab_div_"+tab_index).show();
+    });
+
+</script>
+</body>
+</html>

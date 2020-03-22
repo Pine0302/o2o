@@ -1,0 +1,358 @@
+<table style="min-width: 1500px;overflow:auto">
+    <thead>
+    <tr class="hDivBox">
+        <th axis="col0" style="width: 5%;text-align: left" >
+            <div style="width: 24px;"><i class="ico-check"></i></div>
+        </th>
+
+        <th align="left" axis="col1"  style="width: 16%;text-align: left">
+            <div >操作</div>
+        </th>
+
+        <th align="left" abbr="order_num" axis="col3" class="" style="width: 6%;text-align: left">
+            <div  class="">取单号</div>
+        </th>
+
+
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 12%;text-align: left">
+            <div  class="">下单时间</div>
+        </th>
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 12%;text-align: left">
+            <div  class="">预期时间</div>
+        </th>
+
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 7%;text-align: left">
+            <div  class="">订单状态</div>
+        </th>
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 7%;text-align: left">
+            <div  class="">支付状态</div>
+        </th>
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 8%;text-align: left">
+            <div  class="">订单类型</div>
+        </th>
+
+
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 8%;text-align: left">
+            <div  class="">订单金额</div>
+        </th>
+<!--
+        <th align="left" abbr="consignee" axis="col4" class="" style="width: 20%;text-align: left">
+            <div class="">收货人</div>
+        </th>-->
+        <th align="left" abbr="consignee" axis="col4" class="" style="width: 10%;text-align: left">
+            <div class="">微信手机号</div>
+        </th>
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 10%;text-align:left">
+            <div  class="">配送方式</div>
+        </th>
+
+        <th align="left" abbr="order_sn" axis="col3" class="" style="width: 10%;text-align: left">
+            <div  class="">订单编号</div>
+        </th>
+
+
+        <!--<th align="center" abbr="article_show" axis="col5" class="" style="width: 6%;text-align: left">
+            <div  class="">总金额</div>
+        </th>-->
+
+
+        <th align="center" abbr="article_time" axis="col6" class="" style="width: 8%;text-align: left">
+            <div  class="">支付方式</div>
+        </th>
+
+
+
+        <!--  <th align="left" axis="col1" class="handle">
+            <div style="text-align: left; width: 150px;">开票</div>
+          </th>-->
+
+    </tr>
+    </thead>
+ 	<tbody>
+ 	<if condition="empty($orderList) eq true">
+ 		<tr data-id="0">
+	        <td class="no-data" align="center" axis="col0" colspan="50">
+	        	<i class="fa fa-exclamation-circle"></i>没有符合条件的记录
+	        </td>
+	     </tr>
+	<else/>
+ 	<volist name="orderList" id="list">
+  	<tr data-order-id="{$list.order_id}" id="{$list.order_id}">
+        <td class="sign" axis="col0" style="width: 5%;">
+          <div style="width: 24px;"><i class="ico-check"></i></div>
+        </td>
+
+
+        <td style="width: 16%;">
+            <div>
+                <a class="btn green" href="{:U('Seller/order/detail',array('order_id'=>$list['order_id']))}"><i class="fa fa-list-alt"></i>查看</a>
+                <if condition="($list['order_status'] eq 3  and $list['pay_status'] eq 0) or ($list['order_status'] eq 5)">
+                    <!--   <a class="btn red" href="javascript:void(0);" data-order-id="{$list['order_id']}" onclick="del(this)"><i class="fa fa-trash-o"></i>删除</a>-->
+                </if>
+                <if condition="($list['order_status'] eq 1  and $list['pay_status'] eq 1) ">
+                    <a class="btn red" href="javascript:void(0);" data-order-id="{$list['order_id']}" onclick="receive(this)"><i class="fa fa-trash-o"></i>接单</a>
+                </if>
+                <if condition="($list['order_status'] eq 2  and $list['type'] eq 2) ">
+                    <a class="btn red" href="javascript:void(0);" data-order-id="{$list['order_id']}" onclick="send(this)"><i class="fa fa-trash-o"></i>配送</a>
+                </if>
+                <if condition="($list['order_status'] eq 2  and $list['type'] eq 1) ">
+                    <a class="btn red" href="javascript:void(0);" data-order-id="{$list['order_id']}" onclick="canGet(this)"><i class="fa fa-trash-o"></i>通知可取</a>
+                </if>
+                <if condition="($list['order_status'] eq 3 and $list['type'] eq 1) ">
+                    <a class="btn red" href="javascript:void(0);" data-order-id="{$list['order_id']}" onclick="finish(this)"><i class="fa fa-trash-o"></i>确认完成</a>
+                </if>
+
+
+                <!--<if condition="($list['order_status'] eq 3  and $list['pay_status'] eq 1)">
+                    <a class="btn green" href="{:U('Admin/order/detail',array('order_id'=>$list['order_id']))}"><i class="fa fa-list-alt"></i>查看</a>
+                </if>-->
+            </div>
+        </td>
+
+
+
+        <td align="left" abbr="order_sn" axis="col3" class="" style="width: 6%;">
+            <div class="">{$list.order_num}</div>
+        </td>
+
+
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 12%;">
+            <div class="">{$list.add_time|date='m-d H:i',###}</div>
+        </td>
+        <if condition="($list['way'] eq 1) ">
+            <td align="center" abbr="article_time" axis="col6" class="" style="width: 12%;">
+                <div class="">立即送出</div>
+            </td>
+        </if>
+        <if condition="($list['way'] eq 2) ">
+            <td align="center" abbr="article_time" axis="col6" class="" style="width: 10%;">
+                <div class="">{$list.app_time|date='m-d H:i',###}</div>
+            </td>
+        </if>
+
+
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 7%;">
+            <div  class="">{$order_status[$list[order_status]]}<if condition="$list['is_cod'] eq '1'"><span style="color: red">(货到付款)</span></if></div>
+        </td>
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 7%;">
+            <div class="">{$pay_status[$list[pay_status]]}</div>
+        </td>
+
+        <td align="center" abbr="article_time" axis="col6" class="">
+            <div  class="">{$order_type[$list[way]]}</div>
+        </td>
+
+
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 8%;">
+            <div  class="">{$list.order_amount}</div>
+        </td>
+
+        <!--<td align="left" abbr="consignee" axis="col4" class="" style="width: 10%;">
+            <div  class="">{$list.consignee}:{$list.mobile}</div>
+        </td>-->
+        <td align="left" abbr="consignee" axis="col4" class="" style="width: 10%;">
+            <div  class="">{$list.weixin_mobile}</div>
+        </td>
+
+
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 10%;">
+            <if condition="$list.shipping_status egt 1 && $list.pay_status egt 1 && $list.shipping_name eq '' ">
+                <div  class="">无需物流</div>
+                <else />
+                <!--<div  class="">{$list.shipping_name}</div>-->
+                <div  class="">自取</div>
+            </if>
+        </td>
+
+        <td align="left" abbr="order_sn" axis="col3" class="" style="width: 10%;">
+            <div class="">{$list.order_sn}</div>
+        </td>
+
+        <td align="center" abbr="article_time" axis="col6" class="" style="width: 8%;">
+            <div  class="">{$list.pay_name|default='其他方式'}</div>
+        </td>
+
+
+       <!-- <td align="center" abbr="article_show" axis="col5" class="" style="width: 6%;">
+          <div>{$list.goods_price}</div>
+        </td>-->
+
+
+        <!--<td align="center" abbr="article_time" axis="col6" class="" style="width: 8%;">
+          <div class="">{$shipping_status[$list[shipping_status]]}</div>
+        </td>-->
+
+
+        <!--<td align="left"  axis="col1" align="center" style="width: 10%;">-->
+            <!--<div >{$list.invoice_title}</div>-->
+        <!--</td>-->
+
+      </tr>
+      </volist>
+      </if>
+    </tbody>
+</table>
+<div class="row">
+    <div class="col-sm-6 text-left"></div>
+    <div class="col-sm-6 text-right">{$page}</div>
+</div>
+<script>
+    $('.ico-check ' , '.hDivBox').on("click",function(){
+        console.log("//");
+        $('tr' ,'.hDivBox').toggleClass('trSelected' , function(index,currentclass){
+            var hasClass = $(this).hasClass('trSelected');
+            $('tr' , '#flexigrid').each(function(){
+                if(hasClass){
+                    $(this).addClass('trSelected');
+                }else{
+                    $(this).removeClass('trSelected');
+                }
+            });
+        });
+    });
+    $(".pagination  a").click(function(){
+        var page = $(this).data('p');
+        ajax_get_table('search-form2',page);
+    });
+
+ // 删除操作
+    function del(obj) {
+        layer.confirm('确定要删除吗?', function(){
+            var id=$(obj).data('order-id');
+            $.ajax({
+                type : "POST",
+                url: "{:U('Admin/order/delete_order')}",
+                data:{order_id:id},
+                dataType:'json',
+                async:false,
+                success: function(data){
+                    if(data.status ==1){
+                        layer.alert(data.msg, {icon: 1});
+                        $('#'+id).remove();
+                    }else{
+                        layer.alert(data.msg, {icon: 2});
+                    }
+                },
+                error:function(){
+                    layer.alert('网络异常，请稍后重试',{icon: 2});
+                }
+            });
+		});
+	}
+
+    // 接单操作
+    function receive(obj) {
+        layer.confirm('确定要接单吗?', function(){
+            var id=$(obj).data('order-id');
+            $.ajax({
+                type : "POST",
+                url: "{:U('Seller/order/receive_order')}",
+                data:{order_id:id},
+                dataType:'json',
+                async:false,
+                success: function(data){
+                    if(data.status ==1){
+                        layer.alert(data.msg, {icon: 1});
+                        if(data.order_info.type==1){   //自取
+                            var html='<a class="btn red" href="javascript:void(0);" data-order-id="'+id+'" onclick="canGet(this)"><i class="fa fa-trash-o"></i>通知可取</a>';
+                        }else{                          //快递
+                            var html='<a class="btn red" href="javascript:void(0);" data-order-id="'+id+'" onclick="send(this)"><i class="fa fa-trash-o"></i>配送</a>';
+                        }
+                        $(obj).parent().append(html);
+                        //$(obj).parent().near(html);
+                        $(obj).remove();
+
+                        //window.location.reload();
+                    }else{
+                        layer.alert(data.msg, {icon: 2});
+                    }
+                },
+                error:function(){
+                    layer.alert('网络异常，请稍后重试',{icon: 2});
+                }
+            });
+        });
+    }
+
+    // 接单操作
+    function canGet(obj) {
+        layer.confirm('确定操作完成通知可取吗?', function(){
+            var id=$(obj).data('order-id');
+            $.ajax({
+                type : "POST",
+                url: "{:U('Seller/order/can_get_order')}",
+                data:{order_id:id},
+                dataType:'json',
+                async:false,
+                success: function(data){
+                    if(data.status ==1){
+                        layer.alert(data.msg, {icon: 1});
+                        var html='<a class="btn red" href="javascript:void(0);" data-order-id="'+id+'" onclick="finish(this)"><i class="fa fa-trash-o"></i>确认完成</a>';
+                        $(obj).parent().append(html);
+                        //$(obj).parent().near(html);
+                        $(obj).remove();
+                        // window.location.reload();
+                    }else{
+                        layer.alert(data.msg, {icon: 2});
+                    }
+                },
+                error:function(){
+                    layer.alert('网络异常，请稍后重试',{icon: 2});
+                }
+            });
+        });
+    }
+    // 接单操作
+    function finish(obj) {
+        layer.confirm('确定操作订单完成吗?', function(){
+            var id=$(obj).data('order-id');
+            $.ajax({
+                type : "POST",
+                url: "{:U('Seller/order/finish_self_order')}",
+                data:{order_id:id},
+                dataType:'json',
+                async:false,
+                success: function(data){
+                    if(data.status ==1){
+                        layer.alert(data.msg, {icon: 1});
+                        $(obj).remove();
+                    }else{
+                        layer.alert(data.msg, {icon: 2});
+                    }
+                },
+                error:function(){
+                    layer.alert('网络异常，请稍后重试',{icon: 2});
+                }
+            });
+        });
+    }
+
+    // 配送操作
+    function send(obj) {
+        layer.confirm('确定要配送吗?', function(){
+            var id=$(obj).data('order-id');
+            $.ajax({
+                type : "POST",
+                url: "{:U('Seller/order/send_order')}",
+                data:{order_id:id},
+                dataType:'json',
+                async:false,
+                success: function(data){
+                    if(data.status ==1){
+                        layer.alert(data.msg, {icon: 1});
+                        $(obj).remove();
+                    }else{
+                        layer.alert(data.msg, {icon: 2});
+                    }
+                },
+                error:function(){
+                    layer.alert('网络异常，请稍后重试',{icon: 2});
+                }
+            });
+        });
+    }
+
+
+
+    $('.ftitle>h5').empty().html("(共{$pager->totalRows}条记录)");
+</script>

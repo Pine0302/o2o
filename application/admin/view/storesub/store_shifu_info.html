@@ -1,0 +1,226 @@
+<include file="public/layout" />
+<link href="__PUBLIC__/static/css/seller_center.css" rel="stylesheet" type="text/css">
+
+
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>师傅管理 - 查看店铺{$store.store_name}的师傅</h3>
+			</div>
+		</div>
+	</div>
+
+	<table class="search-form">
+        <form method="get" action="{:U('Storecounty/store_shifu_info')}" id="search-form2" onsubmit="check_form();">
+            <input type="hidden" name="store_id" value="{$_GET['store_id']}">
+            <tr>
+                <td>&nbsp;</td>
+                <td class="w100"><input style="width: 100px;" class="text" type="text" value="{$Think.request.storecounty_shifu}" name="storecounty_shifu" placeholder="输入师傅账号"/></td>
+                <td class="w70 tc"><label class="submit-border"><input type="submit" class="submit" value="搜索"/></label></td>
+            </tr>
+        </form>
+    </table>
+
+    <table class="ncsc-default-table">
+
+        <thead>
+            <tr>
+                <th class="w30">ID</th>
+                <th class="tl20">师傅账号</th>
+                <th class="w80">所属门店</th>
+                <th class="w80">所属区县</th>
+                <th class="tl20">真实姓名</th>
+                <th class="tl20">联系电话</th>
+                <th class="tl20">身份证号</th>
+                <th class="tl20">师傅状态</th>
+                <th class="tl20">入驻时间</th>
+                <th class="w40">状态</th>
+                <!-- <th class="w180">操作</th> -->
+            </tr>
+        </thead>
+
+        <tbody>
+            <empty name="list">
+                <tr>
+                    <td colspan="20" class="norecord"><div class="warning-option"><i class="icon-warning-sign"></i><span>暂无符合条件的数据记录</span></div></td>
+                </tr>
+                <else/>
+                <foreach name="list" item="vo" key="k" >
+                    <tr class="bd-line">
+                        <td>{$vo.id}</td>
+                        <td>{$vo.storecounty_shifu}</td>
+                        <td>{$vo.store_name}</td> 
+                        <td>{$vo.company_district}</td>            
+                        <td>{$vo.contacts_name}</td>
+                        <td>{$vo.contacts_mobile}</td>
+                        <td>{$vo.legal_identity}</td>
+                         <td><if condition="$vo[service_status] eq 1">服务中<else/>空闲</if></td>
+                        <td>{$vo.add_time|date='Y-m-d H:i:s',###}</td>
+                        <td><if condition="$vo[enabled] eq 1">开启<else/>关闭</if></td>
+
+                        <!-- <td class="nscs-table-handle">
+
+                            <span>
+                                <a href="{:U('Storecountyshifu/storecountyshifu_edit',array('id'=>$vo['id']))}" class="btn-bluejeans">
+                                    <i class="icon-edit"></i>
+                                    <p> 编辑</p>
+                                </a>
+                            </span>
+
+                            <span >
+                                <a href="{:U('Storecountyshifu/storecountyshifu_info',array('id'=>$vo['id']))}" class="btn-bluejeans">
+                                    <i class="icon-edit"></i>
+                                    <p>个人信息</p>
+                                </a>
+                            </span>
+
+                            <span > 
+                                <a href="javascript:;" data-url="{:U('Storecountyshifu/storecountyshifu_del')}" data-id="{$vo.id}" onclick="delfun(this)" class="btn-grapefruit">
+                                  <i class="icon-trash"></i>
+                                  <p>删除</p>
+                                </a>
+                            </span>
+                            
+                        </td> -->
+
+                    </tr>
+                </foreach>
+            </empty>
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td colspan="20">
+                    <div class="pagination">{$page}</div>
+                </td>
+            </tr>
+        </tfoot>
+
+    </table>
+
+	<!-- <div class="flexigrid" >
+		<div class="mDiv">
+			<div class="ftitle">
+				<h3>师傅列表</h3>
+				<h5>(共{$bind_class_list|count}条记录)</h5>
+			</div>
+			<div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
+		</div>
+		<div class="hDiv">
+			<div class="hDivBox">
+				<table cellspacing="0" cellpadding="0">
+					<thead>
+					<tr>
+						<th class="sign" axis="col0">
+							<div style="width: 24px;"><i class="ico-check"></i></div>
+						</th>
+						<th align="left" abbr="article_title" axis="col3" class="">
+							<div style="text-align: left; width: 120px;" class="">师傅账号</div>
+						</th>
+						<th align="left" abbr="ac_id" axis="col4" class="">
+							<div style="text-align: left; width: 120px;" class="">师傅姓名</div>
+						</th>
+						<th align="left" abbr="article_show" axis="col5" class="">
+							<div style="text-align: center; width: 120px;" class="">联系电话</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class="">
+							<div style="text-align: center; width: 80px;" class="">身份证号</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class="">
+							<div style="text-align: center; width: 80px;" class="">师傅状态</div>
+						</th>
+						<th style="width:100%" axis="col7">
+							<div></div>
+						</th>
+					</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+		<div class="bDiv" style="height: auto;min-height: 0px;">
+			<div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+				<table>
+					<tbody>
+					<foreach name="bind_class_list" item="vo" key="k" >
+						<tr>
+							<td class="sign">
+								<div style="width: 24px;"><i class="ico-check"></i></div>
+							</td>
+							<td align="left" class="">
+								<div style="text-align: left; width: 120px;">{$vo.class_1_name}</div>
+							</td>
+							<td align="left" class="">
+								<div style="text-align: left; width: 120px;">{$vo.class_2_name}</div>
+							</td>
+							<td align="left" class="">
+								<div style="text-align: center; width: 120px;">
+									{$vo.class_3_name}
+								</div>
+							</td>
+							<td align="center" class="">
+								<div style="text-align: center; width: 80px;">{$vo.commis_rate}</div>
+							</td>
+							<td align="center" class="">
+								<div style="text-align: center; width: 80px;">{$vo.commis_rate}</div>
+							</td>
+							<td align="" class="" style="width: 100%;">
+								<div>&nbsp;</div>
+							</td>
+						</tr>
+					</foreach>
+					</tbody>
+				</table>
+			</div>
+			<div class="iDiv" style="display: none;"></div>
+		</div>
+	</div> -->
+
+</div>
+
+
+<script type="text/javascript">
+	//点击刷新数据
+	  $('.fa-refresh').click(function(){
+	    location.href = location.href;
+	  });
+
+
+
+
+
+	function actsubmit(){
+		$('#class_info').submit();
+	}
+	function delfun(obj) {
+		// 删除按钮
+		layer.confirm('确认删除？', {
+			btn: ['确定', '取消'] //按钮
+		}, function () {
+			$.ajax({
+				type: 'post',
+				url: $(obj).attr('data-url'),
+				data : {act:'del',del_id:$(obj).attr('data-id')},
+				dataType: 'json',
+				success: function (data) {
+					if (data) {
+						$(obj).parent().parent().parent().remove();
+						layer.closeAll();
+					} else {
+						layer.alert('删除失败', {icon: 2});  //alert('删除失败');
+					}
+				}
+			})
+		}, function () {
+			layer.closeAll();
+		});
+	}
+</script>
+
+
+</body>
+</html>

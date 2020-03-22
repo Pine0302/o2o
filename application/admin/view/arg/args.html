@@ -1,0 +1,188 @@
+<include file="public/layout" />
+<body style="background-color: rgb(255, 255, 255); overflow: auto; cursor: default; -moz-user-select: inherit;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title">
+            <div class="subject">
+                <h3>系统参数配置</h3>
+                <h5>系统参数配置</h5>
+            </div>
+        </div>
+    </div>
+    <!-- 操作说明 -->
+    <div id="explanation" class="explanation" style="color: rgb(44, 188, 163); background-color: rgb(237, 251, 248); width: 99%; height: 100%;">
+        <div id="checkZoom" class="title"><i class="fa fa-lightbulb-o"></i>
+            <h4 title="提示相关设置操作时应注意的要点">操作提示</h4>
+            <span title="收起提示" id="explanationZoom" style="display: block;"></span>
+        </div>
+        <ul>
+            <li>系统参数配置, 由总平台设置管理.</li>
+            <li style="color:#ff3c3c;font-size:14px;">备注：一般情况下不建议轻易设置修改，如有需要请联系相关开发管理人员参与修改设置！！！</li>
+        </ul>
+    </div>
+    <div class="flexigrid">
+        <div class="mDiv">
+            <div class="ftitle">
+                <h3>参数列表</h3>
+                <h5>(共{$smsTplList|count}条记录)</h5>
+            </div>
+            <div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
+        </div>
+        <div class="hDiv">
+            <div class="hDivBox">
+                <!--<table cellspacing="0" cellpadding="0">-->
+                    <!--<thead>-->
+                    <!--<tr>-->
+                        <!--<th class="sign" axis="col0" style="width:10%" >-->
+                            <!--<div ><i class="ico-check"></i></div>-->
+                        <!--</th>-->
+                        <!--<th align="left" abbr="article_title" axis="col3" class="" style="width:20%">-->
+                            <!--<div style="text-align: left" class="">应用场景</div>-->
+                        <!--</th>-->
+                        <!--<th align="left" abbr="ac_id" axis="col4" class="" style="text-align: left; width: 20%">-->
+                            <!--<div  class="">名称</div>-->
+                        <!--</th>-->
+                      <!--&lt;!&ndash;  <th align="center" abbr="article_show" axis="col5" class="">-->
+                            <!--<div style="text-align: center; width: 100px;" class="">短信模板</div>-->
+                        <!--</th>-->
+                        <!--<th align="center" abbr="article_content" axis="col6" class="">-->
+                            <!--<div style="text-align: center; width: 500px;" class="">发送短信的内容</div>-->
+                        <!--</th>&ndash;&gt;-->
+                        <!--<th align="center" abbr="article_time" axis="col6" class="" style="text-align: center; width: 25%;">-->
+                            <!--<div  class="">修改时间</div>-->
+                        <!--</th>-->
+                        <!--<th align="center" axis="col1" class="handle" style="text-align: center; width: 25%;">-->
+                            <!--<div >操作</div>-->
+                        <!--</th>-->
+                        <!--&lt;!&ndash;<th style="width:100%" axis="col7">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<div></div>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</th>&ndash;&gt;-->
+                    <!--</tr>-->
+                    <!--</thead>-->
+                <!--</table>-->
+            </div>
+        </div>
+        <!--<div class="tDiv">
+            <div class="tDiv2">
+                <div class="fbutton"> <a href="{:U('Admin/SmsTemplate/addEditSmsTemplate')}">
+                    <div class="add" title="新增模板">
+                        <span><i class="fa fa-plus"></i>新增模板</span>
+                    </div>
+                </a> </div>
+            </div>
+            <div style="clear:both"></div>
+        </div>-->
+        <div class="bDiv" style="height: auto;">
+            <div id="flexigrid" cellpadding="0" cellspacing="0" border="0" class="hDivBox">
+                <table>
+                    <thead class="hDivBox" style="height: 22px;">
+                    <tr  style=" border-bottom:1px solid #f5eded;">
+
+                        <th class="sign" style="width:10%;border-left:1px solid #f5eded">
+                            <div ><i class="ico-check" style="background: url(../images/flexigrid_pic.png) no-repeat 0 0;width: 20px;height: 20px;"></i></div>
+                        </th>
+
+                        <th align="left" abbr="article_title" axis="col3" class="" style="width:20%;border-left:1px solid #f5eded">
+                            <div style="padding:10px 8px" class="">应用场景</div>
+                        </th>
+                        <th align="left" abbr="ac_id" axis="col4" class="" style="text-align: left; width: 20%;border-left:1px solid #f5eded">
+                            <div  style="padding:10px 8px">名称</div>
+                        </th>
+                        <!--  <th align="center" abbr="article_show" axis="col5" class="">
+                              <div style="text-align: center; width: 100px;" class="">短信模板</div>
+                          </th>
+                          <th align="center" abbr="article_content" axis="col6" class="">
+                              <div style="text-align: center; width: 500px;" class="">发送短信的内容</div>
+                          </th>-->
+                        <th align="center" abbr="article_time" axis="col6" class="" style="text-align: center; width: 25%;border-left:1px solid #f5eded">
+                            <div  style="padding:10px 8px">修改时间</div>
+                        </th>
+                        <th align="center" axis="col1"  style="text-align: center; width: 25%;border-left:1px solid #f5eded">
+                            <div style="padding:10px 8px">操作</div>
+                        </th>
+                        <!--<th style="width:100%" axis="col7">-->
+                        <!--<div></div>-->
+                        <!--</th>-->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="args" id="list">
+                        <tr>
+                            <td class="sign" style="width:10%;">
+                                <div ><i class="ico-check"></i></div>
+                            </td>
+                            <td align="left" class="" style="text-align: left; width: 20%;">
+                                <div >{$list.name}</div>
+                            </td>
+                            <td align="left" class="" style="text-align: left; width: 20%;">
+                                <div >{$list.value}</div>
+                            </td>
+                          <!--  <td align="left" class="">
+                                <div style="text-align: left; width: 100px;">{$list.sms_tpl_code}</div>
+                            </td>
+                            <td align="center" class="">
+                                <div style="text-align: center; width: 500px;">{$list.tpl_content}</div>
+                            </td>-->
+                            <td align="center" class="" style="text-align: center; width: 25%;">
+                                <div >{$list.create_at|date='Y-m-d H:i:s',###}</div>
+                            </td>
+                            <td align="center" class="handle" style="text-align: center; width: 25%; ">
+                                <div >
+                                   <!-- <a class="btn red"  href="javascript:void(0)" data-url="{:U('Admin/SmsTemplate/delTemplate')}" data-id="{$list.tpl_id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>-->
+                                    <a href="{:U('Admin/Arg/addEditArgs', array('id' => $list['id']))}" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a> </div>
+                            </td>
+                            <!--<td align="" class="" style="width: 100%;">-->
+                                <!--<div>&nbsp;</div>-->
+                            <!--</td>-->
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+            </div>
+            <div class="iDiv" style="display: none;"></div>
+        </div>
+        <!--分页位置-->
+        {$page} </div>
+</div>
+<script>
+    $(document).ready(function(){
+        // 表格行点击选中切换
+        $('#flexigrid > table>tbody >tr').click(function(){
+            $(this).toggleClass('trSelected');
+        });
+
+        // 点击刷新数据
+        $('.fa-refresh').click(function(){
+            location.href = location.href;
+        });
+
+    });
+
+    function delfun(obj) {
+        // 删除按钮
+        layer.confirm('确认删除？', {
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                type: 'post',
+                url: $(obj).attr('data-url'),
+                data: {id: $(obj).attr('data-id')},
+                dataType: 'json',
+                success: function (data) {
+                    layer.closeAll();
+                    if (data.status == 1) {
+                        $(obj).parent().parent().parent().remove();
+                        layer.msg(data.msg, {icon: 1});
+                    } else {
+                        layer.alert(data.msg, {icon: 2});  //alert('删除失败');
+                    }
+                }
+            })
+        }, function () {
+        });
+    }
+</script>
+</body>
+</html>

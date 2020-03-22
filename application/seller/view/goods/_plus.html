@@ -1,0 +1,104 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;"> 
+<div class="page">
+  <div class="fixed-bar">
+    <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+      <div class="subject">
+        <h3>配料详情</h3>
+        <h5>配料添加与管理</h5>
+      </div>
+    </div>
+  </div>
+
+    <!--表单数据-->
+    <form method="post" id="addEditBrandForm" >
+      <input type="hidden" placeholder="名称" class="input-txt" id="id" name="id" value="{$attr.id}">
+    <div class="ncap-form-default">
+      <dl class="row">
+        <dt class="tit">
+          <label for="ac_name"><em>*</em>配料名称</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" placeholder="名称" class="input-txt" id="name" name="name" value="{$attr.name}">
+		  <span class="err" id="err_name" style="color:#F00; display:none;"></span>
+            <p class="notic"></p>
+        </dd>
+      </dl>
+      <dl class="row">
+        <dt class="tit">
+          <label for="ac_price">配料价格</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" value="{$attr.price}" name="price" id="price" class="t_mane" onKeyUp="this.value=this.value.replace(/[^\d.]/g,'')" onpaste="this.value=this.value.replace(/[^\d.]/g,'')" />
+          <span class="err" id="err_price" style="color:#F00; display:none;"></span>
+          元
+        </dd>
+      </dl>
+
+      <dl class="row">
+        <dt class="tit">
+          <label for="ac_sort">排序</label>
+        </dt>
+        <dd class="opt">
+          <input type="text" placeholder="排序" name="sort" value="{$attr.sort}" maxlength="3" class="input-txt">
+          <span class="err" id="err_sort" style="color:#F00; display:none;"></span>
+            <p class="notic"></p>
+        </dd>
+      </dl>
+
+      <div class="bot"><a href="JavaScript:void(0);" onClick="verifyForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a></div>
+    </div>
+  </form>
+</div>
+<script>
+function verifyForm(){
+    var name = $("#name").val();
+    var price = $("#price").val();
+    if($.trim(name) == '') {
+        layer.msg('请输入名称！！', {icon: 2});return false;
+    }
+    if($.trim(price) == '') {
+        layer.msg('请输入价格！！', {icon: 2});return false;
+    }
+
+
+    $('span.err').show();
+    $.ajax({
+        type: "POST",
+        url: "{:U('Admin/Goods/addEditPlus')}",
+        data: $('#addEditBrandForm').serialize(),
+        dataType: "json",
+        error: function () {
+            layer.alert("服务器繁忙, 请联系管理员!");
+        },
+        success: function (data) {
+            if (data.status == 1) {
+                layer.msg(data.msg, {icon: 1},function () {
+                    location.href = "{:U('Admin/Goods/plusList')}";
+                });
+            } else {
+                layer.msg(data.msg, {icon: 2});
+                $.each(data.result, function (index, item) {
+                    $('#err_' + index).text(item).show();
+                });
+            }
+        }
+    });
+}
+
+
+window.onload = function(){
+    var brand_cat_id = parseInt('{$brand.cat_id}');
+	if(brand_cat_id > 0 ){
+		get_category($("#parent_id_1").val(),'parent_id_2',brand_cat_id);	 
+	}		
+}
+function img_call_back(fileurl_tmp)
+{
+  $("#logo").val(fileurl_tmp);
+  $("#img_a").attr('href', fileurl_tmp);
+  $("#img_i").attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+}
+</script>
+</body>
+</html>

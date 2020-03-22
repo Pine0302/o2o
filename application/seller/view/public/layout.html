@@ -1,0 +1,414 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Apple devices fullscreen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- Apple devices fullscreen -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="__PUBLIC__/static/css/main.css" rel="stylesheet" type="text/css">
+<link href="__PUBLIC__/static/css/page.css" rel="stylesheet" type="text/css">
+<link href="__PUBLIC__/static/font/css/font-awesome.min.css" rel="stylesheet" />
+<!--[if IE 7]>
+  <link rel="stylesheet" href="__PUBLIC__/static/font/css/font-awesome-ie7.min.css">
+<![endif]-->
+<link href="__PUBLIC__/static/js/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css"/>
+<style type="text/css">html, body { overflow: visible;}</style>
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/layer/layer.js"></script><!-- 弹窗js 参考文档 http://layer.layui.com/-->
+<script type="text/javascript" src="__PUBLIC__/static/js/admin.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery.validation.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/common.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery.mousewheel.js"></script>
+<script src="__PUBLIC__/js/myFormValidate.js"></script>
+<script src="__PUBLIC__/js/myAjax3.js"></script>
+<script src="__PUBLIC__/js/global.js"></script>
+
+    <audio id="bgmusic" autoplay preload loop controls style="position: absolute;top:0;left: 0;opacity:0;z-index:-1">
+        <audio id="ms" autoplay preload loop controls  ></audio>
+    </audio>
+
+
+
+    <input type="hidden" value="{$store_id}" id="store_id"/>
+    <script type="text/javascript">
+//    $(function () {
+//        var tocken='';
+//        //	语音播报功能
+//        function sound(str,toc){
+//            var obj=document.createElement("embed");
+//            obj.style.width=0;
+//            obj.style.height=0;
+//            obj.src="https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=4&cuid=30-9C-23-3C-D0-D8&ctp=1&tok="+toc+"&tex="+str;
+//            obj.loop=0;
+//            document.body.appendChild(obj);
+//        }
+//        function test() {
+//            var t1=0;
+//            var t=0;
+//            //获取tocken
+//            $.ajax({
+//                type: "post",
+//                url: "https://www.itafe.cn/api/Tool/getBaiduTokenApi.html",
+//                timeout: 60000,
+//                async: true,
+//                data: {
+//                   code: "milktea"
+//                },
+//                success: function(data) {
+//
+//                    console.log(data);
+//                    tocken=data.bizobj.access_token;
+//                    console.log(tocken);
+//                }
+//            })
+//            //用户下单之后的播报
+//            $.ajax({
+//                type: "GET",
+//                url: "https://www.itafe.cn/api/Order/hasNewOrder1.html",
+//                async: true,
+//                data: {
+//                    store_id:$("#store_id").val()
+//                },
+//                success: function(data, textStatus) {
+//                    console.log(data,"////");
+//                    if(data.bizobj.has_new_order==2){
+//                        sound("有用户下单啦,请注意查收!",tocken)
+//                    }
+//                    if(data.bizobj.has_app_self_order==2){
+//                        setTimeout(function () {
+//                            sound("您有自取预约单!",tocken)
+//                        },6000)
+//                    }
+//                    if(data.bizobj.has_app_send_order==2){
+//                        setTimeout(function () {
+//                            sound("您有配送预约单!",tocken)
+//                        },12000)
+//                    }
+//
+//
+//
+//                }
+//            });
+//
+//        }
+//        window.setInterval(function(){test()},25000);
+//
+//
+//    })
+    $(function () {
+        var tocken='';
+        //	语音播报功能
+        function log(info) {
+            console.log(info);
+            // alert(info);
+        }
+        function forceSafariPlayAudio() {
+            console.log("///.../.../...")
+            audioEl.load(); // iOS 9   还需要额外的 load 一下, 否则直接 play 无效
+            audioEl.play(); // iOS 7/8 仅需要 play 一下
+            ms.load(); // iOS 9   还需要额外的 load 一下, 否则直接 play 无效
+            ms.play(); // iOS 7/8 仅需要 play 一下
+        }
+
+        var audioEl = document.getElementById('bgmusic');
+        var ms=document.getElementById('ms');
+
+        // 可以自动播放时正确的事件顺序是
+        // loadstart
+        // loadedmetadata
+        // loadeddata
+        // canplay
+        // play
+        // playing
+        //
+        // 不能自动播放时触发的事件是
+        // iPhone5  iOS 7.0.6 loadstart
+        // iPhone6s iOS 9.1   loadstart -> loadedmetadata -> loadeddata -> canplay
+        audioEl.addEventListener('loadstart', function() {
+            log('loadstart');
+        }, false);
+        audioEl.addEventListener('loadeddata', function() {
+            log('loadeddata');
+        }, false);
+        audioEl.addEventListener('loadedmetadata', function() {
+            log('loadedmetadata');
+        }, false);
+        audioEl.addEventListener('canplay', function() {
+            log('canplay');
+        }, false);
+        audioEl.addEventListener('play', function() {
+            log('play');
+            // 当 audio 能够播放后, 移除这个事件
+            window.removeEventListener('touchstart', forceSafariPlayAudio, false);
+        }, false);
+        audioEl.addEventListener('playing', function() {
+            log('playing');
+        }, false);
+        audioEl.addEventListener('pause', function() {
+            log('pause');
+        }, false);
+//        播报取号码
+        ms.addEventListener('loadstart', function() {
+            log('loadstart1');
+        }, false);
+        ms.addEventListener('loadeddata', function() {
+            log('loadeddata1');
+        }, false);
+        ms.addEventListener('loadedmetadata', function() {
+            log('loadedmetadata1');
+        }, false);
+        ms.addEventListener('canplay', function() {
+            log('canplay1');
+        }, false);
+        ms.addEventListener('play', function() {
+            log('play1');
+            // 当 audio 能够播放后, 移除这个事件
+            window.removeEventListener('touchstart', forceSafariPlayAudio, false);
+        }, false);
+        ms.addEventListener('playing', function() {
+            log('playing1');
+        }, false);
+        ms.addEventListener('pause', function() {
+            log('pause1');
+        }, false);
+
+
+        // 由于 iOS Safari 限制不允许 audio autoplay, 必须用户主动交互(例如 click)后才能播放 audio,
+        // 因此我们通过一个用户交互事件来主动 play 一下 audio.
+        window.addEventListener('touchstart', forceSafariPlayAudio, false);
+
+//        audioEl.src = 'https://www.itafe.cn/public/upload/logo/2018/12-14/bg.mp3';
+        function test() {
+            var t1=0;
+            var t=0;
+            $("#bgmusic").attr("loop",false);
+            $("#ms").attr("loop",false);
+            audioEl.src = '';
+            $("#ms").attr("src","");
+            forceSafariPlayAudio();
+
+
+
+
+
+            //用户下单之后的播报
+            $.ajax({
+                dateType:'json',
+                type: "POST",
+                url: "https://www.itafe.cn/api/Order/hasNewOrder1.html",
+                async: true,
+                data: {
+                    store_id:$("#store_id").val()
+                },
+                success: function(data, textStatus) {
+                    console.log(data,"////");
+
+                    if(data.bizobj.has_new_order==1){
+
+                        audioEl.src = 'https://www.itafe.cn/public/static/audio/newaudio.mp3';
+                        $("#bgmusic").attr("loop",false);
+
+                    }
+                    if(data.bizobj.has_app_send_order==1){
+                        setTimeout(function () {
+                            var arr=data.bizobj.app_send_order_num.toString();
+                            console.log(arr.length);
+                            audioEl.src = 'https://www.itafe.cn/public/static/audio/sendaudio.mp3';
+                            $("#bgmusic").attr("loop",false);
+                            setTimeout(function () {
+                                for(let i=0;i<arr.length;i++){
+                                    console.log(arr[i])
+                                    setTimeout(function () {
+                                        console.log(arr[i])
+                                        var str="https://www.itafe.cn/public/static/audio/"+Number(arr[i])+".mp3";
+                                        $("#ms").attr("src",str);
+                                        console.log(str);
+                                    },i*700)
+                                }
+                            },4000)
+                            $("#ms").attr("loop",false);
+                        },6000)
+                    }
+                    if(data.bizobj.has_app_self_order==1){
+                        setTimeout(function () {
+                            var arr=data.bizobj.app_self_order_num.toString();
+                            audioEl.src = 'https://www.itafe.cn/public/static/audio/selfaudio.mp3';
+                            $("#bgmusic").attr("loop",false);
+                            setTimeout(function () {
+                                for(let j=0;j<arr.length;j++){
+                                    console.log(arr[j])
+                                    setTimeout(function () {
+                                        console.log(arr[j])
+                                        var str="https://www.itafe.cn/public/static/audio/"+Number(arr[j])+".mp3";
+                                        $("#ms").attr("src",str);
+                                        console.log(str);
+                                    },j*700)
+                                }
+                            },4000)
+                            $("#ms").attr("loop",false);
+
+                        },17000)
+                    }
+
+                }
+            });
+
+        }
+        window.setInterval(function(){test()},28000);
+    })
+    function delfunc(obj){
+    	layer.confirm('确认删除？', {
+    		  btn: ['确定','取消'] //按钮
+    		}, function(){
+    		    // 确定
+   				$.ajax({
+   					type : 'post',
+   					url : $(obj).attr('data-url'),
+   					data : {act:'del',del_id:$(obj).attr('data-id')},
+   					dataType : 'json',
+   					success : function(data){
+						layer.closeAll();
+   						if(data.status==1){
+                            layer.msg(data.msg, {icon: 1, time: 2000},function(){
+                                location.href = '';
+//                                $(obj).parent().parent().parent().remove();
+                            });
+   						}else{
+   							layer.msg(data, {icon: 2,time: 2000});
+   						}
+   					}
+   				})
+    		}, function(index){
+    			layer.close(index);
+    			return false;// 取消
+    		}
+    	);
+    }
+
+    function selectAll(name,obj){
+    	$('input[name*='+name+']').prop('checked', $(obj).checked);
+    }
+
+    function get_help(obj){
+
+		window.open("http://www.tp-shop.cn/");
+		return false;
+
+        layer.open({
+            type: 2,
+            title: '帮助手册',
+            shadeClose: true,
+            shade: 0.3,
+            area: ['70%', '80%'],
+            content: $(obj).attr('data-url'),
+        });
+    }
+
+    function delAll(obj,name){
+    	var a = [];
+    	$('input[name*='+name+']').each(function(i,o){
+    		if($(o).is(':checked')){
+    			a.push($(o).val());
+    		}
+    	})
+    	if(a.length == 0){
+    		layer.alert('请选择删除项', {icon: 2});
+    		return;
+    	}
+    	layer.confirm('确认删除？', {btn: ['确定','取消'] }, function(){
+    			$.ajax({
+    				type : 'get',
+    				url : $(obj).attr('data-url'),
+    				data : {act:'del',del_id:a},
+    				dataType : 'json',
+    				success : function(data){
+						layer.closeAll();
+    					if(data == 1){
+    						layer.msg('操作成功', {icon: 1});
+    						$('input[name*='+name+']').each(function(i,o){
+    							if($(o).is(':checked')){
+    								$(o).parent().parent().remove();
+    							}
+    						})
+    					}else{
+    						layer.msg(data, {icon: 2,time: 2000});
+    					}
+    				}
+    			})
+    		}, function(index){
+    			layer.close(index);
+    			return false;// 取消
+    		}
+    	);
+    }
+
+    /**
+     * 全选
+     * @param obj
+     */
+    function checkAllSign(obj){
+        $(obj).toggleClass('trSelected');
+        if($(obj).hasClass('trSelected')){
+            $('#flexigrid > table>tbody >tr').addClass('trSelected');
+        }else{
+            $('#flexigrid > table>tbody >tr').removeClass('trSelected');
+        }
+    }
+    /**
+     * 批量公共操作（删，改）
+     * @returns {boolean}
+     */
+    function publicHandleAll(type){
+        var ids = '';
+        $('#flexigrid .trSelected').each(function(i,o){
+//            ids.push($(o).data('id'));
+            ids += $(o).data('id')+',';
+        });
+        if(ids == ''){
+            layer.msg('至少选择一项', {icon: 2, time: 2000});
+            return false;
+        }
+        publicHandle(ids,type); //调用删除函数
+    }
+    /**
+     * 公共操作（删，改）
+     * @param type
+     * @returns {boolean}
+     */
+    function publicHandle(ids,handle_type){
+        layer.confirm('确认当前操作？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    // 确定
+                    $.ajax({
+                        url: $('#flexigrid').data('url'),
+                        type:'post',
+                        data:{ids:ids,type:handle_type},
+                        dataType:'JSON',
+                        success: function (data) {
+                            layer.closeAll();
+                            if (data.status == 1){
+                                layer.msg(data.msg, {icon: 1, time: 2000},function(){
+                                    location.href = data.url;
+                                });
+                            }else{
+                                layer.msg(data.msg, {icon: 2, time: 2000});
+                            }
+                        }
+                    });
+                }, function (index) {
+                    layer.close(index);
+                }
+        );
+    }
+
+</script>  
+
+</head>

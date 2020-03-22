@@ -1,0 +1,124 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title">
+            <div class="subject">
+                <h3>推荐区县代理合伙人佣金设置</h3>
+                <h5>平台佣金选项设置</h5>
+            </div>
+        </div>
+    </div>
+    <!-- 操作说明 -->
+    <div class="explanation" id="explanation">
+        <div class="title" id="checkZoom"><i class="fa fa-lightbulb-o"></i>
+            <h4 title="提示相关设置操作时应注意的要点">操作提示</h4>
+            <span id="explanationZoom" title="收起提示"></span>
+        </div>
+        <ul>
+            <li>如果推荐区县代理合伙人佣金比例开关关闭，那么不会平台启用推荐区县代理合伙人佣金模块</li>
+            <li>如果规则由平台设置，那么推荐区县代理合伙人佣金规则统一按平台设置的规则返利</li>
+        </ul>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" name="form1" id="handlepost" action="{:U('Storecounty/handle')}">
+        <input type="hidden" name="inc_type" value="{$inc_type}">
+
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">佣金开关</dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="switch1" class="cb-enable  <if condition="$config['store_county_switch'] eq 1">selected</if>">开启</label>
+                        <label for="switch0" class="cb-disable <if condition="$config['store_county_switch'] eq 0">selected</if>">关闭</label>
+                        <input type="radio" onclick="$('#switch_on_off').show();"  id="switch1"  name="store_county_switch" value="1" <if condition="$config['brand_switch'] eq 1">checked="checked"</if>>
+                        <input type="radio" onclick="$('#switch_on_off').hide();" id="switch0" name="store_county_switch" value="0" <if condition="$config['brand_switch'] eq 0">checked="checked"</if> >
+                    </div>
+                    <p class="notic">佣金开关</p>
+                </dd>
+            </dl>
+
+            <div id="switch_on_off" <if condition="$config['store_county_switch'] eq 0">style="display: none;"</if>>
+
+            <dl class="row">
+                <dt class="tit">
+                    <label>佣金规则设置</label>
+                </dt>
+                <dd class="opt">
+                    <input type="radio" name="store_county_distribut_set_by" value="0" <if condition="$config['store_county_distribut_set_by'] eq 0"> checked </if> >由平台设置  &nbsp;&nbsp;&nbsp;&nbsp;
+                    <!--<input type="radio" name="distribut_set_by" value="1"<if condition="$config['distribut_set_by'] eq 1"> checked </if> >由商家设置-->
+                </dd>
+            </dl>
+
+            <!--<dl class="row">-->
+                <!--<dt class="tit">-->
+                    <!--<label>省级代理合伙人推荐获佣比例</label>-->
+                <!--</dt>-->
+                <!--<dd class="opt">-->
+                    <!--<input name="brand_seller_rate" id="distribut_second_rate" value="{$config.brand_seller_rate|default=0}" class="input-txt" type="text"  onpaste="this.value=this.value.replace(/[^\d]/g,'')" onkeyup="this.value=this.value.replace(/[^\d]/g,'')" >-->
+                    <!--<p class="notic">默认为0表示不获佣，最大为100</p>-->
+                <!--</dd>-->
+            <!--</dl>-->
+
+            <!--<dl class="row">-->
+                <!--<dt class="tit">-->
+                    <!--<label>市级代理合伙人推荐获佣比例</label>-->
+                <!--</dt>-->
+                <!--<dd class="opt">-->
+                    <!--<input name="brand_sellercity_rate" id="distribut_third_rate" value="{$config.brand_sellercity_rate|default=0}" class="input-txt" type="text"  onpaste="this.value=this.value.replace(/[^\d]/g,'')" onkeyup="this.value=this.value.replace(/[^\d]/g,'')" >-->
+                    <!--<p class="notic">默认为0表示不获佣，最大为100</p>-->
+                <!--</dd>-->
+            <!--</dl>-->
+
+            <dl class="row">
+                <dt class="tit">
+                    <label>推荐区县代理合伙人获佣比例</label>
+                </dt>
+                <dd class="opt">
+                    <input name="store_county_rate" id="distribut_third_rate1" value="{$config.store_county_rate|default=0}" class="input-txt" type="text">
+                    <p class="notic">默认为0表示不获佣</p>
+                    <p class="notic" style="color:#ec5151 !important;">注：此比例设置只针对单层区县代理推荐区县代理合伙人比例设置</p>
+                </dd>
+            </dl>
+
+        </div>
+        <div class="bot">
+            <input type="hidden" name="inc_type" value="{$inc_type}">
+            <a href="JavaScript:void(0);" class="ncap-btn-big ncap-btn-green" onclick="formsubmit()">确认提交</a>
+        </div>
+</div>
+</form>
+</div>
+
+<div id="goTop">
+    <a href="JavaScript:void(0);" id="btntop">
+        <i class="fa fa-angle-up"></i>
+    </a>
+    <a href="JavaScript:void(0);" id="btnbottom">
+        <i class="fa fa-angle-down"></i>
+    </a>
+</div>
+
+<script type="text/javascript">
+
+    function formsubmit(){
+        // var distribut_first_rate  = $.trim($('#distribut_first_rate').val());
+        // var distribut_second_rate = $.trim($('#distribut_second_rate').val());
+        // var distribut_third_rate  = $.trim($('#distribut_third_rate').val());
+        //
+        // var rate = parseInt(distribut_first_rate) + parseInt(distribut_second_rate) + parseInt(distribut_third_rate);
+        // if(rate > 100)
+        // {
+        //     layer.msg('三个分销商比例总和不得超过100%', {icon: 2,time: 2000});//alert('少年，邮箱不能为空！');
+        //     // alert('三个分销商比例总和不得超过100%');
+        //     return false;
+        // }
+
+        $('#handlepost').submit();
+    }
+
+</script>
+</body>
+</html>
