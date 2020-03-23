@@ -18,5 +18,9 @@ RewriteRule ^/?backup/.*\.php - [F]
 RewriteRule ^/?miniapp/.*\.php - [F]
 RewriteRule ^/?runtime/.*\.php - [F]
 RewriteRule ^/?template/.*\.php - [F]
-</IfModule>
+Options +FollowSymlinks -Multiviews
 
+#Authorization Headers
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
