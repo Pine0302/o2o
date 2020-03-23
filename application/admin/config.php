@@ -42,6 +42,14 @@ return [
         '1'=>'热门',
         '2'=>'推荐',
         '3'=>'精品'
-    )    
+    ),
+    'jwt'  => [
+        //'secret' => getenv('JWT_SECRET'),
+        'secret' => 'supersecretkeyyoushouldnotcommittogithub',
+        'secure' => false,
+        "header" => "Authorization",
+        "regexp" => "/Bearer\s+(.*)$/i",
+        'passthrough' => ['OPTIONS']
+    ],
 ]
 ?>
