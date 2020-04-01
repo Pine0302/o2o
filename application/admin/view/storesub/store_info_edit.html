@@ -442,12 +442,56 @@
 
 			<dl class="row">
 				<dt class="tit">
-					<label for="user_name"><em>*</em>店铺配送id号</label>
+					<label>店铺图标</label>
 				</dt>
 				<dd class="opt">
-					<input type="text" value="{$store.sfid}" name="sfid" class="input-txt">
-					<span class="err" id="sfid" style="color:#F00; display:none;"></span>
-					<p class="notic">配送id号。</p>
+					<div class="input-file-show">
+            <span class="show">
+                <a id="img_a" target="_blank" class="nyroModal" rel="gal" href="{$goods_category_info.image}">
+                  <i id="img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$store.image}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+                </a>
+            </span>
+						<span class="type-file-box">
+                <input type="text" id="image" name="image" value="{$goods_category_info.image}" class="type-file-text">
+                <input type="button" name="button" id="button1" value="选择上传..." class="type-file-button">
+                <input class="type-file-file" onClick="GetUploadify(1,'','store','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+            </span>
+					</div>
+					<span class="err"></span>
+					<p class="notic"><strong style="color:orange;">此分类图片用于手机端显示, 并有且仅是第三级分类上传的图片才有效</strong></p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="notice"><em>*</em>店铺公告</label>
+				</dt>
+				<dd class="row">
+					<textarea type="text" value="" name="notice" class="input-txt" id="store_notice"></textarea>
+					<span class="err" id="notice" style="color:#F00; display:none;"></span>
+					<p class="notic">店铺公告。</p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="meituan_grade"><em>*</em>美团评分</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.meituan_grade}" id="meituan_grade" name="meituan_grade" class="input-txt" />
+					<span class="err"></span>
+					<p class="meituan_grade"></p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label for="month_sale"><em>*</em>月销量</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.month_sale}" id="month_sale" name="month_sale" class="input-txt" />
+					<span class="err"></span>
+					<p class="month_sale"></p>
 				</dd>
 			</dl>
 

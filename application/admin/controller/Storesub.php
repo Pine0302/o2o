@@ -18,8 +18,11 @@ use app\admin\logic\StorecountyLogic;
 use think\Db;
 use think\Page;
 use fast\LatLngChange;
+use app\common\library\Oss;
 
 class Storesub extends Base{
+
+
 	
 	//店铺等级
 	public function store_grade(){
@@ -134,30 +137,23 @@ class Storesub extends Base{
 	//普通店铺列表
 	////区县代理合伙人列表
 	public function store_list(){
+        //print_r(123);exit;
 		$model =  M('store_sub');
-
 		$seller_name = I('seller_name');
 		if($seller_name) $map['seller_name'] = array('like',"%$seller_name%");
-
 		$store_name = I('store_name');
 		if($store_name) $map['store_name'] = array('like',"%$store_name%");
-
-
 		$count = $model->where($map)->count();
 		$Page = new Page($count,10);
 		$list = $model->where($map)->order('store_id DESC')->limit($Page->firstRow.','.$Page->listRows)->select();
-		
 		foreach($list as $k=>$v) {
 			/*$list[$k]['company_province'] = M('region')->where(array('parent_id'=>$v['city_id'],'level'=>3,'id'=>$v['district']))->getField('name');
 			$list[$k]['apply'] = M('store_sub_apply')->field('contacts_name,contacts_mobile,company_address')->where(array('store_id'=>$v['store_id']))->find();*/
 		}
-
 		$this->assign('list',$list);
-		
 		$show = $Page->show();
 		$this->assign('page',$show);
 		$this->assign('pager',$Page);
-
 		return $this->fetch();
 	}
 
@@ -275,21 +271,31 @@ class Storesub extends Base{
 	/*添加区县代理合伙人*/
 	public function store_add(){
 		if(IS_POST){
-
             $request_data = $this->request->request();
-           // var_dump($request_data);exit;
+
 			$store_name = I('store_name');
             $user_name = I('user_name');
             $store_phone = I('store_phone');
 			$seller_name = I('seller_name');
+			$image = I('image');
 			$sfid = I('sfid');
+            $image_oss ='';
+            if(!empty($image)){
+                $ossLibraryObj = new Oss();
+                $pos = strripos($image,'/',0);
+                $file_name = mb_substr($image,$pos+1);
+                $file_path = mb_substr($image,1,$pos);
+                $server_path = "/opt/app-root/src/";
+                $image_oss = $ossLibraryObj->uploadPicToOs($server_path,$file_path,$file_name);
 
+            }
 			if(M('store_sub')->where("store_name='$store_name'")->count()>0){
 				$this->error("店铺名称已存在");
 			}
 			if(M('store_sub')->where("seller_name='$seller_name'")->count()>0){
 				$this->error("区县代理合伙人账号已被占用");
 			}
+
             /*$storesublist = M('store_sub')->where(array('district'=>$_POST['district'],'store_state'=>1))->find();
             if($storesublist){
                 $this->error("此区县已有代理合伙人");
@@ -323,6 +329,8 @@ class Storesub extends Base{
 				'user_name'=>$user_name,
 				'seller_name'=>$seller_name,
 				'sfid'=>$sfid,
+				'image'=>$image,
+				'image_oss'=>$image_oss,
 				'tui_store_sub_id'=>I('tui_store_sub_id/d'),
 				'store_address'=>I('store_address'),
 				'store_phone'=>I('store_phone'),
@@ -344,7 +352,7 @@ class Storesub extends Base{
 				)
 			);
 
-        //    var_dump($store);
+            var_dump($store);exit;
 
 			$storesubLogic = new StoresubLogic();
 			$store_id = $storesubLogic->addStore($store);
@@ -358,7 +366,6 @@ class Storesub extends Base{
 
 		$province = M('region')->where(array('parent_id'=>0,'level'=>1))->select();
         $this->assign('province',$province);
-
         $storesub= M('store_sub')->field('lnglat,store_id,store_name,city_id,district')->select();
         foreach($storesub as $k=>$v) {
             //$storesub[$k]['lnglat'] = explode(',',$v['lnglat']);
@@ -366,9 +373,7 @@ class Storesub extends Base{
             ->where(array('parent_id'=>$v['city_id'],'level'=>3,'id'=>$v['district']))
             ->getField('name');
         }
-
         $this->assign('storesub',$storesub);
-
 		$is_own_shop = I('is_own_shop',1);
 		$this->assign('is_own_shop',$is_own_shop);
 		return $this->fetch();

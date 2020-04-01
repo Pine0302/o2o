@@ -159,4 +159,5 @@ class Base extends Controller {
             return ['status'=>-1,'msg'=>'您没有操作权限['.($ctl.'@'.$act).'],请联系超级管理员分配权限','url'=>U('Admin/Index/welcome')];
         }
     }
+
 }

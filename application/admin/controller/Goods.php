@@ -93,6 +93,7 @@ class Goods extends Base {
                     $this->ajaxReturn($return_arr);
                 } else {
                     $GoodsCategory->data(input('post.'),true); // 收集数据
+
                     $GoodsCategory->parent_id = I('parent_id');
                     
                     //查找同级分类是否有重复分类

@@ -60,4 +60,12 @@ define('APP_PATH', __DIR__ . '/application/');
 define('NOW_TIME',$_SERVER['REQUEST_TIME']);
 // 加载框架引导文件
 
+function pline($data,$is_stop=1){
+    echo "<pre>";
+    print_r($data);
+    if($is_stop==1){
+        exit;
+    }
+}
+
 require __DIR__ . '/thinkphp/start.php';
