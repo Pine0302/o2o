@@ -36,10 +36,6 @@ class Login extends Api
         $this->wlog($data);
         $code = $data['code'];
 
-        $rec_user_id = $data['uid'] ?? '';  //推荐上级id
-        $this->wlog("新用户进来了");
-        $this->wlog($rec_user_id);
-        $this->wlog("新用户进来了啊");
         $mini_config_url = config('mini.url');
         $appid = config('Wxpay.APPID');
         $app_secret = config('Wxpay.APPSECRET');
@@ -64,9 +60,9 @@ class Login extends Api
             $this->wlog($arr);
 
             $result_set_redis = $this->redis->hmset($sess_key,$arr);
-            $result = $this->registerUser($result['openid'],$rec_user_id);
-
-            $data = ['sess_key'=>$sess_key,'is_new_coupon'=>$result];
+            $result = $this->registerUser($result['openid']);
+            $auth_code = '1';
+            $data = ['auth_code'=>$auth_code,'bind_mobile'=>1];
             $bizobj = ['data'=>$data];
             $this->success('成功', $bizobj);
         }else{
@@ -76,36 +72,24 @@ class Login extends Api
     }
 
     //注册用户
-    public function registerUser($openid,$rec_user_id){
+    public function registerUser($openid){
         $check_user = Db::name('users')->where('openid','=',$openid)->find();
-        $this->wlog($rec_user_id);
-        $this->wlog($check_user);
-        if(empty($check_user)){
-            if(!empty($rec_user_id)&&($rec_user_id!='null')){
-                $data = [
-                    'openid'=>$openid,
-                    'is_new'=>1,
-                    'rec_user_id'=>$rec_user_id,
-                ];
-            }else{
-                $data = [
-                    'openid'=>$openid,
-                    'is_new'=>1,
-                ];
-            }
-            $this->wlog($data);
-            //var_dump($data);exit;
-            Db::name('users')->insert($data);
 
-            //给老用户发券
-            if(!empty($rec_user_id)){
-              //  $coupon_info = Db::name('plat_coupon')->where('is_rec','=',1)->find();
-           //     $this->sendCoupon($rec_user_id,$coupon_info);
-            }
-            return 1;
-        }else{
-            return $check_user['is_new'];
+        if(empty($check_user)){
+            $data = [
+                'openid'=>$openid,
+                'is_new'=>1,
+            ];
         }
+        $this->wlog($data);
+
+        Db::name('users')->insert($data);
+        //给老用户发券
+        if(!empty($rec_user_id)){
+          //  $coupon_info = Db::name('plat_coupon')->where('is_rec','=',1)->find();
+       //     $this->sendCoupon($rec_user_id,$coupon_info);
+        }
+        return 1;
 
     }
 

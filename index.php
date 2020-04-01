@@ -65,6 +65,8 @@ function pline($data,$is_stop=1){
     print_r($data);
     if($is_stop==1){
         exit;
+    }else{
+
     }
 }
 

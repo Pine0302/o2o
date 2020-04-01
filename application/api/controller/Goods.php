@@ -243,14 +243,14 @@ class Goods extends Api
 
 
         //获取加料规格
-        $plus_spec = Db::name('goods_plus')
+        /*$plus_spec = Db::name('goods_plus')
             ->alias('p')
             ->join('tp_plus_attr a','a.id=p.plus_id')
             ->where('p.goods_id','=',$goods_id)
             ->field('p.id,p.plus_id ,a.name,a.price')
             ->order('a.sort desc')
-            ->select();
-
+            ->select();*/
+        $plus_spec = [];
 
 
         //不带加料的价格列表
