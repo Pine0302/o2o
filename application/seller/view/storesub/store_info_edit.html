@@ -354,6 +354,16 @@
 		position: relative;
 		width:200px;
 	}
+
+	#store_notice{
+		line-height: 100px;
+		white-space: nowrap;
+		display: inline-block;
+		height: 100px;
+		overflow: hidden;
+		cursor: text;
+		margin-left: 200px;
+	}
 </style>
 <body style="background-color: #FFF; overflow: auto;">
 <div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
@@ -397,6 +407,44 @@
 					<p class="notic">用以登录区县代理合伙中心密码</p>
 				</dd>
 			</dl>
+
+
+			<dl class="row">
+				<dt class="tit">
+					<label>店铺图标</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+            <span class="show">
+                <a id="img_a" target="_blank" class="nyroModal" rel="gal" href="{$store.image}">
+                  <i id="img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$store.image}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+                </a>
+            </span>
+						<span class="type-file-box">
+                <input type="text" id="image" name="image" value="{$store.image}" class="type-file-text">
+                <input type="button" name="button" id="button1" value="选择上传..." class="type-file-button">
+                <input class="type-file-file" onClick="GetUploadify(1,'','store','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+            </span>
+					</div>
+					<span class="err"></span>
+					<p class="notic"><strong style="color:orange;">此分类图片用于手机端显示, 并有且仅是第三级分类上传的图片才有效</strong></p>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit" >
+					<label for="notice"><em>*</em>店铺公告</label>
+				</dt>
+				<dd class="row">
+					<textarea type="text" value="" name="notice" class="input-txt" id="store_notice">{$store.notice}</textarea>
+					<span class="err" id="notice" style="color:#F00; display:none;"></span>
+					<p class="notic">店铺公告。</p>
+				</dd>
+			</dl>
+
+
+
+
 
 		<!--	<dl class="row">
 				<dt class="tit">
@@ -476,6 +524,18 @@
 				</dd>
 			</dl>
 
+			<dl class="row">
+				<dt class="tit">
+					<label for="store_name"><em>*</em>工作时间2</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.store_time2}" id="store_time2" name="store_time2" class="input-txt" />
+					---	<input type="text" value="{$store.store_end_time2}" id="store_end_time2" name="store_end_time2" class="input-txt" />
+					<span class="err"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+
 
 			<!--<dl class="row">-->
 				<!--<dt class="tit">-->
@@ -511,13 +571,13 @@
 				</dd>
 			</dl>
 
-			<dl class="row">
+			<!--<dl class="row">
 				<dt class="tit"><em>*</em>服务区域坐标：</dt>
 				<dd class="opt">
 					<input class="lnglat" style="display:block;width:100%" type="text" class="w150 text" name="store[lnglat]" value='{$store.lnglat}' readonly/><span></span>
 					<p class="notic" style="color:red;">注：如果需要添加服务区域可添加，没有可不圈画添加</p>
 				</dd>
-			</dl>
+			</dl>-->
 			<!--之前腾讯地图-->
 			<div style="margin:0 auto;position:relative;">
 				<div >
@@ -535,7 +595,7 @@
 						<div class="search">
 							<div class="search_c">
 								<!--<input id="areasearch" style="height:24px;" type="text" class="search_t" onKeyPress="if(event.keyCode==13) {btnSearch.click();return false;}" placeholder="输入服务区域地址搜索"/></div>-->
-								<input name="searchaddress"  style="height:24px;" type="text" class="search_t"  placeholder="输入服务区域地址搜索"/>
+								<input name="searchaddress"  style="height:24px;" type="text" class="search_t"  placeholder="输入店铺地址搜索"/>
 							</div>
 							<div id="btn_search" class="btn_get addresssearch">搜索</div>
 						</div>
@@ -1137,6 +1197,16 @@
         elem: '#store_end_time',
         type: 'time',
     });
+
+
+	laydate.render({
+		elem: '#store_time2'
+		,type: 'time'
+	});
+	laydate.render({
+		elem: '#store_end_time2',
+		type: 'time',
+	});
 
     //根据输入的服务地址获取经纬度并定位在地图上
     $('.addresssearch').click(function() {

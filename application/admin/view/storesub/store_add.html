@@ -370,8 +370,6 @@
 		overflow: hidden;
 		cursor: text;
 		margin-left: 200px;
-
-
 	}
 </style>
 <body style="background-color: #FFF; overflow: auto;">
@@ -533,7 +531,17 @@
 			</dl>
 
 
-
+			<dl class="row">
+				<dt class="tit">
+					<label for="store_name"><em>*</em>工作时间2</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.store_time2}" id="store_time2" name="store_time2" class="input-txt" />
+					---	<input type="text" value="{$store.store_end_time2}" id="store_end_time2" name="store_end_time2" class="input-txt" />
+					<span class="err"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
 
 
 
@@ -1176,7 +1184,17 @@
             elem: '#store_end_time',
             type: 'time',
         });
+
+		laydate.render({
+			elem: '#store_time2'
+			,type: 'time'
+		});
+		laydate.render({
+			elem: '#store_end_time2',
+			type: 'time',
+		});
     });
+
 
 
 

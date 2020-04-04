@@ -278,7 +278,9 @@ class Storesub extends Base{
             $store_phone = I('store_phone');
 			$seller_name = I('seller_name');
 			$image = I('image');
-			$sfid = I('sfid');
+            $notice = I('notice');
+            $meituan_grade = I('meituan_grade');
+            $month_sale = I('month_sale');
             $image_oss ='';
             if(!empty($image)){
                 $ossLibraryObj = new Oss();
@@ -328,7 +330,9 @@ class Storesub extends Base{
 				'store_name'=>$store_name,
 				'user_name'=>$user_name,
 				'seller_name'=>$seller_name,
-				'sfid'=>$sfid,
+				'notice'=>$notice,
+				'meituan_grade'=>$meituan_grade,
+				'month_sale'=>$month_sale,
 				'image'=>$image,
 				'image_oss'=>$image_oss,
 				'tui_store_sub_id'=>I('tui_store_sub_id/d'),
@@ -348,11 +352,12 @@ class Storesub extends Base{
                 'is_shenhe'=>1,
 				'store_time'=>I('store_time'),
 				'store_end_time'=>I('store_end_time'),
-				'is_own_shop'=>I('is_own_shop'
-				)
+                'store_time2'=>I('store_time2'),
+                'store_end_time2'=>I('store_end_time2'),
+				'is_own_shop'=>I('is_own_shop')
 			);
 
-            var_dump($store);exit;
+          //  var_dump($store);exit;
 
 			$storesubLogic = new StoresubLogic();
 			$store_id = $storesubLogic->addStore($store);
@@ -479,7 +484,7 @@ class Storesub extends Base{
 
 			$map =$_REQUEST;
 			$store = $map['store'];
-           // var_dump($store);exit;
+
 			unset($map['store']);
 
             $store_one = M('store_sub')->where(array('store_id'=>$store['store_id']))->find();
@@ -489,6 +494,10 @@ class Storesub extends Base{
             $store['lng'] = $res_lnglat[0];
             $store['lat'] = $res_lnglat[1];
             $store['sfid'] = $map['sfid'];
+
+            $store['notice'] = $map['notice'];
+            $store['meituan_grade'] = $map['meituan_grade'];
+            $store['month_sale'] = $map['month_sale'];
 
             $lnglat = $store['lnglat'];
 
@@ -535,7 +544,7 @@ class Storesub extends Base{
 				}
 				$this->success('编辑成功',U('Storesub/store_list'));exit;
 			}else{
-				$this->error('编辑失败');
+                $this->success('编辑成功',U('Storesub/store_list'));exit;
 			}
 		}
 
@@ -553,12 +562,18 @@ class Storesub extends Base{
 		/*	$apply = M('store_sub_apply')->where('store_id='.$store['store_id'])->find();
 			$this->assign('apply',$apply);*/
 
-            $storsub = M('store_sub')->field('store_id,store_name,store_phone,user_name,city_id,store_time,store_end_time')->where(['store_id'=>$store_id])->find();
+            $storsub = M('store_sub')->field('store_id,store_name,store_phone,user_name,city_id,store_time,store_time2,store_end_time2')->where(['store_id'=>$store_id])->find();
             if(!empty($storsub['store_time'])){
                 $storsub['store_time'] = date("H:i:s",$storsub['store_time']);
             }
             if(!empty($storsub['store_end_time'])){
                 $storsub['store_end_time'] = date("H:i:s",$storsub['store_end_time']);
+            }
+            if(!empty($storsub['store_time2'])){
+                $storsub['store_time2'] = date("H:i:s",$storsub['store_time2']);
+            }
+            if(!empty($storsub['store_end_time2'])){
+                $storsub['store_end_time2'] = date("H:i:s",$storsub['store_end_time2']);
             }
          /*   foreach($storsub as $k=>$v) {
                 $storsub[$k]['company_district'] = M('region')
