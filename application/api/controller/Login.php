@@ -6,9 +6,11 @@ namespace app\api\controller;
 
 use app\common\controller\Api;
 use app\common\library\wx\WXBizDataCrypt;
+use app\common\repository\UserRepository;
 use fast\Http;
 use think\cache\driver\Redis;
 use think\Db;
+use think\Request;
 use think\Session;
 use think\Cache;
 /**
@@ -28,41 +30,49 @@ class Login extends Api
 //    /protected $noNeedRight = ['test2'];
     protected $noNeedRight = ['*'];
 
+    /**
+     * @var UserRepository;
+     */
+    private $userRepository;
+
+    public function __construct(Request $request = null,UserRepository $userRepository)
+    {
+        parent::__construct($request);
+        $this->userRepository = $userRepository;
+    }
+
     public function login()
     {
 
-
         $data = $this->request->post();
-        $this->wlog($data);
         $code = $data['code'];
 
         $mini_config_url = config('mini.url');
         $appid = config('Wxpay.APPID');
         $app_secret = config('Wxpay.APPSECRET');
         $login_url = $mini_config_url['wx_login']."?appid={$appid}&secret={$app_secret}&js_code={$code}&grant_type=authorization_code";
+
         $this->wlog($login_url);
         $result_json = Http::get($login_url);
         $result = json_decode($result_json,true);
-
-
-        $sess_key = $this->rd3_session(16);
-
-        //   error_log(var_export($result_json,1),3,"/data/wwwroot/mini3.pinecc.cn/runtime/test.txt");
+        if(IS_TEST){
+            $result = [
+                'openid'=>'oUQcI0bzIh2RXXaD5eN11QNnd9uo2',
+                'session_key'=>'123123',
+            ];
+        }
 
         if(!empty($result['openid'])&&(!empty($result['session_key']))){
-
-            $arr = [
+            $user_data = [
                 'openid'=>$result['openid'],
                 'session_key'=>$result['session_key'],
-                'sess_key'=>$sess_key,
             ];
-
-            $this->wlog($arr);
-
-            $result_set_redis = $this->redis->hmset($sess_key,$arr);
-            $result = $this->registerUser($result['openid']);
-            $auth_code = '1';
-            $data = ['auth_code'=>$auth_code,'bind_mobile'=>1];
+            $this->cacheUser($user_data);
+            $auth_code = $this->signUserJwtToken($user_data);     //获取token
+            $user_info = $this->registerUser($result['openid']);            //插入用户openid
+            $bind_mobile = empty($user_info['mobile']) ? 2 : 1;
+            $is_login = empty($user_info['is_login']) ? 2 : $user_info['is_login'];
+            $data = ['auth_code'=>$auth_code,'bind_mobile'=>$bind_mobile];
             $bizobj = ['data'=>$data];
             $this->success('成功', $bizobj);
         }else{
@@ -71,26 +81,71 @@ class Login extends Api
 
     }
 
+    //验证手机号
+    public function getUserMobile(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $sessionKey = $this->redis->hget($openid,'session_key');
+
+        $appid = config('wxpay.APPID');
+        $encryptedData = $data['encryptedData'];
+        $iv = $data['iv'];
+        $pc = new WXBizDataCrypt($appid, $sessionKey);
+        $mobile_info_json = $pc->decryptData($encryptedData, $iv, $data );
+        $result = json_decode($mobile_info_json,true);
+
+        if(IS_TEST){
+            $result = [
+                'purePhoneNumber'=>'19906721236',
+            ];
+        }
+
+        if(!empty($result['purePhoneNumber'])){
+            $user_info = $this->getGUserInfo($openid);
+            if(!empty($user_info['user_id'])){
+                Db::name('users')->where('user_id','=',$user_info['user_id'])->update(['weixin_mobile'=>$result['purePhoneNumber']]);
+            }
+        }else{
+            $this->error('lostkey',null,10);exit;
+        }
+        $response = [
+            'data'=>$result['purePhoneNumber']
+        ];
+        $this->success('success',$response);
+    }
+
+
+    //手机号登录
+    public function mobileLogin(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $mobile = $data['mobile'];
+        $sms_code = $data['sms_code'];
+        //验证密码
+        $profile_key = $openid . "_profile";
+        $code = $this->redis->get($profile_key);
+        if($code==$sms_code){
+            //给用户登录身份
+            $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
+            $this->success('登录成功');
+        }else{
+            $this->success('短信验证码错误');
+        }
+    }
+
+
     //注册用户
     public function registerUser($openid){
         $check_user = Db::name('users')->where('openid','=',$openid)->find();
-
         if(empty($check_user)){
             $data = [
                 'openid'=>$openid,
-                'is_new'=>1,
             ];
+            Db::name('users')->insert($data);
+            $check_user = $data;
         }
-        $this->wlog($data);
-
-        Db::name('users')->insert($data);
-        //给老用户发券
-        if(!empty($rec_user_id)){
-          //  $coupon_info = Db::name('plat_coupon')->where('is_rec','=',1)->find();
-       //     $this->sendCoupon($rec_user_id,$coupon_info);
-        }
-        return 1;
-
+        return $check_user;
     }
 
 
@@ -226,46 +281,6 @@ class Login extends Api
     }
 
 
-    public function getUserMobile(){
-       // $this->wlog('getUserMobile');
-        $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $sessionKey = $this->redis->hget($sess_key,'session_key');
-        $appid = config('wxpay.APPID');
-        $encryptedData = $data['encryptedData'];
-        $iv = $data['iv'];
-
-
-
-        $pc = new WXBizDataCrypt($appid, $sessionKey);
-
-     //   $this->wlog($encryptedData);
-     //   $this->wlog($iv);
-
-
-
-        $mobile_info_json = $pc->decryptData($encryptedData, $iv, $data );
-
-      // $this->wlog($mobile_info_json);
-
-        $result = json_decode($mobile_info_json,true);
-
-
-        if(!empty($result['purePhoneNumber'])){
-            $user_info = $this->getGUserInfo($sess_key);
-            if(!empty($user_info['user_id'])){
-                Db::name('users')->where('user_id','=',$user_info['user_id'])->update(['weixin_mobile'=>$result['purePhoneNumber']]);
-            }
-        }else{
-            $this->error('lostkey',null,10);exit;
-        }
-        $response = [
-            'data'=>$result['purePhoneNumber']
-        ];
-        $this->success('success',$response);
-    }
-
-
     //添加上级
     public function updateTeam($up_user_id,$low_user_id){
         //先看看下级用户是否有上级,如果有则不管了,没有则添加上级
@@ -317,6 +332,89 @@ class Login extends Api
         // remove none url chars
         $result = strtr($result, '+/', '-_');
         return substr($result, 0, $len);
+    }
+
+
+
+    public function updateUserInfo()
+    {
+        $data = $this->request->post();
+
+        $sess_key = $data['sess_key'] ?? '';
+        $mobile = $data['mobile'] ?? '';
+        $id = $data['id'] ?? '';
+        $name = $data['name'] ?? '';
+        $gender = $data['gender'] ?? 0;
+        $birthday = $data['birthday'] ?? '';
+        $sms_code = $data['sms_code'] ?? '';
+        if ((!empty($sess_key)) && (!empty($mobile)) && (!empty($name))  && (!empty($birthday)) && (!empty($sms_code)) && (!empty($id)) ) {
+            try {
+
+                //验证验证码
+                $user_info = Db::table('user')
+                    ->where('id', $id)
+                    ->field('id,username,mobile,gender,birthday,available_balance,openid_re')
+                    ->find();
+                $openid_re = $user_info['openid_re'];
+                //发短信
+                //生成随机6位数
+                $code = rand(100000, 999999);
+                $param = array(
+                    'code' => $code,
+                );
+                $profile_key = $openid_re . "_profile";
+                //  $code = Session::get($profile_key);
+                $code = $this->redis->get($profile_key);
+                //  error_log("缓存里的code".json_encode($code),3,"/data/wwwroot/mini3.pinecc.cn/runtime/test.txt");
+                //   error_log("用户的code".json_encode($sms_code),3,"/data/wwwroot/mini3.pinecc.cn/runtime/test.txt");
+                if($code==$sms_code){
+                    //修改user表和resume表里面的信息
+                    $update_user = [
+                        'username'=>$name,
+                        'mobile'=>$mobile,
+                        'gender'=>$gender,
+                        'birthday'=>$birthday,
+                    ];
+                    $update_re_resume = [
+                        'name'=>$name,
+                        'mobile'=>$mobile,
+                        'sex'=>$gender,
+                        'age'=>$birthday,
+                    ];
+                    $result_user =  Db::table('user')
+                        ->where('id',$id)
+                        ->update($update_user);
+                    $check_resume = Db::table('re_resume')
+                        ->where('user_id',$id)
+                        ->find();
+                    if(!empty($check_resume)){
+                        $result_resume =  Db::table('re_resume')
+                            ->where('user_id',$id)
+                            ->update($update_re_resume);
+                    }else{
+                        $create_re_resume = [
+                            'name'=>$name,
+                            'user_id'=>$id,
+                            'mobile'=>$mobile,
+                            'sex'=>$gender,
+                            'age'=>$birthday,
+                            'create_at'=>date('Y-m-d H:i:s',time()),
+                            'update_at'=>date('Y-m-d H:i:s',time()),
+                        ];
+                        $result_resume =  Db::table('re_resume')->insert($create_re_resume);
+                    }
+
+                    $this->success('修改成功');
+                }else{
+                    $this->error('短信验证码错误', null, 3);
+                }
+
+            } catch (Exception $e) {
+                $this->error('网络繁忙,请稍后再试1');
+            }
+        } else {
+            $this->error('缺少必要的参数', null, 2);
+        }
     }
 
 

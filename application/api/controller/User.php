@@ -30,6 +30,34 @@ class User extends Api
         parent::_initialize();
     }
 
+    //验证手机号
+    public function validMobile(){
+        $data = $this->request->post();
+        $auth_code = $data['auth_code'] ?? '';
+        $code = $data['code'] ?? '';
+        $mobile = $data['mobile'] ?? '';
+        try{
+            $user_info = $this->getGUserInfo($sess_key);
+            $openid = $user_info['openid'];
+            $user_id = $user_info['user_id'];
+            $profile_key = $user_info['openid']."_profile";
+            $sess_code = $this->redis->get($profile_key);
+            if($sess_code==$code){
+                $arr_user_update = [
+                    'mobile'=>$mobile,
+                    'mobile_validated'=>1,
+                    'weixin_mobile'=>$mobile,
+                ];
+                Db::name('users')->where('user_id','=',$user_id)->update($arr_user_update);
+                $this->success('success', null);
+            }else{
+                $this->error('验证码有误',null);
+            }
+        }catch (Exception $e) {
+            $this->error('网络繁忙,请稍后再试');
+        }
+    }
+
     /*
  * 搜集用户的formId
  */
@@ -106,36 +134,6 @@ class User extends Api
             }
     }
 
-
-
-
-    //验证手机号
-    public function validMobile(){
-        $data = $this->request->post();
-        $sess_key = $data['sess_key'] ?? '';
-        $code = $data['code'] ?? '';
-        $mobile = $data['mobile'] ?? '';
-        try{
-            $user_info = $this->getGUserInfo($sess_key);
-            $openid = $user_info['openid'];
-            $user_id = $user_info['user_id'];
-            $profile_key = $user_info['openid']."_profile";
-            $sess_code = $this->redis->get($profile_key);
-            if($sess_code==$code){
-                $arr_user_update = [
-                    'mobile'=>$mobile,
-                    'mobile_validated'=>1,
-                    'weixin_mobile'=>$mobile,
-                ];
-                Db::name('users')->where('user_id','=',$user_id)->update($arr_user_update);
-                $this->success('success', null);
-            }else{
-                $this->error('验证码有误',null);
-            }
-        }catch (Exception $e) {
-            $this->error('网络繁忙,请稍后再试');
-        }
-    }
 
 
 

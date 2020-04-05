@@ -15,6 +15,7 @@ use think\Request;
 use think\Response;
 use think\Cache;
 use think\Db;
+use app\common\util\JwtUtil;
 //use app\common\library\wx\WXBizDataCrypt;
 //use fast\Http;
 use think\cache\driver\Redis;
@@ -395,10 +396,9 @@ class Api
     }
 
     //获取用户信息
-    public function getGUserInfo($sess_key){
+    public function getGUserInfo($openid){
         $arr = [  'openid', 'session_key' ];
-        $sess_info = $this->redis->hmget($sess_key,$arr);
-
+        $sess_info = $this->redis->hmget($openid,$arr);
         if(empty($sess_info['openid'])){
             $this->error('lostkey',null,10);exit;
         }
@@ -509,7 +509,37 @@ class Api
         }
     }
 
+    //给用户做jwt签名
+    public function signUserJwtToken($user_data){
+        $jwtUtil = new JwtUtil();
+        return $jwtUtil->signToken($user_data);
+    }
 
+
+
+    //解析用户token
+    public function analysisUserJwtToken(){
+        $auth_code = $_SERVER['HTTP_AUTHORIZATION'];
+        $auth_code = str_replace("Bearer ","",$auth_code);
+        $jwtUtil = new JwtUtil();
+        if(empty($auth_code)){
+            $this->error('token过期,请重新调用login接口', null, 14);exit;
+        }
+        $userData =  $jwtUtil->analysisToken($auth_code);
+        if(!empty($userData->openid)){
+            return $userData->openid;
+        }else{
+            $this->error('token有误,请重新调用login接口', null, 14);exit;
+        }
+    }
+
+    //把用户存储到redis中
+    public function cacheUser($user_data){
+        $openid = $user_data['openid'];
+        array_walk($user_data,function($value,$key)use($openid){
+            $result = $this->redis->hset($openid,$key,$value);
+        });
+    }
 
 
 

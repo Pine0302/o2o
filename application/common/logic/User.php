@@ -42,6 +42,10 @@ class User
     public function setUser($user){
         $this->user = $user;
     }
+
+
+
+
     /**
      * 绑定账号
      */
