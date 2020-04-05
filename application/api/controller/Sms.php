@@ -9,11 +9,8 @@ use think\addons\Controller;
 use think\Session;
 use think\Db;
 use think\cache\driver\Redis;
-use addons\alisms\library\Alisms;
-use aliyunSms\sendSms;
-use fast\Http;
+use alisms\library\Alisms;
 
-/*require_once dirname(__DIR__) . "../../../extend/aliyunsms/demo/sendSms.php";*/
 
 /**
  * 手机短信接口
@@ -29,48 +26,40 @@ class Sms extends Api
         parent::_initialize();
     }
 
-    public function test(){
-     /*   $sendSmsObj = new sendSms();
-        $sendSmsObj->sendSmstest();*/
 
-    }
 
 
 
     public function sendProfileSms(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'] ?? '';
+        $openid = $this->analysisUserJwtToken();
         $mobile = $data['mobile'];
-        $template = "SMS_152514269";
-        $sign = '蓝火柴ITAFE';
-
-        if((!empty($template))&&(!empty($mobile))){
+        $template = "SMS_187215748";
+        $sign = '骑士汇';
+        if(!empty($mobile)){
             try {
-                $user_info = $this->getGUserInfo($sess_key);
-
-
                 //发短信
                 //生成随机6位数
                 $code = rand(100000,999999);
                 $param = array(
                     'code'=>$code,
                 );
-             //   error_log(var_export($param,1),3,"/data/wwwroot/mini3.pinecc.cn/tt.txt");
-                $profile_key = $user_info['openid']."_profile";
-                $result_set = $this->redis->set($profile_key,$code);
+                $profile_key = $openid."_profile";
+                $result_set = $this->redis->set($profile_key,$code);$code = $this->redis->get($profile_key);
 
-                $code = $this->redis->get($profile_key);
-                $sendSmsObj = new sendSms();
-
-                $result = $sendSmsObj->sendSmstest($code,$mobile,$template,$sign);
-                if($result->Code=="OK"){
-                  //  $this->wlog($result->Code,'smslog.txt');
-                    $this->success("发送成功");
-                }else
+                $alisms = new Alisms();
+                $ret = $alisms->mobile($mobile)
+                    ->template($template)
+                    ->sign($sign)
+                    ->param($param)
+                    ->send();
+                if ($ret)
                 {
-                   // $this->error('网络繁忙,请稍后再试');
-                 //   $this->wlog($result->Message,'smslog.txt');
-                    $this->error("发送失败！失败原因：" . $result->Message);
+                    $this->success("发送成功",$param);
+                }
+                else
+                {
+                    $this->error("发送失败！失败原因：" . $alisms->getError());
                 }
             } catch (Exception $e) {
                 $this->error('网络繁忙,请稍后再试');
@@ -78,23 +67,6 @@ class Sms extends Api
         }else{
             $this->error('缺少必要的参数',null,2);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 
