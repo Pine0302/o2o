@@ -39,7 +39,7 @@ if(file_exists("./install/") && !file_exists("./install/install.lock")){
 	exit(); 
 }
 
-
+define('IS_TEST',1);
 //require __DIR__ . '/saas.php';
 // 开启调试模式 建议开发阶段开启 部署阶段注释或者设为false
 //define('APP_DEBUG',false); debug tp5 里面已经改为 config.php 里面
