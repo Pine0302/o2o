@@ -23,9 +23,9 @@ use think\cache\Driver;
 class Redis extends Driver
 {
     protected $options = [
-        'host'       => '127.0.0.1',
+        'host'       => 'redis',
         'port'       => 6379,
-        'password'   => 'scs890302ZHR',
+        'password'   => '',
         'select'     => 0,
         'timeout'    => 0,
         'expire'     => 0,
@@ -42,7 +42,6 @@ class Redis extends Driver
      */
     public function __construct($options = [])
     {
-
         if (!extension_loaded('redis')) {
             throw new \BadFunctionCallException('not support: redis');
         }
