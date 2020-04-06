@@ -12,7 +12,7 @@
 
 return [
     'iss' => 'https://o2o.pinecc.cn',
-    'expire_time' => 60*60*24*1,
+    'expire_time' => 60*60*24*365,
     'key' => 'pine',
 
 ];
