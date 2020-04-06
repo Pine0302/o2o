@@ -32,6 +32,53 @@ class Address extends Api
 
 
 
+    //获取用户定位
+    public function getUserPosition(){
+
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $latitude = $data['latitude'];
+        $longitude = $data['longitude'];
+
+        $lbs_qq_key = config('Lbs.QQ_KEY');
+        $location = $latitude.",".$longitude;
+
+        $url = "http://apis.map.qq.com/ws/geocoder/v1/?location={$location}&key={$lbs_qq_key}&get_poi=1";
+
+        $http = new Http();
+        $result_user_position = $http->get($url);
+        $result_user_position_arr = json_decode($result_user_position,true);
+        $my_village = $this->getMyVillageFromPositionInfo($result_user_position_arr['result']);
+        $location_areano = substr($result_user_position_arr['result']['ad_info']['city_code'],3);
+        $location_area_name = $result_user_position_arr['result']['ad_info']['city'];
+        $location_district_name = $result_user_position_arr['result']['ad_info']['district'];
+        $data = [
+            'my_village'=>$my_village,
+            'location_areano'=>$location_areano,
+            'location_area_name'=>$location_area_name,
+            'location_district_name'=>$location_district_name,
+        ];
+        $response = [
+            'data'=>$data
+        ];
+        $this->success('success',$response);
+
+        //验证密码
+
+    }
+
+    public function getMyVillageFromPositionInfo($result_user_position_arr){
+        $position = $result_user_position_arr['formatted_addresses']['recommend'];
+        if(!empty($result_user_position_arr['address_reference']['landmark_l2']['title'])){
+            $position = $result_user_position_arr['address_reference']['landmark_l2']['title'];
+        }
+        if($result_user_position_arr['poi_count']>0){
+            $position = $result_user_position_arr['pois'][0]['title'];
+        }
+        return $position;
+    }
+
 
     //修改/更新地址
     public function addEditUserAddress(){
