@@ -8,6 +8,7 @@ use fast\AreaInclude;
 use fast\Http;
 use think\cache\driver\Redis;
 use think\Db;
+use think\Request;
 use think\Session;
 use think\Cache;
 use app\api\controller\Common;
@@ -38,66 +39,72 @@ class Store extends Api
     //店铺列表
     public function storeList(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
         $user_point = [
-            'lng'=>$data['lng'],
-            'lat'=>$data['lat'],
+            'lng'=>$data['longitude'],
+            'lat'=>$data['latitude'],
         ];
-        $this->wlog("---------",'ttt.txt');
-        $this->wlog($user_info['user_id'],'ttt.txt');
-        $this->wlog($user_point,'ttt.txt');
-        $this->wlog("storeList",'ttt.txt');
-        $this->wlog("---------",'ttt.txt');
-      //  Db::name('users')->where('user_id','=',$user_info['user_id'])->update($user_point);
+        $type = $data['type'];
+        $title = $data['title'];
 
-
-        $store_list = Db::name('store_sub')
-            ->where('is_shenhe','=',1)
-            ->select();
-
-        $arr = [];
-
-        if(count($store_list)>0){
-            $areaIncludeObj = new AreaInclude();
-
-            foreach($store_list as $kd=>$vd){
-
-                $lnglat_tx = unserialize($vd['lnglat_tx']);
-                $this->wlog("---------------");
-                $this->wlog($lnglat_tx);
-
-
-                $is_include = $areaIncludeObj->is_point_in_polygon($user_point,$lnglat_tx);
-
-                $this->wlog($is_include);
-                $this->wlog("~~~~~~~~~~~~~~~~");
-
-           //     if($is_include==1){
-                    //获取两点之间的距离
-                 //   $distance = $areaIncludeObj->distance($data['lng'],$data['lat'],$vd['store_lng_tx'],$vd['store_lat_tx']);
-                    $distance = $areaIncludeObj->getDistance($data['lat'],$data['lng'],$vd['store_lat_tx'],$vd['store_lng_tx']);
-                    $distance = number_format($distance,2);
-                    $arr[] = [
-                        'store_id'=>$vd['store_id'],
-                        'store_name'=>$vd['store_name'],
-                        'store_state'=>$this->getStoreState($vd),
-                        'mobile'=>$vd['store_phone'],
-                        'address'=>$vd['store_address'],
-                        'lng'=>$vd['store_lng_tx'],
-                        'lat'=>$vd['store_lat_tx'],
-                        'store_time'=>$vd['store_time'],
-                        'store_end_time'=>$vd['store_end_time'],
-                        'distance'=>$distance,
-                        'store_status'=>$vd['store_state'],
-                    ];
-              //  }
-            }
+        $storeDb = Db::name('store_sub');
+        if(!empty($data['title'])){
+            $storeDb->where('store_name','like',"'%".$data['title']."%'");
         }
+        $storeDb->where('is_shenhe','=',1);
+        switch($type){
+            case "price":
+                $storeDb->order(['average_consume'=>'asc']);
+                break;
+            case "sale":
+                $storeDb->order(['month_sale'=>'desc']);
+                break;
+        }
+        $store_list = $storeDb->select();
+        $store_list = $this->getStoreWithDistance($store_list,$user_point);
+        if($type=="distance"){
+            $distances = array_column($store_list,'distance');
+            array_multisort($distances,SORT_ASC,$store_list);
+        }
+        $arr = $store_list;
         $data = [
             'data'=>$arr,
         ];
         $this->success('success', $data);
+    }
+
+
+    public function getStoreWithDistance($store_list,$user_point){
+        $arr = [];
+        if(count($store_list)>0){
+            $areaIncludeObj = new AreaInclude();
+            foreach($store_list as $kd=>$vd){
+                $lnglat_tx = unserialize($vd['lnglat_tx']);
+                $distance = $areaIncludeObj->distance($user_point['lat'],$user_point['lng'],$vd['store_lat_tx'],$vd['store_lng_tx']);
+                $distance = number_format($distance/1000,2);
+                $arr[] = [
+                    'store_id'=>$vd['store_id'],
+                    'store_name'=>$vd['store_name'],
+                    'store_state'=>$this->getStoreState($vd),
+                    'mobile'=>$vd['store_phone'],
+                    'address'=>$vd['store_address'],
+                    'lng'=>$vd['store_lng_tx'],
+                    'lat'=>$vd['store_lat_tx'],
+                    'store_time'=>$vd['store_time'],
+                    'store_time2'=>$vd['store_time2'],
+                    'store_end_time'=>$vd['store_end_time'],
+                    'store_end_time2'=>$vd['store_end_time2'],
+                    'distance'=>$distance,
+                    'month_sale'=>$vd['month_sale'],
+                    'average_consume'=>$vd['average_consume'],
+                    'meituan_grade'=>$vd['meituan_grade'],
+                    'notice'=>$vd['notice'],
+                    'logo' => $this->getImage($vd['image'],$vd['image_oss']),
+                ];
+            }
+        }
+        return $arr;
     }
 
 

@@ -542,6 +542,15 @@ class Api
     }
 
 
+    //获取图片
+    public function getImage($image,$image_oss){
+        if(!empty($image_oss)){
+            return $image_oss;
+        }else{
+            $server_image_url = "https://".config('server_name').$image;
+            return $server_image_url;
+        }
+    }
 
 
 

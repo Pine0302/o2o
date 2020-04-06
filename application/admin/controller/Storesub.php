@@ -281,6 +281,7 @@ class Storesub extends Base{
             $notice = I('notice');
             $meituan_grade = I('meituan_grade');
             $month_sale = I('month_sale');
+            $average_comsume = I('average_consume');
             $image_oss ='';
             if(!empty($image)){
                 $ossLibraryObj = new Oss();
@@ -333,6 +334,7 @@ class Storesub extends Base{
 				'notice'=>$notice,
 				'meituan_grade'=>$meituan_grade,
 				'month_sale'=>$month_sale,
+                'average_consume' => $average_comsume,
 				'image'=>$image,
 				'image_oss'=>$image_oss,
 				'tui_store_sub_id'=>I('tui_store_sub_id/d'),
@@ -498,6 +500,10 @@ class Storesub extends Base{
             $store['notice'] = $map['notice'];
             $store['meituan_grade'] = $map['meituan_grade'];
             $store['month_sale'] = $map['month_sale'];
+            if($map['store_time2']&&($map['store_end_time2'])){
+                $store['store_time2'] = $map['store_time2'];
+                $store['store_end_time2'] = $map['store_end_time2'];
+            }
 
             $lnglat = $store['lnglat'];
 
@@ -530,7 +536,8 @@ class Storesub extends Base{
             if ($store_one['password'] != $store['password']) {
                 $store['password'] = encrypt($store['password']);
             }
-         //   var_dump($store);exit;
+            $store['average_consume']  = I('average_consume');
+
            $result =  $a = M('store_sub')->where(array('store_id'=>$store['store_id']))->save($store);
            // var_dump($result);
            // var_dump($store);
