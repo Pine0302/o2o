@@ -107,7 +107,7 @@
                 <li><a href="javascript:void(0);" data-index='1' class="tab current"><span>通用信息</span></a></li>
                 <!--<li><a href="javascript:void(0);" data-index='2' class="tab"><span>商品相册</span></a></li>-->
                 <li><a href="javascript:void(0);" data-index='3' class="tab"><span>商品模型</span></a></li>
-                <li><a href="javascript:void(0);" data-index='4' class="tab"><span>加料管理</span></a></li>
+                <!--<li><a href="javascript:void(0);" data-index='4' class="tab"><span>加料管理</span></a></li>-->
                 <!--    <li><a href="javascript:void(0);" data-index='5' class="tab"><span>积分折扣</span></a></li>-->
             </ul>
         </div>
@@ -125,11 +125,11 @@
     <form method="post" id="addEditGoodsForm">
         <input type="hidden" name="goods_id" value="{$goods.goods_id}">
         <input type="hidden" name="__token__" value="{$Request.token}" />
-        <input type="hidden" value="{$Request.param.is_distribut}" name="is_distribut" disabled="disabled"/>
-        <input type="hidden" value="{$level_cat['1']}" name="level_cat_1" disabled="disabled"/>
-        <input type="hidden" value="{$level_cat['2']}" name="level_cat_2" disabled="disabled"/>
-        <input type="hidden" value="{$level_cat['3']}" name="level_cat_3" disabled="disabled"/>
-        <input type="hidden" value="{$goods['brand_id']|default = 0}" name="goods_brand_id" disabled="disabled"/>
+        <input type="hidden" value="{$Request.param.is_distribut}" name="is_distribut" />
+        <input type="hidden" value="{$level_cat['1']}" name="level_cat_1" />
+        <input type="hidden" value="{$level_cat['2']}" name="level_cat_2" />
+        <input type="hidden" value="{$level_cat['3']}" name="level_cat_3" />
+        <input type="hidden" value="{$goods['brand_id']|default = 0}" name="goods_brand_id" />
         <!--通用信息-->
         <div class="ncap-form-default tab_div_1">
             <dl class="row">
@@ -137,7 +137,7 @@
                     <label>商品名称</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" value="{$goods.goods_name}" name="goods_name" class="input-txt" readonly disabled/>
+                    <input type="text" value="{$goods.goods_name}" name="goods_name" class="input-txt"  />
                     <span class="err" id="err_goods_name"></span>
                 </dd>
             </dl>
@@ -146,7 +146,7 @@
                     <label>商品分类</label>
                 </dt>
                 <dd class="opt">
-                    <select name="cat_id" id="cat_id" class="small form-control" disabled="disabled">
+                    <select name="cat_id" id="cat_id" class="small form-control">
                         <option value="0">请选择商品分类</option>
                         <foreach name="cat_list" item="v" key="k">
                             <option value="{$v['id']}" <if condition="$v['id'] eq $level_cat['1']">selected="selected"</if>>
@@ -168,7 +168,7 @@
                     <label>商品简介</label>
                 </dt>
                 <dd class="opt">
-                    <textarea rows="3" cols="80" name="goods_remark" class="input-txt" readonly disabled >{$goods.goods_remark}</textarea>
+                    <textarea rows="3" cols="80" name="goods_remark" class="input-txt"  >{$goods.goods_remark}</textarea>
                     <span id="err_goods_remark" class="err"></span>
                 </dd>
             </dl>
@@ -197,7 +197,7 @@
                     <p class="notic">如果不填会自动生成</p>
                 </dd>
             </dl>-->
-            <input type="hidden" disabled value="{$goods.goods_sn}" name="goods_sn" class="input-txt"/>
+            <input type="hidden"  value="{$goods.goods_sn}" name="goods_sn" class="input-txt"/>
 
             <!--<dl class="row">
                 <dt class="tit">
@@ -252,9 +252,20 @@
                     <label>本店售价</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" value="{$goods.shop_price}" disabled readonly name="shop_price" class="t_mane"
+                    <input type="text" value="{$goods.shop_price}"   name="shop_price" class="t_mane"
                            onKeyUp="this.value=this.value.replace(/[^\d.]/g,'')" onpaste="this.value=this.value.replace(/[^\d.]/g,'')"/>
                     <span class="err" id="err_shop_price"></span>
+                </dd>
+            </dl>
+
+            <dl class="row">
+                <dt class="tit"><em>*</em>
+                    <label>其他平台价格</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" value="{$goods.other_price}" name="other_price" class="t_mane"
+                           onKeyUp="this.value=this.value.replace(/[^\d.]/g,'')" onpaste="this.value=this.value.replace(/[^\d.]/g,'')"/>
+                    <span class="err" id="err_other_price"></span>
                 </dd>
             </dl>
             <!--<dl class="row">
@@ -304,7 +315,7 @@
                         <span class="type-file-box">
                             <input type="text" id="imagetext" name="original_img" value="{$goods.original_img}" class="type-file-text">
                             <input type="button" name="button" id="button1" value="选择上传..." class="type-file-button">
-                            <input class="type-file-file"  disabled readonly onClick="GetUploadify(1,'','goods','img_call_back')" size="30"
+                            <input class="type-file-file"    onClick="GetUploadify(1,'','goods','img_call_back')" size="30"
                                    title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
                         </span>
                     </div>
@@ -420,10 +431,10 @@
                     <if condition="$goods['goods_id'] gt 0">
                         <if condition="$goods['is_virtual'] eq 1">
                             <span>是</span>
-                            <input name="is_virtual" value="1" type="hidden" disabled="disabled">
+                            <input name="is_virtual" value="1" type="hidden" >
                         <else/>
                             <span>否</span>
-                            <input name="is_virtual" value="0" type="hidden" disabled="disabled">
+                            <input name="is_virtual" value="0" type="hidden" >
                         </if>
                     <else/>
                     <div class="onoff">
@@ -537,7 +548,7 @@
                             <td>商品模型:</td>
                             <td>
                               <!--  <a class="btn" id="new_type_info"><i class="fa fa-plus"></i>新增</a>-->
-                                <select name="goods_type" id="goods_type" disabled class="form-control" style="width:200px;">
+                                <select name="goods_type" id="goods_type"  class="form-control" style="width:200px;">
                                     <option value="0">选择商品模型</option>
                                     <foreach name="goodsType" item="vo" key="k" >
                                         <option value="{$vo.id}"<if condition="$goods[goods_type] eq $vo[id]"> selected="selected" </if> >{$vo.name}</option>
@@ -575,7 +586,7 @@
                 <dd class="opt">
                     <volist name="goodsPlus" id="vo">
                         <div class="alisth" style="font-size: 15px">
-                            <label><input name="plus[]" disabled type="checkbox" <if condition="$vo['is_choose']==1"> checked </if>  value="{$vo['id']}" />&nbsp&nbsp&nbsp {$vo['name']}--¥ {$vo['price']} </label>
+                            <label><input name="plus[]"  type="checkbox" <if condition="$vo['is_choose']==1"> checked </if>  value="{$vo['id']}" />&nbsp&nbsp&nbsp {$vo['name']}--¥ {$vo['price']} </label>
                         </div>
                     </volist>
                 </dd>
@@ -647,10 +658,10 @@
         </div>
 
         <div class="ncap-form-default">
-           <!-- <div class="bot">
+           <div class="bot">
                 <a href="JavaScript:void(0);" id="submit" class="ncap-btn-big ncap-btn-green">确认提交</a>
                 <span class="err" id="err_goods_id"></span>
-            </div>-->
+            </div>
         </div>
     </form>
     <!--表单数据-->

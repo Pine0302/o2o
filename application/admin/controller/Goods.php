@@ -439,7 +439,7 @@ class Goods extends Base {
         $GoodsLogic->afterSave($goods['goods_id']);
 
         $GoodsLogic->saveGoodsAttr($goods['goods_id'], $goods['goods_type']); // 处理商品 属性
-        $GoodsLogic->saveGoodsPlus($goods['goods_id'], $plus_item); // 处理商品 加料
+      //  $GoodsLogic->saveGoodsPlus($goods['goods_id'], $plus_item); // 处理商品 加料
         $return_arr = ['status' => 1, 'msg' => '操作成功'];
 
 

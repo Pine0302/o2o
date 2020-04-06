@@ -11,7 +11,7 @@
  * Date: 2015-09-22
  */
  
-namespace app\admin\controller;
+namespace app\seller\controller;
 
 class Uploadify extends Base{
    
@@ -21,10 +21,10 @@ class Uploadify extends Base{
 		$image_upload_limit_size = config('image_upload_limit_size');
         $fileType = I('fileType','Images');  //上传文件类型，视频，图片
         if($fileType == 'Flash'){
-            $upload = U('Admin/Ueditor/videoUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'video'));
+            $upload = U('Seller/Ueditor/videoUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'video'));
             $type = 'mp4,3gp,flv,avi,wmv';
         }else{
-            $upload = U('Admin/Ueditor/imageUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'images'));
+            $upload = U('Seller/Ueditor/imageUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'images'));
             $type = 'jpg,png,gif,jpeg';
         }
         $info = array(
@@ -32,7 +32,7 @@ class Uploadify extends Base{
         	'fileType'=> $fileType,
             'title' => '',
             'upload' =>$upload,
-        	'fileList'=>U('Admin/Uploadify/fileList',array('path'=>$path)),
+        	'fileList'=>U('Seller/Uploadify/fileList',array('path'=>$path)),
             'size' => $image_upload_limit_size/(1024 * 1024).'M',
             'type' =>$type,
             'input' => I('input'),
@@ -49,10 +49,10 @@ class Uploadify extends Base{
         $image_upload_limit_size = config('image_upload_limit_size');
         $fileType = I('fileType','Images');  //上传文件类型，视频，图片
         if($fileType == 'Flash'){
-            $upload = U('Admin/Ueditor/videoUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'video'));
+            $upload = U('Seller/Ueditor/videoUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'video'));
             $type = 'mp4,3gp,flv,avi,wmv';
         }else{
-            $upload = U('Admin/Ueditor/imageUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'images'));
+            $upload = U('Seller/Ueditor/imageUp',array('savepath'=>$path,'pictitle'=>'banner','dir'=>'images'));
             $type = 'jpg,png,gif,jpeg';
         }
         $info = array(
@@ -60,7 +60,7 @@ class Uploadify extends Base{
             'fileType'=> $fileType,
             'title' => '',
             'upload' =>$upload,
-            'fileList'=>U('Admin/Uploadify/fileList',array('path'=>$path)),
+            'fileList'=>U('Seller/Uploadify/fileList',array('path'=>$path)),
             'size' => $image_upload_limit_size/(1024 * 1024).'M',
             'type' =>$type,
             'input' => I('input'),

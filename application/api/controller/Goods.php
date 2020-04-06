@@ -59,8 +59,9 @@ class Goods extends Api
     //所有产品列
     public function allGoodsList(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+
         $store_id = $data['store_id'];
 
         $type_list = Db::name('goods_category')
@@ -74,7 +75,7 @@ class Goods extends Api
             ->where('c.is_show','=',1)
             ->where('g.store_id','=',$store_id)
             ->where('g.is_on_sale',1)
-            ->field("g.goods_id,g.original_img,g.goods_remark,g.goods_name,g.shop_price,g.store_count,c.name as cat_name,c.id as cat_id,g.sort")
+            ->field("g.goods_id,g.original_img,g.other_price,g.goods_remark,g.goods_name,g.shop_price,g.store_count,c.name as cat_name,c.id as cat_id,g.sort")
             ->order('c.sort_order asc,g.sort asc')
             ->select();
         $all_goods = [];
@@ -92,10 +93,11 @@ class Goods extends Api
                     }
                     $type_goods_list[] = [
                         'id'=>$vg['goods_id'],
-                        'picurl'=>$picurl,
+                        'image'=>$picurl,
                         'price'=>number_format($vg['shop_price']),
-                        'remark'=>$vg['goods_remark'],
-                        'remark_simple'=>$remark_simple,
+                        'other'=>number_format($vg['other_price']),
+                        'description'=>$vg['goods_remark'],
+                        'description_simple'=>$remark_simple,
                         'name'=>$vg['goods_name'],
                         'has_spec'=> $has_spec,
                         'sold_out'=>$sold_out,

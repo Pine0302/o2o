@@ -494,7 +494,6 @@ class Loader
         }
 
         list($module, $class) = self::getModuleAndClass($name, $layer, $appendSuffix);
-
         if (class_exists($class)) {
             $validate = new $class;
         } else {

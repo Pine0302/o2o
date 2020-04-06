@@ -94,9 +94,9 @@
                   <span style="margin-left:<?php echo ($vo[level] * 3); ?>em" class="btn"><em><i class="fa fa-cog"></i>设置<i class="arrow"></i></em>
                   <ul>
                     <li><a href="{:U('Goods/addEditCategory',array('id'=>$vo['id']))}">编辑分类信息</a></li>
-                    <if condition="$vo[level] lt 3">                  
+                    <!--<if condition="$vo[level] lt 3">
                     <li><a href="{:U('Goods/addEditCategory',array('parent_id'=>$vo['id']))}">新增下级分类</a></li>
-                    </if>
+                    </if>-->
                     <li><a href="javascript:;" onclick="publicHandle({$vo['id']})">删除当前分类</a></li>
                   </ul>
                   </span>

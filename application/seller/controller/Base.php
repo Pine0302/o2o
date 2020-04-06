@@ -46,6 +46,7 @@ class Base extends Controller
         $this->seller = $seller;
         $this->store_id = $this->seller['store_id'];
 
+
         $this->assign('seller', $seller);
         $this->assign('store_id',$this->store_id );
     }

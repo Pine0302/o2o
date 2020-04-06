@@ -1236,6 +1236,7 @@ function update_stock_log($muid, $stock = 1, $goods, $order_sn = '')
     $data['goods_name'] = $goods['goods_name'];
     $data['goods_spec'] = empty($goods['spec_key_name']) ? $goods['key_name'] : $goods['spec_key_name'];
     $data['order_sn'] = $order_sn;
+
     if('' !== $order_sn && $stock < 0){
         $data['change_type'] = 0; //默认0为订单出库，
     }elseif ('' !== $order_sn && $stock > 0){
@@ -1245,6 +1246,7 @@ function update_stock_log($muid, $stock = 1, $goods, $order_sn = '')
     }else{
         $data['change_type'] = 3;//3为盘点时或者普通修改库存
     }
+
     M('stock_log')->add($data);
 }
 

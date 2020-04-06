@@ -32,12 +32,17 @@ use app\seller\logic\StockLogic;
 
 class Goods extends Base {
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      *  商品分类列表
      */
     public function categoryList(){
 
-        $GoodsLogic = new GoodsLogic();               
+        $GoodsLogic = new GoodsLogic();
         $cat_list = $GoodsLogic->goods_cat_list();
         $this->assign('cat_list',$cat_list);        
         return $this->fetch();
@@ -53,7 +58,7 @@ class Goods extends Base {
         ('393','时尚饰品'),
      */
     public function addEditCategory(){
-        
+
             $GoodsLogic = new GoodsLogic();        
             if(IS_GET)
             {
@@ -80,10 +85,13 @@ class Goods extends Base {
             //ajax提交验证
             if(I('is_ajax') == 1)
             {
+
                 // 数据验证            
                 $validate = \think\Loader::validate('GoodsCategory');
+
                 if(!$validate->batch()->check(input('post.')))
-                {                          
+                {
+
                     $error = $validate->getError();
                     $error_msg = array_values($error);
                     $return_arr = array(
@@ -93,14 +101,16 @@ class Goods extends Base {
                     );
                     $this->ajaxReturn($return_arr);
                 } else {
+
                     $GoodsCategory->data(input('post.'),true); // 收集数据
                     $GoodsCategory->parent_id = I('parent_id');
-                    
+
                     //查找同级分类是否有重复分类
                     $par_id = ($GoodsCategory->parent_id > 0) ? $GoodsCategory->parent_id : 0;
                     $sameCateWhere = ['parent_id'=>$par_id , 'name'=>$GoodsCategory['name']];
                     $GoodsCategory->id && $sameCateWhere['id'] = array('<>' , $GoodsCategory->id);
                     $same_cate = M('GoodsCategory')->where($sameCateWhere)->find();
+
                     if($same_cate){
                         $return_arr = array('status' => 0,'msg' => '同级已有相同分类存在','data' => '');
                         $this->ajaxReturn($return_arr);
@@ -123,13 +133,13 @@ class Goods extends Base {
                     }
 
 
-                    if($GoodsCategory->commission_rate > 100)
+                    /*if($GoodsCategory->commission_rate > 100)
                     {
                         //  编辑
                         $return_arr = array('status' => -1,'msg'   => '分佣比例不得超过100%','data'  => '');
-                        $this->ajaxReturn($return_arr);                        
-                    }   
-                   
+                        $this->ajaxReturn($return_arr);
+                    }*/
+                    //$GoodsCategory->store_id = $this->store_id;
                     if ($type == 2)
                     {
                         $GoodsCategory->isUpdate(true)->save(); // 写入数据到数据库
@@ -144,7 +154,7 @@ class Goods extends Base {
                     $return_arr = array(
                         'status' => 1,
                         'msg'   => '操作成功',
-                        'data'  => array('url'=>U('Admin/Goods/categoryList')),
+                        'data'  => array('url'=>U('Seller/Goods/categoryList')),
                     );
                     $this->ajaxReturn($return_arr);
 
@@ -418,8 +428,9 @@ class Goods extends Base {
     //商品保存
     public function save(){
         $data = input('post.');
+    //   print_r($data);exit;
         $default_spec_item = $this->handleDefaultSpecItem($data);
-        $spec_item = input('item/a');
+     //   $spec_item = input('item/a');
      //   $validate = Loader::validate('Goods');// 数据验证
       /*  if (!$validate->batch()->check($data)) {
             $error = $validate->getError();
@@ -439,16 +450,22 @@ class Goods extends Base {
             $store_count_change_num = $data['store_count'];
         }
 
+
         $data['default_spec_item'] = $default_spec_item;
 
 
         $goods->data($data, true);
         $goods->last_update = time();
         $goods->price_ladder = true;
+        $goods->store_id = $this->store_id;
         $goods->save();
-        if(empty($spec_item)){
-            update_stock_log(session('admin_id'), $store_count_change_num, ['goods_id' => $goods['goods_id'], 'goods_name' => $goods['goods_name']]);//库存日志
-        }
+        //print_r($data);exit;
+
+
+      /*  if(empty($spec_item)){
+            update_stock_log($this->store_id, $store_count_change_num, ['goods_id' => $goods['goods_id'], 'goods_name' => $goods['goods_name']]);//库存日志
+        }*/
+
         $GoodsLogic = new GoodsLogic();
         $GoodsLogic->afterSave($goods['goods_id']);
         $GoodsLogic->saveGoodsAttr($goods['goods_id'], $goods['goods_type']); // 处理商品 属性
@@ -740,7 +757,7 @@ class Goods extends Base {
     /**
      * 动态获取商品规格选择框 根据不同的数据返回不同的选择框
      */
-    public function ajaxGetSpecSelect()
+/*    public function ajaxGetSpecSelect()
     {
         $goods_id = input('goods_id/d', 0);
         $type_id = input('type_id/d', 0);
@@ -757,8 +774,38 @@ class Goods extends Base {
         $this->assign('items_ids', $items_ids);
         $this->assign('specList', $specList);
         return $this->fetch('ajax_spec_select');
-    }    
-    
+    }*/
+
+    /**
+     * 动态获取商品规格选择框 根据不同的数据返回不同的选择框
+     */
+    public function ajaxGetSpecSelect()
+    {
+        $goods_id = input('goods_id/d', 0);
+        $type_id = input('type_id/d', 0);
+        $specList = db('Spec')->where("type_id", $type_id)->order('`order` desc')->select();
+
+        $goods = Db::table('tp_goods')->where('goods_id','=',$goods_id)->field('goods_id,default_spec_item')->find();
+        if(count(unserialize($goods['default_spec_item']))>0){
+            $default_sepc_item = unserialize($goods['default_spec_item']);
+        }
+        $this->assign('default_sepc_item', $default_sepc_item);
+        foreach ($specList as $k => $v)
+            $specList[$k]['spec_item'] = db('SpecItem')->where("spec_id = " . $v['id'])->order('id')->getField('id,item'); // 获取规格项
+        $items_id = db('SpecGoodsPrice')->where('goods_id', $goods_id)->getField("GROUP_CONCAT(`key` SEPARATOR '_') AS items_id");
+        $items_ids = explode('_', $items_id);
+        // 获取商品规格图片
+        if ($goods_id) {
+            $specImageList = db('spec_image')->where("goods_id", $goods_id)->getField('spec_image_id,src');
+            $this->assign('specImageList', $specImageList);
+
+        }
+        $this->assign('items_ids', $items_ids);
+        $this->assign('specList', $specList);
+        return $this->fetch('ajax_spec_select');
+    }
+
+
     /**
      * 动态获取商品规格输入框 根据不同的数据返回不同的输入框
      */    

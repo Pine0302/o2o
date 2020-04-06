@@ -24,6 +24,16 @@ use think\db;
 class GoodsLogic extends Model
 {
 
+    public $store_id;
+
+
+    public function __construct($data = [])
+    {
+        parent::__construct($data);
+        $seller = session('seller');
+        $this->store_id = $seller['store_id'];
+    }
+
     /**
      * 获得指定分类下的子分类的数组     
      * @access  public
@@ -35,17 +45,18 @@ class GoodsLogic extends Model
      */
     public function goods_cat_list($cat_id = 0, $selected = 0, $re_type = true, $level = 0)
     {
-                global $goods_category, $goods_category2;                
-                $sql = "SELECT * FROM  __PREFIX__goods_category ORDER BY parent_id , sort_order ASC";
-                $goods_category = DB::query($sql);
-                $goods_category = convert_arr_key($goods_category, 'id');
-                
-                foreach ($goods_category AS $key => $value)
-                {
-                    if($value['level'] == 1)
-                        $this->get_cat_tree($value['id']);                                
-                }
-                return $goods_category2;               
+        global $goods_category, $goods_category2;
+        $sql = "SELECT * FROM  __PREFIX__goods_category ORDER BY parent_id , sort_order ASC ";
+        $goods_category = DB::query($sql);
+
+        $goods_category = convert_arr_key($goods_category, 'id');
+
+        foreach ($goods_category AS $key => $value)
+        {
+            if($value['level'] == 1)
+                $this->get_cat_tree($value['id']);
+        }
+        return $goods_category2;
     }
     
     /**
@@ -248,7 +259,7 @@ class GoodsLogic extends Model
                <td><input id="item_sku" value="" onkeyup="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)" onpaste="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)"></td>
                <td><button id="item_fill" type="button" class="btn btn-success">批量填充</button></td>
              </tr>';*/
-            $str_fill .='<td><input  disabled id="item_price" value="0" onkeyup="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)" onpaste="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)"></td>
+            $str_fill .='<td><input  id="item_price" value="0" onkeyup="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)" onpaste="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)"></td>
                <td><input id="item_store_count" value="0" onkeyup="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)" onpaste="this.value=this.value.replace(/[^\d.]/g,&quot;&quot;)"></td>
                <td><button id="item_fill" type="button" class="btn btn-success">批量填充</button></td>
              </tr>';
@@ -267,7 +278,7 @@ class GoodsLogic extends Model
             ksort($item_key_name);            
             $item_key = implode('_', array_keys($item_key_name));
             $item_name = implode(' ', $item_key_name);
-            
+
 			$keySpecGoodsPrice[$item_key][price] ? false : $keySpecGoodsPrice[$item_key][price] = 0; // 价格默认为0
 			$keySpecGoodsPrice[$item_key][store_count] ? false : $keySpecGoodsPrice[$item_key][store_count] = 0; //库存默认为0
 			$keySpecGoodsPrice[$item_key][cost_price] ? false : $keySpecGoodsPrice[$item_key][cost_price] = 0; //成本价默认为0
@@ -454,15 +465,19 @@ class GoodsLogic extends Model
      */
     public function afterSave($goods_id)
     {
+
         $item_img = I('item_img/a');
+
         // 商品货号
         $goods_sn = "TP".str_pad($goods_id,7,"0",STR_PAD_LEFT);
         Db::name('goods')->where("goods_id = $goods_id and goods_sn = ''")->save(array("goods_sn"=>$goods_sn)); // 根据条件更新记录
 
         // 商品图片相册  图册
         $goods_images = I('goods_images/a');
+
         if(count($goods_images) > 1)
         {
+
             array_pop($goods_images); // 弹出最后一个
             $goodsImagesArr = M('GoodsImages')->where("goods_id = $goods_id")->getField('img_id,image_url'); // 查出所有已经存在的图片
 
@@ -482,6 +497,7 @@ class GoodsLogic extends Model
                 }
             }
         }
+
         // 查看主图是否已经存在相册中
         $original_img = I('original_img');
         $c = M('GoodsImages')->where("goods_id = $goods_id and image_url = '{$original_img}'")->count();
@@ -500,6 +516,7 @@ class GoodsLogic extends Model
         $goods_item = I('item/a'); // 这里没有传market_price
         $eidt_goods_id = I('goods_id',0);
         $market_price = Db::name('goods')->where("goods_id = $goods_id")->value('market_price');
+
         if ($goods_item) {
             $keyArr = '';//规格key数组
             foreach ($goods_item as $k => $v) {
@@ -510,6 +527,7 @@ class GoodsLogic extends Model
                 $v['sku'] = trim($v['sku']);
                 $data = [
                     'goods_id' => $goods_id,
+                    'store_id' => $this->store_id,
                     'key' => $k,
                     'key_name' => $v['key_name'],
                     'price' => $v['price'],
@@ -518,6 +536,7 @@ class GoodsLogic extends Model
                     'cost_price'=>$v['cost_price'],
                     'commission'=>$v['commission'],
                 ];
+
                 $specGoodsPrice = Db::name('spec_goods_price')->where(['goods_id' => $data['goods_id'], 'key' => $data['key']])->find();
                 if ($item_img) {
                     $spec_key_arr = explode('_', $k);
@@ -528,12 +547,13 @@ class GoodsLogic extends Model
                         }
                     }
                 }
+
                 if($specGoodsPrice){
                     Db::name('spec_goods_price')->where(['goods_id' => $goods_id, 'key' => $k])->update($data);
                 }else{
                     Db::name('spec_goods_price')->insert($data);
                 }
-
+                //print_r($data);exit;
                 if(!empty($specGoodsPrice) && $v['store_count'] != $specGoodsPrice['store_count'] && $eidt_goods_id>0){
                     $stock = $v['store_count'] - $specGoodsPrice['store_count'];
                 }else{
