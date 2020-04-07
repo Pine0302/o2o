@@ -52,7 +52,7 @@ class Login extends Api
         $app_secret = config('Wxpay.APPSECRET');
         $login_url = $mini_config_url['wx_login']."?appid={$appid}&secret={$app_secret}&js_code={$code}&grant_type=authorization_code";
 
-        $this->wlog($login_url);
+  //      $this->wlog($login_url);
         $result_json = Http::get($login_url);
         $result = json_decode($result_json,true);
         if(IS_TEST){

@@ -39,8 +39,8 @@ class Goods extends Api
     //商品类型分类列表
     public function goodsType(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
         $type_list = Db::name('goods_category')
             ->where('is_show','=',1)
             ->field("id,name,image")
@@ -165,13 +165,14 @@ class Goods extends Api
     //商品规格价格展示
     public function specItemPrice(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
 
         $goods_id = $data['good_id'];
         $sepc_info = Db::name('spec_goods_price')->where("goods_id",'=',$goods_id)->select();
         $goods_info = Db::name('goods')->where("goods_id",'=',$goods_id)->field('goods_id,default_spec_item')->find();
         $default_spec_item = unserialize($goods_info['default_spec_item']);
+        //print_r($sepc_info);exit;
 
         //获取所有规格
         $key_arr = [];//所有规格项
@@ -259,103 +260,16 @@ class Goods extends Api
         $sepc_info_price = [];
         foreach($sepc_info as $ks=>$vs){
             $sepc_info_price[] = [
-                'item'=> $vs['key'],
                 'item_spec'=> $vs['key'],
                 //'price'=> intval($vs['price']),
                 'price'=> number_format($vs['price']),
             ];
         }
 
-        if(count($plus_spec)>0){
-            $arr_spec_item_list_plus = [];
-            $plus_spec_change = [];
-            foreach($plus_spec as $kp=>$vp){
-                $arr_spec_item_list_plus[] = [
-                    'id'=>$vp['plus_id'],
-                    'name'=>$vp['name'],
-                    'is_default'=>2,
-                ];
-                $plus_spec_change[$vp['plus_id']] = $vp;
-            }
-            $arr_spec_item_list_plus_item = [                 //加料规格列表
-                'id'=>'-1',
-                'name'=>'加料',
-                'order'=>50,
-                'itemList'=>$arr_spec_item_list_plus,
-            ];
 
-            $arr_spec_item_list_front = [];
-            $arr_spec_item_list_end = [];
-            foreach($arr_spec_item_list as $karr=>$varr){
-                if($varr['order']>50){
-                    $arr_spec_item_list_front[] = $varr;
-                }else{
-                    $arr_spec_item_list_end[] = $varr;
-                }
-            }
-            $arr_spec_item_list_front[] = $arr_spec_item_list_plus_item;
+        $specItemList =$arr_spec_item_list;
+        $priceList = $sepc_info_price;
 
-            $specItemList = array_merge($arr_spec_item_list_front,$arr_spec_item_list_end);    //带加料的规格列表
-
-
-
-            //把plus_id 转化为abc 用来做组合函数
-            $map_plus = config('mapplus');
-            $num = count($plus_spec);
-            $arr_map_plus = [];
-            $arr_map = [];
-            $str_map = '';
-            for ($i=0;$i<$num;$i++){
-                $arr_map_plus[$map_plus[$i]] = $plus_spec[$i]['plus_id'];
-                $arr_map[] = $map_plus[$i];
-                $str_map = $str_map.$map_plus[$i];
-            }
-            $arr_map_result = [];
-            $AlgorObj = new Algor();
-
-            $AlgorObj->get_combinations($str_map,$arr_map_result);
-
-            $plus_spec_attr = [];
-            foreach($arr_map_result as $kp=>$vp){
-                $vp_arr = str_split($vp,1);
-                $spec_arr = [];
-                $item = '';
-                $price = 0 ;
-                foreach($vp_arr as $kv=>$vv){
-                    $spec_arr[] = $arr_map_plus[$vv];
-                    $item = $item."_".$arr_map_plus[$vv];
-                    $price = $price + $plus_spec_change[$arr_map_plus[$vv]]['price'];
-                }
-                $plus_spec_attr[] = [
-                    'item'=>$item,
-                 //   'price'=>intval($price),
-                    'price'=>number_format($price),
-                ];
-            }
-
-            $arr_spec_price = [];
-        //    var_dump(count($plus_spec_attr));
-        //    var_dump(count($sepc_info_price));
-          //  exit;
-            foreach($plus_spec_attr as $kp=>$vp){
-                foreach($sepc_info_price as $ks=>$vs){
-                    $item = $vs['item'].$vp['item'];
-                    $price = $vs['price'] + $vp['price'];
-                    $arr_spec_price[] = [
-                        'item'=>$item,
-                        'item_spec'=>$vs['item'],
-                     //   'price'=>intval($price),
-                        'price'=>number_format($price),
-                    ];
-                }
-            }
-            $priceList = array_merge($sepc_info_price,$arr_spec_price);
-
-        }else{
-
-            $specItemList =$arr_spec_item_list;
-            $priceList = $sepc_info_price;
-        }
 
         $arr = [
             'specItemList'=>$specItemList,
