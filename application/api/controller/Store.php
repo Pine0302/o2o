@@ -215,71 +215,44 @@ class Store extends Api
     }
 
 
-    //店铺列表
+    //店铺详情
     public function storeInfo(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getTUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
         $store_id =  $data['store_id'];
         $user_point = [
-            'lng'=>$data['lng'],
-            'lat'=>$data['lat'],
+            'lng'=>$data['longitude'],
+            'lat'=>$data['latitude'],
         ];
         Db::name('users')->where('user_id','=',$user_info['user_id'])->update($user_point);
-        $store_list = Db::name('store_sub')
+        $store_info = Db::name('store_sub')
             ->where('is_shenhe','=',1)
             ->where('store_id','=',$store_id)
-            ->select();
-        $arr = [];
-        if(count($store_list)>0){
-            $areaIncludeObj = new AreaInclude();
-            $default_distance = 10000000;
-            $default_store_id = 0;
-            $arr = [];
-            foreach($store_list as $kd=>$vd){
-
-                $lnglat_tx = unserialize($vd['lnglat_tx']);
-
-                $is_include = $areaIncludeObj->is_point_in_polygon($user_point,$lnglat_tx);
-
-                $this->wlog($is_include);
-                //  if($is_include==1){
-                $distance = $areaIncludeObj->distance($user_point['lat'],$user_point['lng'],$vd['store_lat_tx'],$vd['store_lng_tx']);
-
-           //     if(intval($distance)<$default_distance){
-                    $default_distance = $distance;
-                    $default_store_id = $vd['store_id'];
-
-                    $arr[$vd['store_id']] = [
-                        'store_id'=>$vd['store_id'],
-                        'store_name'=>$vd['store_name'],
-                        'store_state'=>$this->getStoreState($vd),
-                        'mobile'=>$vd['store_phone'],
-                        'address'=>$vd['store_address'],
-                        'lng'=>$vd['store_lng_tx'],
-                        'lat'=>$vd['store_lat_tx'],
-                        'store_time'=>$vd['store_time'],
-                        'store_end_time'=>$vd['store_end_time'],
-                        'distance'=>number_format($distance/1000,2),
-                        'store_status'=>$vd['store_state'],
-                    ];
-                }
-                //  }
-        //    }
-
-            $default_store = $arr[$default_store_id];
-        }else{
-            $default_store = null;
-        }
-
-        if($user_info['user_id']==646){
-            $this->wlog('-------------','ttt.txt');
-            $this->wlog($default_store,'ttt.txt');
-            $this->wlog('-------------','ttt.txt');
-        }
-
+            ->find();
+        $areaIncludeObj = new AreaInclude();
+        $distance = $areaIncludeObj->distance($user_point['lat'],$user_point['lng'],$store_info['store_lat_tx'],$store_info['store_lng_tx']);
+        $arr = [
+            'store_id'=>$store_info['store_id'],
+            'name'=>$store_info['store_name'],
+            'notice'=>$store_info['notice'],
+            'store_description'=>$store_info['store_description'],
+            'meituan_grade'=>$store_info['meituan_grade'],
+            'month_sale'=>$store_info['month_sale'],
+            'meituan_grade'=>$store_info['meituan_grade'],
+            'type_name'=>$store_info['type_name'],
+            'store_state'=>$this->getStoreState($store_info),
+            'mobile'=>$store_info['store_phone'],
+            'address'=>$store_info['store_address'],
+            'lng'=>$store_info['store_lng_tx'],
+            'lat'=>$store_info['store_lat_tx'],
+            'store_time'=>$store_info['store_time'],
+            'store_end_time'=>$store_info['store_end_time'],
+            'distance'=>number_format($distance/1000,2),
+            'store_status'=>$store_info['store_state'],
+        ];
         $data = [
-            'data'=>$default_store,
+            'data'=>$arr,
         ];
         $this->success('success', $data);
     }

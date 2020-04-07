@@ -482,7 +482,26 @@
 				</dd>
 			</dl>
 
-
+			<dl class="row">
+				<dt class="tit">
+					<label for="notice"><em>*</em>店铺介绍</label>
+				</dt>
+				<dd class="row">
+					<textarea type="text" value="" name="store_description" class="input-txt" id="store_description">{$store.store_description}</textarea>
+					<span class="err" id="description" style="color:#F00; display:none;"></span>
+					<p class="notic">店铺介绍。</p>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="type_name"><em>*</em>商家品类</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" value="{$store.type_name}" id="type_name" name="type_name" class="input-txt" />
+					<span class="err"></span>
+					<p class="meituan_grade"></p>
+				</dd>
+			</dl>
 			<dl class="row">
 				<dt class="tit">
 					<label for="meituan_grade"><em>*</em>美团评分</label>

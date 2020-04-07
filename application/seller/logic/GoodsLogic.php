@@ -283,7 +283,7 @@ class GoodsLogic extends Model
 			$keySpecGoodsPrice[$item_key][store_count] ? false : $keySpecGoodsPrice[$item_key][store_count] = 0; //库存默认为0
 			$keySpecGoodsPrice[$item_key][cost_price] ? false : $keySpecGoodsPrice[$item_key][cost_price] = 0; //成本价默认为0
 			$keySpecGoodsPrice[$item_key][commission] ? false : $keySpecGoodsPrice[$item_key][commission] = 0; //佣金默认为0
-            $str .="<td><input disabled name='item[$item_key][price]' value='{$keySpecGoodsPrice[$item_key][price]}' onkeyup='this.value=this.value.replace(/[^\d.]/g,\"\")' onpaste='this.value=this.value.replace(/[^\d.]/g,\"\")' /></td>";
+            $str .="<td><input  name='item[$item_key][price]' value='{$keySpecGoodsPrice[$item_key][price]}' onkeyup='this.value=this.value.replace(/[^\d.]/g,\"\")' onpaste='this.value=this.value.replace(/[^\d.]/g,\"\")' /></td>";
          //  $str .="<td><input name='item[$item_key][cost_price]' value='{$keySpecGoodsPrice[$item_key][cost_price]}' onkeyup='this.value=this.value.replace(/[^\d.]/g,\"\")' onpaste='this.value=this.value.replace(/[^\d.]/g,\"\")' /></td>";
           // $str .="<td><input name='item[$item_key][commission]' value='{$keySpecGoodsPrice[$item_key][commission]}' onkeyup='this.value=this.value.replace(/[^\d.]/g,\"\")' onpaste='this.value=this.value.replace(/[^\d.]/g,\"\")' /></td>";
             $str .="<td><input name='item[$item_key][store_count]' value='{$keySpecGoodsPrice[$item_key][store_count]}' onkeyup='this.value=this.value.replace(/[^\d.]/g,\"\")' onpaste='this.value=this.value.replace(/[^\d.]/g,\"\")'/></td>";            

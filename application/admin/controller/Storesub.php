@@ -279,6 +279,8 @@ class Storesub extends Base{
 			$seller_name = I('seller_name');
 			$image = I('image');
             $notice = I('notice');
+            $type_name = I('type_name');
+            $store_description = I('store_description');
             $meituan_grade = I('meituan_grade');
             $month_sale = I('month_sale');
             $average_comsume = I('average_consume');
@@ -332,6 +334,8 @@ class Storesub extends Base{
 				'user_name'=>$user_name,
 				'seller_name'=>$seller_name,
 				'notice'=>$notice,
+				'type_name'=>$type_name,
+				'store_description'=>$store_description,
 				'meituan_grade'=>$meituan_grade,
 				'month_sale'=>$month_sale,
                 'average_consume' => $average_comsume,
@@ -498,6 +502,8 @@ class Storesub extends Base{
             $store['sfid'] = $map['sfid'];
 
             $store['notice'] = $map['notice'];
+            $store['store_description'] = $map['store_description'];
+            $store['type_name'] = $map['type_name'];
             $store['meituan_grade'] = $map['meituan_grade'];
             $store['month_sale'] = $map['month_sale'];
             if($map['store_time2']&&($map['store_end_time2'])){
