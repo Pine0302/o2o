@@ -121,17 +121,31 @@ class Login extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getGUserInfo($openid);
         $mobile = $data['mobile'];
-        $sms_code = $data['sms_code'];
-        //验证密码
-        $profile_key = $openid . "_profile";
-        $code = $this->redis->get($profile_key);
-        if($code==$sms_code){
-            //给用户登录身份
+
+        //先验证该手机号是否已被使用(除了自己)
+        $checkMobile= $this->userRepository->validMobile($openid,$mobile);
+        if(!empty($checkMobile)){
+            $this->error('该手机已注册');
+        }
+        if(!empty($user_info['weixin_mobile'])&&($user_info['weixin_mobile']==$mobile)){
             $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
             $this->success('登录成功');
         }else{
-            $this->success('短信验证码错误');
+            $sms_code = $data['sms_code'];
+            //验证密码
+            $profile_key = $openid . "_profile";
+            $code = $this->redis->get($profile_key);
+
+
+            if($code==$sms_code){
+                //给用户登录身份
+                $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
+                $this->success('登录成功');
+            }else{
+                $this->error('短信验证码错误');
+            }
         }
+
     }
 
 

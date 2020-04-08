@@ -35,4 +35,14 @@ class UserRepository
         $userDb->removeOption();
     }
 
+    public function validMobile($openid,$mobile){
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        $userDb->where('mobile','=',$mobile);
+        $userDb->where('openid','neq',$openid);
+        $result = $userDb->find();
+        $userDb->removeOption();
+        return $result;
+    }
+
+
 }
