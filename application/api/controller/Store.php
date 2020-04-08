@@ -42,8 +42,8 @@ class Store extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getGUserInfo($openid);
         $user_point = [
-            'lng'=>$data['longitude'],
-            'lat'=>$data['latitude'],
+            'lng'=>$data['lng'],
+            'lat'=>$data['lat'],
         ];
         $type = $data['type'];
         $title = $data['title'];
@@ -85,7 +85,7 @@ class Store extends Api
                 $distance = number_format($distance/1000,2);
                 $arr[] = [
                     'store_id'=>$vd['store_id'],
-                    'store_name'=>$vd['store_name'],
+                    'name'=>$vd['store_name'],
                     'store_state'=>$this->getStoreState($vd),
                     'mobile'=>$vd['store_phone'],
                     'address'=>$vd['store_address'],
@@ -182,7 +182,7 @@ class Store extends Api
 
                         $arr[$vd['store_id']] = [
                             'store_id'=>$vd['store_id'],
-                            'store_name'=>$vd['store_name'],
+                            'name'=>$vd['store_name'],
                             'store_state'=>$this->getStoreState($vd),
                             'mobile'=>$vd['store_phone'],
                             'address'=>$vd['store_address'],
@@ -333,7 +333,7 @@ class Store extends Api
                     //$distance = 1000;
                     $arr[] = [
                         'store_id'=>$vd['store_id'],
-                        'store_name'=>$vd['store_name'],
+                        'name'=>$vd['store_name'],
                         'store_state'=>$this->getStoreState($vd),
                         'mobile'=>$vd['store_phone'],
                         'address'=>$vd['store_address'],
@@ -395,7 +395,7 @@ class Store extends Api
                 $distance = number_format($distance,2);
                 $arr[] = [
                     'store_id'=>$vd['store_id'],
-                    'store_name'=>$vd['store_name'],
+                    'name'=>$vd['store_name'],
                     'store_state'=>$this->getStoreState($vd),
                     'mobile'=>$vd['store_phone'],
                     'address'=>$vd['store_address'],

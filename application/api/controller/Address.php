@@ -38,8 +38,8 @@ class Address extends Api
         $data = $this->request->post();
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getGUserInfo($openid);
-        $latitude = $data['latitude'];
-        $longitude = $data['longitude'];
+        $latitude = $data['lat'];
+        $longitude = $data['lng'];
 
         $lbs_qq_key = config('Lbs.QQ_KEY');
         $location = $latitude.",".$longitude;
