@@ -72,7 +72,7 @@ class Login extends Api
             $user_info = $this->registerUser($result['openid']);            //插入用户openid
             $bind_mobile = empty($user_info['mobile']) ? 2 : 1;
             $is_login = empty($user_info['is_login']) ? 2 : $user_info['is_login'];
-            $data = ['auth_code'=>$auth_code,'bind_mobile'=>$bind_mobile];
+            $data = ['auth_code'=>$auth_code,'bind_mobile'=>$bind_mobile,'rider_auth'=>$user_info['rider_auth']];
             $bizobj = ['data'=>$data];
             $this->success('成功', $bizobj);
         }else{
@@ -148,6 +148,18 @@ class Login extends Api
 
     }
 
+    //退出登录
+    public function loginOut(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $this->userRepository->updateUserByFilter(['is_login'=>2,'mobile'=>'','weixin_mobile'=>''],['openid'=>$openid]);
+        $this->success('退出成功');
+    }
+
+
+
+
+
 
     //注册用户
     public function registerUser($openid){
@@ -155,6 +167,7 @@ class Login extends Api
         if(empty($check_user)){
             $data = [
                 'openid'=>$openid,
+                'rider_auth'=>2,
             ];
             Db::name('users')->insert($data);
             $check_user = $data;

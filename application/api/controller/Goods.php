@@ -303,8 +303,9 @@ class Goods extends Api
 
     //组合多种key
     //针对spec_key 在前  attr_key 在后 的情况 优化组合数量
-    public function explode2sortNew($spec_key,$key){
-        if($spec_key==$key){
+    public function explode2sortNew($spec_key){
+        return $this->explode2sort($spec_key);
+        /*if($spec_key==$key){
             return $this->explode2sort($spec_key);
         }else{
             $spec_length = strlen($spec_key)+1;
@@ -317,10 +318,6 @@ class Goods extends Api
             $arr = [];
             foreach($spec_key_result_arr as $ks=>$vs){
                 $arr[] = $vs."_".$new_key;
-               /*
-                foreach($new_key_result_arr as $kn=>$vn){
-                    $arr[] = $vs."_".$vn;
-                }*/
             }
             $str_result = '';
             foreach($arr as $kr=>$vr){
@@ -328,7 +325,7 @@ class Goods extends Api
             }
             $str_result = substr($str_result,0,strlen($str_result)-1);
             return $str_result;
-        }
+        }*/
     }
 
 
@@ -360,44 +357,28 @@ class Goods extends Api
     //添加到购物车
     public function addToCart(){
 
-        $stratTime = microtime(true);
-        $startMemory = memory_get_usage();
-
-
-
-
+        /*$stratTime = microtime(true);
+        $startMemory = memory_get_usage();*/
 
         $data = $this->request->post();
 
         $goods_id = $data['good_id'];
         $num = $data['num'];
         $type = $data['type'] ?? 1;
-        $key = $data['key'] ?? "";
+       // $key = $data['key'] ?? "";
         $spec_key = $data['spec_key'] ?? "";
-        $sess_key = $data['sess_key'];
-
-        $user_info = $this->getGUserInfo($sess_key);
-
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
         $goods_info = Db::name('goods')->where("goods_id",'=',$goods_id)->field('goods_id,shop_price as goods_price,store_id,goods_name')->find();
 
         if(!empty($spec_key)){  //有规格
             $spec_key_str = $this->explode2sort($spec_key);
-
-          //  $spec_key_arr = explode(",",$spec_key_str);
-          //  var_dump($spec_key_str);
-        //    $this->wlog($spec_key_str);
-            //$this->wlog(count($spec_key_arr));
             $spec_info = Db::name('spec_goods_price')
                 ->where("goods_id",'=',$goods_id)
                 ->where("key",'in',$spec_key_str)
                 ->find();
-        //    var_dump($spec_info);
-        //   exit;
-          //  var_dump($spec_info);
-            //查看购物车是否有该商品,有的话数量+,没有的话插入数据
-            /*******************testetsetestset*************************/
-            //$key_str = $this->explode2sort($key);
-            $key_str = $this->explode2sortNew($spec_key,$key);
+
+            $key_str = $this->explode2sortNew($spec_key);
 
             $check_cart = Db::name('cart')
                 ->where('user_id','=',$user_info['user_id'])
@@ -416,35 +397,17 @@ class Goods extends Api
                     }
                 }
 
-                if($key == $spec_key ){  //没有加料
-                /*    var_dump("无加料");*/
-                    $spec_key_price = $key_price = $spec_info['price'];
-                    $map = [
-                        'key_price'=>number_format($spec_info['price']),
-                        'spec_key_price'=>number_format($spec_info['price']),
-                        'goods_price'=>$goods_info['goods_price'],
-                        'goods_num'=>$new_num,
-                    ];
-                   // Db::name('cart')->where($map)->setInc('goods_num', $num);
-                }else{                  //有加料
-              /*      var_dump("有加料");*/
-                    $spec_key_price = number_format($spec_info['price']);
-                    $spec_len = strlen($spec_key)+1;
-                    $plus_str = substr($key,$spec_len);
-                    $plus_str = str_replace("_",",",$plus_str);
-                  //  $plus_arr = exlode("_",$plus_str);
-                    $plus_price = Db::name('plus_attr')->where('id','in',$plus_str)->sum('price');
-                    $key_price = $spec_key_price + $plus_price;
-                    $map = [
-                        'key_price'=>$key_price,
-                        'spec_key_price'=>$spec_info['price'],
-                        'goods_price'=>$goods_info['goods_price'],
-                        'goods_num'=>$new_num,
-                    ];
-                  //  var_dump($map);
-                }
-            /*    echo "更新数据";
-                var_dump($map);*/
+                $spec_key_price = $key_price = $spec_info['price'];
+                $map = [
+                    'key_price'=>number_format($spec_info['price']),
+                    'spec_key_price'=>number_format($spec_info['price']),
+                    'goods_price'=>$goods_info['goods_price'],
+                    'goods_num'=>$new_num,
+                ];
+
+
+                $spec_key_price = $key_price = $spec_info['price'];
+
                 Db::name('cart')
                     ->where('goods_id','=',$goods_id)
                     ->where('key','in',$key_str)
@@ -453,68 +416,25 @@ class Goods extends Api
                 $cart_id = $check_cart['id'];
             }else{    //购物车无该数据
                 $now = time();
-          //      var_dump("无该数据");
-                if($key == $spec_key ) {  //没有加料
-             //       var_dump("没有加料");
-                    $arr_insert = [
-                        'user_id'=>$user_info['user_id'],
-                        'goods_id'=>$goods_id,
-                        'goods_name'=>$goods_info['goods_name'],
-                        'goods_price'=>$goods_info['goods_price'],
-                        'goods_num'=>$num,
-                        'item_id'=>$spec_info['item_id'],
-                        'spec_key'=>$spec_info['key'],
-                        'spec_key_name'=>$spec_info['key_name'],
-                        'spec_key_price'=>$spec_info['price'],
-                        'key'=>$spec_info['key'],
-                        'key_name'=>$spec_info['key_name'],
-                        'key_price'=>$spec_info['price'],
-                        'add_time'=>1,  //默认选中
-                        'prom_type'=>1,
-                        'store_id'=>$goods_info['store_id'],
-                    ];
-                }else{                    //有加料
-                /*    var_dump("有加料");*/
 
-                    $spec_key_price = $spec_info['price'];
-                    $spec_len = strlen($spec_key)+1;
-                    $plus_str = substr($key,$spec_len);
-                    $plus_str = str_replace("_",",",$plus_str);
-                    $plus_price = 0;
-                    //  $plus_arr = exlode("_",$plus_str);
-                    $plus_list = Db::name('plus_attr')
-                        ->where('id','in',$plus_str)
-                        ->field("price,name")
-                        ->select();
+                $arr_insert = [
+                    'user_id'=>$user_info['user_id'],
+                    'goods_id'=>$goods_id,
+                    'goods_name'=>$goods_info['goods_name'],
+                    'goods_price'=>$goods_info['goods_price'],
+                    'goods_num'=>$num,
+                    'item_id'=>$spec_info['item_id'],
+                    'spec_key'=>$spec_info['key'],
+                    'spec_key_name'=>$spec_info['key_name'],
+                    'spec_key_price'=>$spec_info['price'],
+                    'key'=>$spec_info['key'],
+                    'key_name'=>$spec_info['key_name'],
+                    'key_price'=>$spec_info['price'],
+                    'add_time'=>1,  //默认选中
+                    'prom_type'=>1,
+                    'store_id'=>$goods_info['store_id'],
+                ];
 
-                    $plus_name = '加料:';
-                    foreach($plus_list as $kp=>$vp){
-                        $plus_name = $plus_name.$vp['name'].",";
-                        $plus_price = $plus_price + $vp['price'];
-                    }
-                    $plus_name = mb_substr($plus_name,0,mb_strlen($plus_name)-1);
-                    $key_name =  $spec_info['key_name']." ".$plus_name;
-                    $key_price = $spec_key_price + $plus_price;
-                    $arr_insert = [
-                        'user_id'=>$user_info['user_id'],
-                        'goods_id'=>$goods_id,
-                        'goods_name'=>$goods_info['goods_name'],
-                        'goods_price'=>$goods_info['goods_price'],
-                        'goods_num'=>$num,
-                        'item_id'=>$spec_info['item_id'],
-                        'spec_key'=>$spec_info['key'],
-                        'spec_key_name'=>$spec_info['key_name'],
-                        'spec_key_price'=>$spec_info['price'],
-                        'key'=>$key,
-                        'key_name'=>$key_name,
-                        'key_price'=>$key_price,
-                        'add_time'=>1,  //默认选中
-                        'prom_type'=>1,
-                        'store_id'=>$goods_info['store_id'],
-                        ];
-                }
-              /*  echo "插入数据";
-                var_dump($arr_insert);*/
                 $cart_id = Db::name('cart')->insertGetId($arr_insert);
             }
 
@@ -567,15 +487,13 @@ class Goods extends Api
         $this->wipeZeroCart($user_info['user_id']);
 
 
-        $endTime = microtime(true);
+        /*$endTime = microtime(true);
         $runtime = ($endTime - $stratTime) * 1000; //将时间转换为毫秒
         $endMemory = memory_get_usage();
         $usedMemory = ($endMemory - $startMemory) / 1024;
         $this->wlog( "addToCart".PHP_EOL);
         $this->wlog( "运行时间: {$runtime} 毫秒".PHP_EOL);
-        $this->wlog( "耗费内存: {$usedMemory} K".PHP_EOL);
-
-
+        $this->wlog( "耗费内存: {$usedMemory} K".PHP_EOL);*/
 
         $this->success("success");
     }
@@ -597,9 +515,9 @@ class Goods extends Api
 
 
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
+        $openid = $this->analysisUserJwtToken();
         $store_id = $data['store_id'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $user_info = $this->getGUserInfo($openid);
         $cart_list = Db::name('cart')
             ->where('user_id','=',$user_info['user_id'])
             ->where('store_id','=',$store_id)
@@ -618,6 +536,7 @@ class Goods extends Api
             $price = $price + $item_price;
             $item_num = $item_num + $vc['goods_num'];
             $goodList[] = [
+                'goods_id'=>$vc['goods_id'],
                 'cart_id'=>$vc['id'],
                 'name'=>$vc['goods_name'],
                 'spec'=>$vc['key'],
@@ -636,7 +555,7 @@ class Goods extends Api
         }
         $respond_arr = [
             'goodList'=>$goodList,
-            'goods_info'=>$goods_info_new,
+         //   'goods_info'=>$goods_info_new,
             'price'=>$price,
             'total_num'=>$item_num,
         ];
@@ -661,10 +580,10 @@ class Goods extends Api
     //修改购物车数量
     public function editCart(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
+        $openid = $this->analysisUserJwtToken();
         $cart_id = $data['cart_id'];
         $num = $data['num'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $user_info = $this->getGUserInfo($openid);
        // $check_cart = Db::name('cart')->where('id','=',$cart_id)->find();
         Db::name('cart')->where('id','=',$cart_id)->update(['goods_num'=>$num]);
         $this->wipeZeroCart($user_info['user_id']);
@@ -674,10 +593,10 @@ class Goods extends Api
     //清空购物车
     public function emptyCart(){
         $data = $this->request->post();
-        $sess_key = $data['sess_key'];
+        $openid = $this->analysisUserJwtToken();
         $store_id = $data['store_id'];
 
-        $user_info = $this->getGUserInfo($sess_key);
+        $user_info = $this->getGUserInfo($openid);
         $result = Db::name('cart')
             ->where('user_id','=',$user_info['user_id'])
             ->where('store_id','=',$store_id)

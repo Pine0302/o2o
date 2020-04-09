@@ -222,8 +222,8 @@ class Store extends Api
         $user_info = $this->getTUserInfo($openid);
         $store_id =  $data['store_id'];
         $user_point = [
-            'lng'=>$data['longitude'],
-            'lat'=>$data['latitude'],
+            'lng'=>$data['lng'],
+            'lat'=>$data['lat'],
         ];
         Db::name('users')->where('user_id','=',$user_info['user_id'])->update($user_point);
         $store_info = Db::name('store_sub')
