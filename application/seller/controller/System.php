@@ -13,9 +13,9 @@
  * Date: 2015-10-09
  */
 
-namespace app\admin\controller;
+namespace app\seller\controller;
 
-use app\admin\logic\GoodsLogic;
+use app\seller\logic\GoodsLogic;
 use app\common\logic\ModuleLogic;
 use think\db;
 use think\Cache;

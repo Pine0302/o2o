@@ -48,17 +48,17 @@ class Order extends Api
         $noticeHandel->sendModel(33,1);
     }
 
-    //我的购物车列表
+    //下单展示页面
     public function orderShow(){
         $data = $this->request->post();
 
         $now = time();
-        $sess_key = $data['sess_key'];
+        $openid = $this->analysisUserJwtToken();
         $store_id = $data['store_id'];
-        $type = $data['type'];
+        $type = isset($data['type']) ? $data['type'] : 1;
         $coupon_id = isset($data['coupon_id']) ? $data['coupon_id']:'' ;
-        $address_id = isset($data['address_id']) ? $data['address_id']:'' ;
-        $user_info = $this->getGUserInfo($sess_key);
+    //    $address_id = isset($data['address_id']) ? $data['address_id']:'' ;
+        $user_info = $this->getGUserInfo($openid);
 
         $cart_list = Db::name('cart')
           /*  ->where('user_id','=',$user_info['user_id'])
@@ -133,178 +133,25 @@ class Order extends Api
         }*/
 
 
-        if(empty($address_id)){
-            $address_info = Db::name('user_address')
-                ->where('user_id','=',$user_info['user_id'])
-                ->where('is_default','=',1)
-                ->find();
-
-            $address_response = [
-                'address_id'=>$address_info['address_id'],
-                'address_num'=>$address_info['address_num'],
-                'label'=>$address_info['label'],
-                'mobile'=>$address_info['mobile'],
-                'name'=>$address_info['consignee'],
-                'gender'=>$address_info['gender'],
-                'is_default'=>$address_info['is_default'],
-                'lat'=>$address_info['latitude'],
-                'lng'=>$address_info['longitude'],
-            ];
-        }else{
-            $address_info = Db::name('user_address')
-                ->where('address_id','=',$address_id)
-                ->find();
-            $address_response = [
-                'address_id'=>$address_info['address_id'],
-                'address_num'=>$address_info['address_num'],
-                'label'=>$address_info['label'],
-                'mobile'=>$address_info['mobile'],
-                'name'=>$address_info['consignee'],
-                'gender'=>$address_info['gender'],
-                'is_default'=>$address_info['is_default'],
-                'lat'=>$address_info['latitude'],
-                'lng'=>$address_info['longitude'],
-            ];
-        }
-
-        if(empty($address_response['mobile'])){
-            $address_response['mobile'] = $user_info['weixin_mobile'];
-        }
-
-
         //获取起送费和是否支达到起送金额
-        $init_delivery_info = Db::name('store_arg')->where('id','=',1)->find();
-        $delivery_fee_info = Db::name('store_arg')->where('id','=',2)->find();
-        $no_fee_info = Db::name('store_arg')->where('id','=',3)->find();
+        $package_info = Db::name('store_arg')->where('store_id','=',$store_id)->find();
+        $package_fee = $package_info['value'];
+        $total_price = $price + $package_fee;
 
-        $init_delivery_fee = $init_delivery_info['value'];
-        //获取是否在配送范围  todo 这个暂时不清楚具体逻辑,先默认在配送范围
-        $user_point = [
-            'lat'=>$address_response['lat'],
-            'lng'=>$address_response['lng'],
-        ];
-        $init_delivery_area = $this->checkSendInfo($user_point,$store_id);
-        //查看是否有选择coupon
-        if(!empty($coupon_id)){
-            $coupon_info =
-                Db::name('coupon_list')
-                    ->alias('l')
-                    ->join('tp_plat_coupon c','c.id=l.cid','left')
-                    ->where("l.id",'=',$coupon_id)
-                    ->field('l.*,c.is_new,c.is_rec')
-                    ->find();
-
-            $coupon_money = $coupon_info['money'];
-            $coupon_type = $coupon_info['type'];
-
-
-            if(intval($coupon_money)==0){
-             //   if(($coupon_info['is_new']==1)||($coupon_info['is_rec']==1)){
-                    $coupon_dec_money = $cart_list[0]['goods_price'];
-                    foreach($cart_list as $kc=>$vc){
-                        if($vc['goods_price']<$coupon_dec_money){
-                            $coupon_dec_money = $vc['goods_price'];
-                        }
-                    }
-            //    }
-            }else{
-                if($coupon_type==1){
-                    $coupon_dec_money = $coupon_money ;
-                }else{
-                    //$coupon_dec_money = (100-$coupon_money)/100*$price;
-                    $coupon_cat_id_arr = explode(",",$coupon_info['category_ids']);
-                    if($coupon_type==2){   //折扣券
-                        $coupon_inlude_goods_price = 0;
-                        if(!empty($coupon_info['category_ids'])){    //优惠券有规定类别
-                            foreach ($goodList as $kg=>$vg){
-                                if(in_array($vg['cat_id'],$coupon_cat_id_arr)){
-                                    $coupon_inlude_goods_price = $coupon_inlude_goods_price + $vg['total_price'];
-                                }
-                            }
-                        }else{          //优惠券适用所有类别
-                            $coupon_inlude_goods_price = $price;
-                        }
-                        $coupon_dec_money = (100-$coupon_money)/100*$coupon_inlude_goods_price;
-                    }elseif($coupon_type==3){ //买一赠一券
-                        $coupon_inlude_goods_price = 0;
-                        if(!empty($coupon_info['category_ids'])){    //优惠券有规定类别
-                            foreach ($goodList as $kg=>$vg){
-                                if(in_array($vg['cat_id'],$coupon_cat_id_arr)){
-                                    if($coupon_inlude_goods_price==0){
-                                        $coupon_inlude_goods_price =  $vg['price'];
-                                    }else{
-                                        if($vg['price']<$coupon_inlude_goods_price){
-                                            $coupon_inlude_goods_price = $vg['price'];
-                                        }
-                                    }
-                                }
-                            }
-                        }else{          //优惠券适用所有类别
-                            foreach ($goodList as $kg=>$vg){
-                                if($coupon_inlude_goods_price==0){
-                                    $coupon_inlude_goods_price =  $vg['price'];
-                                }else{
-                                    if($vg['price']<$coupon_inlude_goods_price){
-                                        $coupon_inlude_goods_price = $vg['price'];
-                                    }
-                                }
-                            }
-                        }
-                        $coupon_dec_money = $coupon_inlude_goods_price;
-                    }
-                }
-            }
-
-            $init_delivery_status = (($price-$coupon_dec_money)>$init_delivery_fee) ? 1 : 2;
-            $delivery_fee = 0;
-            $total_price = $price;
-            $coupon_money = $coupon_dec_money;
-            $total_money = $price-$coupon_dec_money;
-            if($type==2){    //配送
-                $delivery_fee = $delivery_fee_info['value'];
-                if($total_money<$no_fee_info['value']){
-                    $total_money = $total_money + $delivery_fee;
-                }else{
-                    $delivery_fee = 0;
-                }
-
-            }
-        }else{
-            $init_delivery_status = ($price>$init_delivery_fee) ? 1 : 2;
-            $delivery_fee = 0;
-            $total_price = $price;
-            $coupon_money = 0;
-            $total_money = $price;
-            if($type==2){    //配送
-                $delivery_fee = $delivery_fee_info['value'];
-
-                if($total_money<$no_fee_info['value']){
-                    $total_money = $total_money + $delivery_fee;
-                }else{
-                    $delivery_fee = 0;
-                }
-            }
+        if($total_price<0){
+            $total_price = 0;
         }
-      //  $this->wlog($delivery_fee);
-        if($total_money<0){
-            $total_money = 0;
-        }
-        $info = [
-       //     'valid_coupon'=>$valid_coupon_count,
-            'init_delivery_fee'=>$init_delivery_fee,
-            'init_delivery_status'=>$init_delivery_status,
-            'init_delivery_area'=>$init_delivery_area,
-            'delivery_fee'=>$delivery_fee,
+        $order_info = [
+            'package_fee'=>$package_fee,
             'total_price'=>$total_price,
-            'coupon_money'=>$coupon_money,
-            'total_money'=>$total_money,
         ];
 
         $respond_arr = [
             'goodList'=>$goodList,
-         //   'coupon_list'=>$coupon_arr,
-            'address_info'=>$address_response,
-            'info'=>$info,
+            'order_info'=>$order_info,
+            'user_info'=>[
+                'mobile'=>$user_info['mobile']
+            ],
         ];
         $data = [
             'data'=>$respond_arr,

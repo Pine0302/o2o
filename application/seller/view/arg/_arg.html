@@ -1,0 +1,63 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>系统参数配置- 编辑参数</h3>
+                <h5>网站系统系统参数管理</h5>
+            </div>
+        </div>
+    </div>
+    <form class="form-horizontal" id="addEditSmsTemplate" method="post">
+        <input type="hidden" name="id" value="{$arg.id}">
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">
+                    <label for="sms_sign"><em>*</em>场景名称</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" value="{$arg.name}" name="name" id="name" class="input-txt" readonly>
+                 <!--   <span class="err" id="err_name" style="display:none;">短信签名不能为空 </span>
+                    <p class="notic">必须与阿里云短信签名一致</p>-->
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label for="sms_tpl_code"><em>*</em>值</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" value="{$arg['value']}" name="value" id="value" class="input-txt">
+                    <span id="err_value" class="err" style="display:none;">场景值不能为空</span>
+            <!--        <p class="notic">必须与阿里云短信模板ID一致</p>-->
+                </dd>
+            </dl>
+
+            <div class="bot"><a href="JavaScript:void(0);" onclick="checkForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a></div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    // 判断输入框是否为空
+    function checkForm(){
+
+
+        var value = $("#value").val();		//模板ID
+
+
+        if($.trim(value) == '')
+        {
+            $("#err_value").show();
+            return false;
+        }
+
+
+        $('#addEditSmsTemplate').submit();
+    }
+</script>
+</body>
+</html>

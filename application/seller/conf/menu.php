@@ -7,43 +7,46 @@ return	array(
 	)),
 
 	'system'=>array('name'=>'设置','child'=>array(
-				array('name' => '系统','child' => array(
-						array('name'=>'商城设置','act'=>'index','op'=>'System'),
-						
-						//array('name'=>'支付方式','act'=>'index1','op'=>'System'),
-						array('name'=>'地区&配送','act'=>'region','op'=>'Tools'),
-						array('name'=>'短信模板','act'=>'index','op'=>'SmsTemplate'),
-						array('name'=>'消息通知','act'=>'index','op'=>'MessageTemplate'),
-						//array('name'=>'接口对接','act'=>'index3','op'=>'System'),
-						//array('name'=>'验证码设置','act'=>'index4','op'=>'System'),
-						array('name'=>'友情链接','act'=>'linkList','op'=>'Article'),
-						array('name'=>'清除缓存','act'=>'cleanCache','op'=>'System'),
-						array('name' => '运费模板', 'act'=>'index', 'op'=>'Freight'),
-						array('name' => '快递公司', 'act'=>'index', 'op'=>'Shipping'),
-				)),
+        array('name' => '系统','child' => array(
+            /*array('name'=>'商城设置','act'=>'index','op'=>'System'),*/
+            array('name'=>'系统参数','act'=>'index','op'=>'Arg'),
+            array('name'=>'首页展示图','act'=>'adList','op'=>'Ad'),
+            array('name'=>'下单页展示图','act'=>'adList','op'=>'Ado'),
+            array('name'=>'小程序过渡页展示图','act'=>'adList','op'=>'Adenter'),
+            //array('name'=>'支付方式','act'=>'index1','op'=>'System'),
+            /*		array('name'=>'地区&配送','act'=>'region','op'=>'Tools'),
+                    array('name'=>'短信模板','act'=>'index','op'=>'SmsTemplate'),*/
+            /*array('name'=>'消息通知','act'=>'index','op'=>'MessageTemplate'),*/
+            //array('name'=>'接口对接','act'=>'index3','op'=>'System'),
+            //array('name'=>'验证码设置','act'=>'index4','op'=>'System'),
+            /*array('name'=>'友情链接','act'=>'linkList','op'=>'Article'),
+            array('name'=>'清除缓存','act'=>'cleanCache','op'=>'System'),
+            array('name' => '运费模板', 'act'=>'index', 'op'=>'Freight'),
+            array('name' => '快递公司', 'act'=>'index', 'op'=>'Shipping'),*/
+        )),
 
-				array('name' => '支付','child'=>array(
-					array('name' => '支付配置', 'act'=>'index', 'op'=>'Plugin'),
-				)),
-			
+        /*array('name' => '支付','child'=>array(
+            array('name' => '支付配置', 'act'=>'index', 'op'=>'Plugin'),
+        )),*/
 
 
-			array('name' => '权限','child'=>array(
-						array('name' => '管理员列表', 'act'=>'index', 'op'=>'Admin'),
-						array('name' => '角色管理', 'act'=>'role', 'op'=>'Admin'),
-						array('name'=>'权限资源列表','act'=>'right_list','op'=>'System'),
-						//array('name' => '管理员日志', 'act'=>'log', 'op'=>'Admin'),
-						array('name' => '供应商列表', 'act'=>'supplier', 'op'=>'Admin'),
-				)),
-			
-				array('name' => '数据','child'=>array(
-						array('name' => '数据备份', 'act'=>'index', 'op'=>'Tools'),
-						array('name' => '数据还原', 'act'=>'restore', 'op'=>'Tools'),
-                        array('name' => '清空演示数据', 'act'=>'clear_demo_data', 'op'=>'Tools'),						
-						//array('name' => 'ecshop数据导入', 'act'=>'ecshop', 'op'=>'Tools'),
-						//array('name' => '淘宝csv导入', 'act'=>'taobao', 'op'=>'Tools'),
-						//array('name' => 'SQL查询', 'act'=>'log', 'op'=>'Admin'),
-				)),
+
+        /*	array('name' => '权限','child'=>array(
+                        array('name' => '管理员列表', 'act'=>'index', 'op'=>'Admin'),
+                        array('name' => '角色管理', 'act'=>'role', 'op'=>'Admin'),
+                        array('name'=>'权限资源列表','act'=>'right_list','op'=>'System'),
+                        //array('name' => '管理员日志', 'act'=>'log', 'op'=>'Admin'),
+                        array('name' => '供应商列表', 'act'=>'supplier', 'op'=>'Admin'),
+                )),*/
+
+        /*	array('name' => '数据','child'=>array(
+                    array('name' => '数据备份', 'act'=>'index', 'op'=>'Tools'),
+                    array('name' => '数据还原', 'act'=>'restore', 'op'=>'Tools'),
+                    array('name' => '清空演示数据', 'act'=>'clear_demo_data', 'op'=>'Tools'),
+                    //array('name' => 'ecshop数据导入', 'act'=>'ecshop', 'op'=>'Tools'),
+                    //array('name' => '淘宝csv导入', 'act'=>'taobao', 'op'=>'Tools'),
+                    //array('name' => 'SQL查询', 'act'=>'log', 'op'=>'Admin'),
+            )),*/
 
 	)),
 		
