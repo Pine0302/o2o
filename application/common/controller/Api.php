@@ -413,13 +413,10 @@ class Api
 
 
     //获取用户信息
-    public function getTUserInfo($sess_key){
-        $arr = [  'openid', 'session_key' ];
-        $sess_info = $this->redis->hmget($sess_key,$arr);
-        $openid = $sess_info['openid'];
+    public function getTUserInfo($openid){
         $user_info = Db::name('users')
             ->where('openid',$openid)
-            ->field('user_id,openid,mobile,mobile_validated,weixin_mobile,coupon_status,sex,lat,lng,nickname,default_store_id')
+            ->field('user_id,openid,mobile,mobile_validated,weixin_mobile,sex,lat,lng,nickname,user_money,frozen_money')
             ->find();
         return $user_info;
     }

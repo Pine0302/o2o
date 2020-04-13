@@ -78,6 +78,18 @@ class OssUtils implements OssInterface
      */
     public function uploadDir123($bucket, $prefix, $localDirectory, $exclude = '.|..|.svn|.git', $recursive = false, $checkMd5 = true){}
 
+
+    //获取图片
+    public function getImage($image,$image_oss){
+        if(!empty($image_oss)){
+            return $image_oss;
+        }else{
+            $server_image_url = "https://".config('server_name').$image;
+            return $server_image_url;
+        }
+    }
+
+
 }
 
 

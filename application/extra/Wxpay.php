@@ -42,7 +42,8 @@ return [
 
     //传乐威客
     'APPID'              => 'wxd61df5c4050192b7', // 微信支付APPID
-    'MCHID'              => '1533572111', // 微信支付MCHID 商户收款账号
+
+    'MCHID'              => '1570626431', // 微信支付MCHID 商户收款账号
     'KEY'                => 'bVrD41Icg67Lk1ciU6HrXRtkkPGG17LX', // 微信支付KEY
     'APPSECRET'          => 'c31d8902cfc7ae369dd642684f42f6f4',  //公众帐号secert
     'NOTIFY_URL'         => 'https://o2o.pinecc.cn/pay/Weixinpay/notify', // 接收支付状态的连接  改成自己的域名

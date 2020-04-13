@@ -7,6 +7,7 @@
  */
 namespace app\common\library;
 
+use app\common\entity\OrderE;
 use think\Db;
 
 class OrderHandle
@@ -22,7 +23,49 @@ class OrderHandle
 
     public function createOrder($prefix="re")
     {
-        return strtoupper(uniqid());
+        return strtoupper($prefix."_".uniqid());
+    }
+
+    /**
+     * error_code 0 检测通过   1:有问题
+     * @param $user_info
+     * @param $order_info
+     * @param $pay_type
+     * @return array
+     */
+    public function  checkOrder($user_info,$order_info,$pay_type){
+        $error_code = 0 ;
+        $msg = '';
+        if($order_info['pay_status']==1) {
+            $error_code = 1;  //已支付
+            $msg = "已支付";
+            return [
+                'error_code'=>$error_code,
+                'msg'=>$msg,
+            ];
+        }
+        if($order_info['order_amount']=="0.00") {
+            $error_code = 1;  //已支付
+            $msg = "订单有误";
+            return [
+                'error_code'=>$error_code,
+                'msg'=>$msg,
+            ];
+        }
+        if($pay_type==OrderE::PAY_TYPE['MONEY']){
+            if($user_info['user_money']<$order_info['order_amount']){
+                $error_code = 1;  //已支付
+                $msg = "余额不足";
+                return [
+                    'error_code'=>$error_code,
+                    'msg'=>$msg,
+                ];
+            }
+        }
+        return [
+            'error_code'=>$error_code,
+            'msg'=>$msg,
+        ];
     }
 
 
@@ -55,8 +98,6 @@ class OrderHandle
         if(!empty($result)){
             return $insert_coupon_list_arr;
         }
-
-
     }
 
 

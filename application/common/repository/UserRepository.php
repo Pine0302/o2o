@@ -13,9 +13,12 @@
  */
 namespace app\common\repository;
 
+use app\common\entity\RiderCompany;
+use app\common\entity\SellerSub;
 use think\Db;
 use think\Model;
 use app\common\entity\User;
+use app\common\entity\RiderCompanyBind;
 
 
 class UserRepository
@@ -43,6 +46,44 @@ class UserRepository
         $userDb->removeOption();
         return $result;
     }
+
+    //检测骑手和公司的认证
+    public function validRiderCompany($mobile){
+        $riderCompanyBindDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        $riderCompanyBindDb->alias('rcb');
+        $riderCompanyBindDb->field('rcb.mobile,rc.name as company_name');
+        $riderCompanyBindDb->join(RiderCompany::TABLE_NAME." rc ",'rc.id = rcb.company_id');
+        $riderCompanyBindDb->where("rcb.mobile",'=',$mobile);
+        $riderCompanyBindDb->where("rcb.status","=",1);
+        $result = $riderCompanyBindDb->find();
+        $riderCompanyBindDb->removeOption();
+        return $result;
+    }
+
+    /**
+     * 给用户扣钱
+     * @param $amount
+     * @param $user_id
+     */
+    public function deductMoney($amount,$user_id){
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        $map = ['user_id'=>$user_id];
+        $userDb->where($map)->setDec('user_money',$amount);
+    }
+
+
+    /**
+     * 给商家发钱
+     * @param $order_info
+     */
+    public function raiseMerchMoney($order_info,$store_sub_info){
+        $per = $store_sub_info['withdraw_percent']/100;
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$order_info['store_id']];
+        return $sellerSubDb->where($map)->inc('frozen_money',$per*$order_info['order_amount'])->inc('total_money',$order_info['order_amount'])->update();
+    }
+
+
 
 
 }

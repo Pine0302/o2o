@@ -5,7 +5,9 @@ namespace app\api\controller;
 use app\common\controller\Api;
 use app\common\library\Ems;
 use app\common\library\Sms;
+use app\common\repository\UserRepository;
 use fast\Random;
+use think\Request;
 use think\Validate;
 use think\Db;
 use think\Cache;
@@ -25,9 +27,44 @@ class User extends Api
     protected $noNeedLogin = ['blList','login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third','userInfo','updateUserInfo','complain','shareQrPic','teamUserList','teamPrizeList','withdraw','withdrawList','checkUserResume','pic2UserInfo','bindPic2UserInfo','getAccessToken','getPic','test1111','resumeFill','webInfo','testuser','workDetailSharePic','getUserFormId','trainDetailSharePic'];
     protected $noNeedRight = '*';
 
+    /**
+     * @var UserRepository;
+     */
+    private $userRepository;
+
+    public function __construct(Request $request = null,UserRepository $userRepository)
+    {
+        parent::__construct($request);
+        $this->userRepository = $userRepository;
+    }
+
+
+
     public function _initialize()
     {
         parent::_initialize();
+    }
+
+
+    //骑手认证
+    public function validRider(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        if(!empty($user['mobile'])){
+            $this->error('用户尚未认证手机号',null);
+        }
+        $valid_info = $this->userRepository->validRiderCompany($user_info['mobile']);
+        $response =[];
+        if(!empty($valid_info)){
+            $response = [
+                'data'=>$valid_info,
+            ];
+            $this->success('success', $response);
+        }else{
+            $this->error('暂无数据');
+        }
+
     }
 
     //验证手机号

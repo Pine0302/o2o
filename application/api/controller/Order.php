@@ -3,7 +3,12 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use app\common\entity\OrderE;
 use app\common\library\wx\WXBizDataCrypt;
+use app\common\repository\OrderRepository;
+use app\common\repository\StoreRepository;
+use app\common\repository\UserRepository;
+use app\common\util\OssUtils;
 use fast\AreaInclude;
 use fast\Http;
 use think\cache\driver\Redis;
@@ -33,13 +38,27 @@ class Order extends Api
 //    /protected $noNeedRight = ['test2'];
     protected $noNeedRight = ['*'];
 
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
 
+    /**
+     * @var OrderRepository;
+     */
+    private $orderRepository;
 
-    public function __construct()
+    /**
+     * @var StoreRepository
+     */
+    private $storeRepository;
+
+    public function __construct(Request $request = null,UserRepository $userRepository,OrderRepository $orderRepository,StoreRepository $storeRepository)
     {
-        parent::__construct();
-
-
+        parent::__construct($request);
+        $this->userRepository = $userRepository;
+        $this->orderRepository = $orderRepository;
+        $this->storeRepository = $storeRepository;
     }
 
 
@@ -210,67 +229,37 @@ class Order extends Api
        // $this->wlog($data);
         $OrderHandleObj = new OrderHandle();
         $now = time();
-        $sess_key = $data['sess_key'];
+        $openid = $this->analysisUserJwtToken();
         $store_id = $data['store_id'];
-        $type = $data['type'];           //配送方式 1:自取 2:配送
-        $coupon_id = isset($data['coupon_id']) ? $data['coupon_id']:'' ;
-        $way = $data['way'] ?? 1;         //购买方式 1:立即下单 2:预约下单
+        $type = $data['type'];           //配送方式 1:堂食 2:外带
+        $pay_type = $data['pay_type'];           //支付方式 1:小程序 2:余额
+     //   $coupon_id = isset($data['coupon_id']) ? $data['coupon_id']:'' ;
+        //$way = $data['way'] ?? 1;         //购买方式 1:立即下单 2:预约下单
 
-        if($data['app_time']==0){  //选择了时间,则认为是预约单
+        /*if($data['app_time']==0){  //选择了时间,则认为是预约单
             $way = 1;
         }else{
             $way = 2;
-        }
+        }*/
 
         $app_time = isset($data['app_time']) ? strtotime($data['app_time']):$now ; //预约时间
         $mobile = isset($data['mobile']) ? $data['mobile']:'' ; //手机号
+        $consignee = isset($data['consignee']) ? $data['consignee']:'' ; //取餐人
         $tips = isset($data['tips']) ? $data['tips']:'' ; //备注
-        $address_id = isset($data['address_id']) ? $data['address_id']:'' ; //用户地址id
-        $user_info = $this->getTUserInfo($sess_key);
+
+       // $address_id = isset($data['address_id']) ? $data['address_id']:'' ; //用户地址id
+        $user_info = $this->getTUserInfo($openid);
         $cart_info = $this->getCartList($store_id,$user_info['user_id']);
-        if($type==2){
-            $result_check = $this->checkAddressId($address_id,$store_id);
-            if($result_check==2){
-                $this->error('该门店离您的位置已超出区域范围，敬请期待新门店的开通');exit;
-            }
+        if(empty($cart_info['goodList'])){
+            $this->error('系统繁忙,请稍候再试');
         }
-
-
-        if((!empty($user_info['lat']))&&(!empty($user_info['lng']))){
-            $distance = 1;
-            $areaIncludeObj = new AreaInclude();
-            $store_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
-          //  $distance = $areaIncludeObj->distance($user_info['lng'],$user_info['lat'],$store_info['store_lng_tx'],$store_info['store_lat_tx']);
-            $distance = $areaIncludeObj->distance($user_info['lat'],$user_info['lng'],$store_info['store_lat_tx'],$store_info['store_lng_tx']);
-         //   $distance = intval($distance);
-            $this->wlog("--distance----",'ttt.txt');
-            $this->wlog($distance,'ttt.txt');
-            $this->wlog($user_info['nickname'],'ttt.txt');
-            $this->wlog($user_info['lng'],'ttt.txt');
-            $this->wlog($user_info['lat'],'ttt.txt');
-            $this->wlog($store_info['store_lng_tx'],'ttt.txt');
-            $this->wlog($store_info['store_lat_tx'],'ttt.txt');
-            $this->wlog("--distance----",'ttt.txt');
-            if($distance>15000){
-                $this->error('该门店离您的位置已超出区域范围，敬请期待新门店的开通');exit;
-            }
-        }
-
-
-        //如果用户选择的地址超出了配送范围,就不予以配送
-
-        //适配,测试一下使用
-       /* if($type==2){
-            $address_id = 102;
-        }*/
-
 
 
         $arg_info = Db::name('store_arg')->select();
         $delivery_fee = $arg_info[1]['value'];
         $no_fee_condition = $arg_info[2]['value'];
-        $coupon_dec = 0;
-        if($coupon_id>0){
+  //      $coupon_dec = 0;
+        /*if($coupon_id>0){
             $coupon_info = Db::name('coupon_list')
                 ->alias('l')
                 ->join('tp_plat_coupon c','l.cid=c.id','left')
@@ -279,69 +268,37 @@ class Order extends Api
                 ->find();
             $price = $cart_info['price'];
 
-
-
-          //  if($user_info['user_id']==265){
-
                 if(intval($coupon_info['money']==0)){
-                //    if(($coupon_info['is_new']==1)||($coupon_info['is_rec']==1)) {
                         $coupon_dec = $cart_info['goodList'][0]['price'];
                         foreach ($cart_info['goodList'] as $kc => $vc) {
                             if ($vc['price'] < $coupon_dec) {
                                 $coupon_dec = $vc['price'];
                             }
                         }
-                //    }
                 }else{
                     $coupon_dec = $this->couponDec($price,$coupon_info);  //优惠券减少的金额
                 }
 
-       //     }
+        }*/
 
-          //  $coupon_dec = $this->couponDec($price,$coupon_info);  //优惠券减少的金额
-        }
-
-        $without_deliver_fee = $cart_info['price'] - $coupon_dec;
-        if($type==2){     //配送单
-            if(($without_deliver_fee > $no_fee_condition)||($without_deliver_fee == $no_fee_condition)){
-                $total_fee = $without_deliver_fee;
-                $delivery_fee = 0;
-            }else{
-                $total_fee = $without_deliver_fee + $delivery_fee;
-            }
-        }else{          //自提单
-            $total_fee = $without_deliver_fee;
-            $delivery_fee = 0;
-        }
+        $package_info = Db::name('store_arg')->where('store_id','=',$store_id)->find();
+        $package_fee = $package_info['value'];
 
 
-        $consignee = '';
-        $address = '';
-        $address_num = '';
+
         $mobile = '';
-        $longitude = '';
-        $latitude = '';
-        $pay_name = "微信小程序支付";
+        $pay_name = ($pay_type==1) ? "微信小程序支付":"余额支付";
+
         $goods_price = $cart_info['price'];
-        $shipping_price = $delivery_fee;
-
-        if($type==2){
-            $address_info = Db::name('user_address')->where('address_id','=',$address_id)->find();
-            $consignee = $address_info['consignee'];
-            $address = $address_info['address'];
-            $address_num = $address_info['address_num'];
-            $mobile = $address_info['mobile'];
-            $longitude = $address_info['longitude'];
-            $latitude = $address_info['latitude'];
-        }
+        $total_price = $goods_price + $package_fee;
 
 
-        $order_sn = $OrderHandleObj->createOrder("tea");
+        $order_sn = $OrderHandleObj->createOrder("o2o");
 
         $order_num = $this->getOrderNum();
 
-        if($total_fee<0){
-            $total_fee = 0;
+        if($total_price<0){
+            $total_price = 0;
         }
      //生成订单
         $order_insert = [
@@ -349,22 +306,17 @@ class Order extends Api
             'order_num'=>$order_num,
             'user_id'=>$user_info['user_id'],
             'type'=>$type,
-            'way'=>$way,
             'mobile'=>$mobile,
             'order_status'=>0,
             'pay_status'=>0,
             'consignee'=>$consignee,
-            'address'=>$address,
-            'address_num'=>$address_num,
-            'longitude'=>$longitude,
-            'latitude'=>$latitude,
+            'pay_type'=>$pay_type,
             'pay_name'=>$pay_name,
             'goods_price'=>$goods_price,
-            'shipping_price'=>$shipping_price,
-            'coupon_price'=>$coupon_dec,
-            'coupon_id'=>$coupon_id,
-            'total_amount'=>$goods_price,
-            'order_amount'=>$total_fee,
+            'package_fee'=>$package_fee,
+            'total_amount'=>$total_price,
+            'order_amount'=>$total_price,
+            'package_fee'=>$package_fee,
             'add_time'=>$now,
             'user_note'=>$tips,
             'app_time'=>$app_time,
@@ -372,7 +324,9 @@ class Order extends Api
             'is_comment'=>0,
             'shipping_status'=>0,
         ];
+
         $arr_isnert_goods_order = [];
+        $result = 0;
         Db::startTrans();
         try{
             $order_id = Db::name('order')->insertGetId($order_insert);
@@ -387,8 +341,8 @@ class Order extends Api
                     'goods_price'=>$vog['price'],
                     'key'=>$vog['spec'],
                     'key_name'=>$vog['spec_item'],
-                    'spec_key'=>$vog['spec'],
-                    'spec_key_name'=>$vog['spec_item'],
+                    /*'spec_key'=>$vog['spec'],
+                    'spec_key_name'=>$vog['spec_item'],*/
                     'prom_type'=>0,
                     'is_send' => 0,
                 ];
@@ -416,15 +370,75 @@ class Order extends Api
             Db::rollback();
             $this->error('系统繁忙,请稍候再试');
         }
-        $this->wlog($result);
+       // $this->wlog($result);
         if($result>0){
-
             $data = [
                 'order_id'=>$order_id,
             ];
             $this->success('success',$data);
         }
     }
+
+    //用户用余额支付
+    public function payWithMoney(){
+        $data = $this->request->post();
+
+        $OrderHandleObj = new OrderHandle();
+        $now = time();
+        $openid = $this->analysisUserJwtToken();
+
+        $order_id = $data['order_id'];
+
+        $user_info = $this->getTUserInfo($openid);
+        $order_info = Db::name('order')->where('order_id','=',$order_id)->find();
+        $check_pay = $OrderHandleObj->checkOrder($user_info,$order_info,OrderE::PAY_TYPE['MONEY']);
+        if($check_pay['error_code']!=0){
+            $response = [
+                "error_code"=> $check_pay['error_code'],
+                "msg"=> $check_pay['msg'],
+                "time"=> time(),
+                "bizobj"=>  null,
+            ];
+            echo json_encode($response);exit;
+        }else{
+            $this->moneyPay($user_info,$order_info);
+        }
+    }
+
+    public function moneyPay($user_info,$order_info){
+
+        $store_sub_info = $this->storeRepository->getStoreSubByStoreId($order_info['store_id']);
+
+
+        Db::startTrans();
+        try{
+            //给用户扣钱
+            $this->userRepository->deductMoney($order_info['order_amount'],$user_info['user_id']);
+            //把订单设定为已支付
+            $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY']);
+
+            //增加用户支付记录
+            $this->orderRepository->addMemberCashLog($order_info,$user_info);
+            //扣减商品库存
+
+            $this->orderRepository->deductOrderGoodsStock($order_info);
+            //给商家加钱
+            $this->userRepository->raiseMerchMoney($order_info,$store_sub_info);
+
+            //给商家增加收入记录
+            $this->orderRepository->addMerchCashLog($order_info,$store_sub_info);
+            Db::commit();
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            $this->error('系统繁忙,请稍候再试');
+        }
+
+        //todo 给用户发消息
+        //todo 给商家发消息
+        $this->success('订单支付成功!');
+    }
+
 
     public function checkAddressId($address_id,$store_id){
         $areaIncludeObj = new AreaInclude();
@@ -441,27 +455,30 @@ class Order extends Api
 
 
     // 今日订单(已支付)
-    public function todayOrderList(){
+    public function orderList(){
         $data = $this->request->post();
         $now = time();
         $today_begin = strtotime(date("Y-m-d 00:00:00",$now));
         $today_end = $today_begin + 24*60*60;
-        $sess_key = $data['sess_key'];
-        $user_info = $this->getGUserInfo($sess_key);
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
 
         $order_list = Db::name('order')
             ->where('user_id','=',$user_info['user_id'])
             ->where('pay_status','=',1)
-            ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
+          //  ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
             ->order('pay_time desc')
             ->select();
 
         $arr_response = [];
+        $OssUtilsObj = new OssUtils();
         foreach($order_list as $ko=>$vo){
             $store_arr = Db::name('store_sub')->where('store_id','=',$vo['store_id'])->find();
+            $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
 
             $arr_response[$ko]['store_info'] = [
                 'store_name'=>$store_arr['store_name'],
+                'pic'=>$pic,
                 'store_phone'=>$store_arr['store_phone'],
                 'lng'=>$store_arr['store_lng_tx'],
                 'lat'=>$store_arr['store_lat_tx'],
@@ -469,8 +486,9 @@ class Order extends Api
             ];
             $goods_arr = Db::name("order_goods")->where('order_id','=',$vo['order_id'])->select();
             $goods_info = [];
-
+            $total_goods_num= 0;
             foreach($goods_arr as $kg=>$vg){
+                $total_goods_num += $vg['goods_num'];
                 $goods_spec = Db::name('goods')->where('goods_id','=',$vg['goods_id'])->field('original_img')->find();
                 $item_price = $vg['goods_price'] * $vg['goods_num'];
                 $goods_info[] = [
@@ -483,27 +501,38 @@ class Order extends Api
             }
 
             $arr_response[$ko]['goods_info'] = $goods_info;
+            $now_date = date("Y-m-d");
+            $app_date = date("Y-m-d",$vo['app_time']);
+            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            if($total_goods_num==1){
+                $description = $goods_arr[0]['goods_name']." 一件商品";
+            }else{
+                $description = $goods_arr[0]['goods_name']." 等".$total_goods_num."件商品";;
+            }
 
             $order_info = [
                 'order_id'=>$vo['order_id'],
-                'shipping_price'=>$vo['shipping_price'],
-                'coupon_price'=>$vo['coupon_price'],
-                'goods_price'=>$vo['goods_price'],
-                'order_amount'=>$vo['order_amount'],
-                'type'=>$vo['type'],
-                'way'=>$vo['way'],
+            //    'shipping_price'=>$vo['shipping_price'],
+               // 'coupon_price'=>$vo['coupon_price'],
+              //  'goods_price'=>$vo['goods_price'],
+                'total_price'=>$vo['order_amount'],
+               // 'type'=>$vo['type'],
+           //     'way'=>$vo['way'],
                 'order_status'=>$vo['order_status'],
+                'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$vo['order_status']],
                 'order_num'=>$vo['order_num'],
                 'order_sn'=>$vo['order_sn'],
-                'add_time'=>date("m/d H:i",$vo['add_time']),
-                'app_time'=>date("m/d H:i",$vo['app_time']),
+                'add_time'=>date("Y-m-d H:i",$vo['add_time']),
+                'app_time'=>date("Y-m-d ".$check_is_tomorrow." H:i",$vo['app_time']),
                 'user_name'=> $vo['consignee'],
-                'address'=> $vo['address'],
-                'address_num'=> $vo['address_num'],
+             //   'address'=> $vo['address'],
+            //    'address_num'=> $vo['address_num'],
                 'mobile'=> $vo['mobile'],
+                'description' => $description,
+
             ];
 
-            $rider_info =[];
+            /*$rider_info =[];
             if($vo['order_status']==4){
                 //获取配送员信息
 
@@ -515,7 +544,7 @@ class Order extends Api
                     'rider_name'=>$rider_info['rider_name'],
                     'rider_phone'=>$rider_info['rider_phone'],
                 ];
-            }
+            }*/
 
             $arr_response[$ko]['order_info'] = $order_info;
         }
