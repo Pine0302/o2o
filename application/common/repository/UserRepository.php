@@ -32,6 +32,12 @@ class UserRepository
 
     }
 
+    public function getUserById($id){
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        $userDb->where('user_id','=',$id);
+        $result = $userDb->find();
+        return $result;
+    }
     public function updateUserByFilter($data,$map){
         $userDb = Db::name(User::SHORT_TABLE_NAME);
         $userDb->where($map)->update($data);

@@ -2,6 +2,8 @@
 namespace app\pay\controller;
 
 
+use app\common\entity\OrderE;
+use think\Request;
 use weixinpay\Weixinpay as WeixinpayClass;
 use think\Controller;
 use think\Model;
@@ -10,12 +12,39 @@ use app\common\library\CommonFunc;
 use app\common\library\OrderHandle;
 use app\api\library\NoticeHandle;
 
+use app\common\repository\OrderRepository;
+use app\common\repository\StoreRepository;
+use app\common\repository\UserRepository;
 
 class Weixinpay extends Controller
 {
 
     public function index(){
         echo 12322;exit;
+    }
+
+
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
+
+    /**
+     * @var OrderRepository;
+     */
+    private $orderRepository;
+
+    /**
+     * @var StoreRepository
+     */
+    private $storeRepository;
+
+    public function __construct(Request $request = null,UserRepository $userRepository,OrderRepository $orderRepository,StoreRepository $storeRepository)
+    {
+        parent::__construct($request);
+        $this->userRepository = $userRepository;
+        $this->orderRepository = $orderRepository;
+        $this->storeRepository = $storeRepository;
     }
     /**
     * notify_url接收页面
@@ -34,7 +63,7 @@ class Weixinpay extends Controller
 
         if(($arr['result_code']=='SUCCESS')&&($arr['return_code']=='SUCCESS')){
             $this->afterpay($arr);
-            WeixinpayClass::notify();
+          //  WeixinpayClass::notify();
         }
 
     }
@@ -183,7 +212,14 @@ EOT;
 
     public function testAfterPay()
     {
-        $arr =  ["appid"=>"wxd98c6a52dab64ef7","bank_type"=>"CFT","cash_fee"=>"1","fee_type"=>"CNY","is_subscribe"=>"Y","mch_id"=>"1486122612","nonce_str"=>"CmES","openid"=>"oUTUPwt3kDmbu8f0EJZROuqPX5Zc","out_trade_no"=>"B2P_5B03D42E339FC","result_code"=>"SUCCESS","return_code"=>"SUCCESS","sign"=>"2B36C19BD4C1196F1DE939968D7588A0","time_end"=>"20180522162705","total_fee"=>"1","trade_type"=>"NATIVE","transaction_id"=>"4200000145201805223882998629"];
+        $arr =  ["appid"=>"wxd98c6a52dab64ef7","bank_type"=>"CFT",
+            "cash_fee"=>"1","fee_type"=>"CNY","is_subscribe"=>"Y",
+            "mch_id"=>"1486122612","nonce_str"=>"CmES",
+            "openid"=>"oUTUPwt3kDmbu8f0EJZROuqPX5Zc",
+            "out_trade_no"=>"O2O_5E94702A6C712",
+            "result_code"=>"SUCCESS","return_code"=>"SUCCESS",
+            "sign"=>"2B36C19BD4C1196F1DE939968D7588A0","time_end"=>"20180522162705",
+            "total_fee"=>"1","trade_type"=>"NATIVE","transaction_id"=>"4200000145201805223882998629"];
         $this->afterpay($arr);
     }
 
@@ -202,6 +238,9 @@ EOT;
                 case 'TRAIN':
                     $this->afterPayTrain($order_id,$arr);
                     break;
+                case 'O2O':
+                    $this->afterPayO2O($order_id,$arr);
+                    break;
                 default:
                     $this->afterpaytea($order_id,$arr);
                     break;
@@ -209,6 +248,46 @@ EOT;
 
     }
 
+    public function afterpayO2O($order_id,$arr){
+
+        $order_info = $this->orderRepository->getOrderBySn($order_id);
+        $user_info = $this->userRepository->getUserById($order_info['user_id']);
+        $store_sub_info = $this->storeRepository->getStoreSubByStoreId($order_info['store_id']);
+
+        if($order_info['pay_status']==OrderE::PAY_STATUS['NO']){
+            Db::startTrans();
+            try{
+
+                //把订单设定为已支付
+                $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['WEIXIN'],$arr['transaction_id']);
+
+                //增加用户支付记录
+                $this->orderRepository->addMemberCashLog($order_info,$user_info);
+                //扣减商品库存
+
+                $this->orderRepository->deductOrderGoodsStock($order_info);
+                //给商家加钱
+                $this->userRepository->raiseMerchMoney($order_info,$store_sub_info);
+
+                //给商家增加收入记录
+                $result = $this->orderRepository->addMerchCashLog($order_info,$store_sub_info);
+                Db::commit();
+            } catch (\Exception $e) {
+                // 回滚事务
+                Db::rollback();
+                $this->error('系统繁忙,请稍候再试');
+            }
+        }else{
+            $result = 1;
+        }
+
+        //todo 给用户发消息
+        //todo 给商家发消息
+        if(!empty($result)){
+            WeixinpayClass::notify();
+        }
+
+    }
 
     public function afterpaytea($order_id,$arr){
         error_log("进入afterpaytea---".json_encode($order_id),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");

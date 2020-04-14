@@ -41,12 +41,12 @@ class OrderRepository
      * @param $pay_type
      * @return int|string
      */
-    public function setOrderPaid($order_info,$pay_type){
+    public function setOrderPaid($order_info,$pay_type,$transaction_id=''){
         $now = time();
         $arr_order_update = [
             'order_status'=>OrderE::ORDER_STATUS['PAID'],
             'pay_status'=>OrderE::PAY_STATUS['YES'],
-            'transaction_id'=>'',
+            'transaction_id'=>$transaction_id,
             'pay_time'=>$now,
             'pay_type'=>$pay_type,
         ];
@@ -106,5 +106,16 @@ class OrderRepository
         return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
     }
 
+    public function changeOrderStatus($order_info,$order_status){
+        $arr_order_update = [
+            'order_status'=>$order_status,
+        ];
+        switch($order_status){
+            case OrderE::ORDER_STATUS['DONE_BACK']:
+                $arr_order_update['cancel_time'] = time();
+                break;
+        }
+        Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
+    }
 
 }

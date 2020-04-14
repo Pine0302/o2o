@@ -15,6 +15,7 @@ use fast\Date;
 use app\common\library\CommonFunc;
 use app\api\library\NoticeHandle;
 use app\common\library\OrderHandle;
+use app\common\util\JwtUtil;
 
 
 
@@ -61,24 +62,11 @@ class Weixinpay
     //小程序支付
    public function  miniPay(){
 
-       $sess_key = $_REQUEST['sess_key'];
+       
        $order_id = $_REQUEST['order_id'];
-
-       $arr = [  'openid', 'session_key' ];
-       $sess_info = $this->redis->hmget($sess_key,$arr);
-       $openid = $sess_info['openid'];
-
-       if(!empty($sess_info['openid'])){
-           $openid = $sess_info['openid'];
-       }else{
-           $response = [
-               "error_code"=> 4,
-               "msg"=> "登录超时",
-               "time"=> time(),
-               "bizobj"=>  null,
-           ];
-           echo json_encode($response);exit;
-       }
+      
+       $openid = $this->analysisUserJwtToken();
+     
 
        $user_info = Db::name('users')->where('openid','=',$openid)->find();
 
@@ -96,30 +84,36 @@ class Weixinpay
             echo json_encode($response);exit;
         }else{
             if((number_format($order_info['order_amount'],2))!='0.00'){
-                $this->wxTrainPay($user_info,$order_info);
+                $result = $this->wxTrainPay($user_info,$order_info);
+                echo json_encode($result);exit;
             }else{
-
-                $result_pay0 = $this->pay0succes($order_info);
-
-                if($result_pay0==1){
-                    $response = [
-                        "error_code"=> 6,
-                        "msg"=> "支付成功",
-                        "time"=> time(),
-                        "bizobj"=>  null,
-                    ];
-                }else{
                     $response = [
                         "error_code"=> 1,
                         "msg"=> "系统繁忙,请稍候再试",
                         "time"=> time(),
                         "bizobj"=>  null,
                     ];
-                }
+
 
            //     var_dump($response);exit;
                 echo json_encode($response);exit;
             }
+        }
+    }
+
+    //解析用户token
+    public function analysisUserJwtToken(){
+        $auth_code = $_SERVER['HTTP_AUTHORIZATION'];
+        $auth_code = str_replace("Bearer ","",$auth_code);
+        $jwtUtil = new JwtUtil();
+        if(empty($auth_code)){
+            $this->error('token过期,请重新调用login接口', null, 14);exit;
+        }
+        $userData =  $jwtUtil->analysisToken($auth_code);
+        if(!empty($userData->openid)){
+            return $userData->openid;
+        }else{
+            $this->error('token有误,请重新调用login接口', null, 14);exit;
         }
     }
 
@@ -187,7 +181,9 @@ class Weixinpay
             'openId'=>$user_info['openid'],
 
         ];
+        //print_r($order);exit;
         $uni_return = $weixinPay->unifiedMiniOrder($order);
+         
 
     }
 

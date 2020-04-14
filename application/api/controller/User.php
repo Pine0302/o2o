@@ -67,6 +67,17 @@ class User extends Api
 
     }
 
+
+    public function getUserInfo(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
+        $response = [
+            'data'=>$user_info,
+        ];
+        $this->success('success', $response);
+    }
+
     //验证手机号
     public function validMobile(){
         $data = $this->request->post();

@@ -234,7 +234,7 @@ class Order extends Api
         $type = $data['type'];           //配送方式 1:堂食 2:外带
         $pay_type = $data['pay_type'];           //支付方式 1:小程序 2:余额
      //   $coupon_id = isset($data['coupon_id']) ? $data['coupon_id']:'' ;
-        //$way = $data['way'] ?? 1;         //购买方式 1:立即下单 2:预约下单
+        $way = $data['way'] ?? 1;         //购买方式 1:立即下单 2:预约下单
 
         /*if($data['app_time']==0){  //选择了时间,则认为是预约单
             $way = 1;
@@ -320,6 +320,7 @@ class Order extends Api
             'add_time'=>$now,
             'user_note'=>$tips,
             'app_time'=>$app_time,
+            'way'=>$way,
             'store_id'=>$store_id,
             'is_comment'=>0,
             'shipping_status'=>0,
@@ -415,7 +416,7 @@ class Order extends Api
             //给用户扣钱
             $this->userRepository->deductMoney($order_info['order_amount'],$user_info['user_id']);
             //把订单设定为已支付
-            $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY']);
+            $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY'],'');
 
             //增加用户支付记录
             $this->orderRepository->addMemberCashLog($order_info,$user_info);
@@ -440,7 +441,7 @@ class Order extends Api
     }
 
 
-    public function checkAddressId($address_id,$store_id){
+    /*public function checkAddressId($address_id,$store_id){
         $areaIncludeObj = new AreaInclude();
         $store_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
         $address_info = Db::name('user_address')->where('address_id','=',$address_id)->find();
@@ -451,7 +452,7 @@ class Order extends Api
         ];
         $is_include = $areaIncludeObj->is_point_in_polygon($user_point,$lnglat_tx);
         return $is_include;
-    }
+    }*/
 
 
     // 今日订单(已支付)
@@ -466,7 +467,7 @@ class Order extends Api
         $order_list = Db::name('order')
             ->where('user_id','=',$user_info['user_id'])
             ->where('pay_status','=',1)
-          //  ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
+            //  ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
             ->order('pay_time desc')
             ->select();
 
@@ -512,12 +513,12 @@ class Order extends Api
 
             $order_info = [
                 'order_id'=>$vo['order_id'],
-            //    'shipping_price'=>$vo['shipping_price'],
-               // 'coupon_price'=>$vo['coupon_price'],
-              //  'goods_price'=>$vo['goods_price'],
+                //    'shipping_price'=>$vo['shipping_price'],
+                // 'coupon_price'=>$vo['coupon_price'],
+                //  'goods_price'=>$vo['goods_price'],
                 'total_price'=>$vo['order_amount'],
-               // 'type'=>$vo['type'],
-           //     'way'=>$vo['way'],
+                // 'type'=>$vo['type'],
+                //     'way'=>$vo['way'],
                 'order_status'=>$vo['order_status'],
                 'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$vo['order_status']],
                 'order_num'=>$vo['order_num'],
@@ -525,8 +526,8 @@ class Order extends Api
                 'add_time'=>date("Y-m-d H:i",$vo['add_time']),
                 'app_time'=>date("Y-m-d ".$check_is_tomorrow." H:i",$vo['app_time']),
                 'user_name'=> $vo['consignee'],
-             //   'address'=> $vo['address'],
-            //    'address_num'=> $vo['address_num'],
+                //   'address'=> $vo['address'],
+                //    'address_num'=> $vo['address_num'],
                 'mobile'=> $vo['mobile'],
                 'description' => $description,
 
@@ -553,6 +554,130 @@ class Order extends Api
             'data'=>$arr_response,
         ];
         $this->wlog($order_info);
+        $this->success('success',$data);
+    }
+
+    // 订单详情(已支付)
+    public function orderDetail(){
+        $data = $this->request->post();
+        $now = time();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $order_id = $data['order_id'];
+        $order_detail = Db::name('order')
+            ->where('user_id','=',$user_info['user_id'])
+            ->where('pay_status','=',1)
+            ->where('order_id','=',$order_id)
+            ->find();
+
+        $arr_response = [];
+        $OssUtilsObj = new OssUtils();
+
+        $store_arr = Db::name('store_sub')->where('store_id','=',$order_detail['store_id'])->find();
+        $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
+
+        $arr_response['store_info'] = [
+            'store_name'=>$store_arr['store_name'],
+            'pic'=>$pic,
+            'store_phone'=>$store_arr['store_phone'],
+            'lng'=>$store_arr['store_lng_tx'],
+            'lat'=>$store_arr['store_lat_tx'],
+            'store_address'=>$store_arr['store_address'],
+        ];
+        $goods_arr = Db::name("order_goods")->where('order_id','=',$order_detail['order_id'])->select();
+        $goods_info = [];
+        $total_goods_num= 0;
+        foreach($goods_arr as $kg=>$vg){
+            $total_goods_num += $vg['goods_num'];
+            $goods_spec = Db::name('goods')->where('goods_id','=',$vg['goods_id'])->field('original_img')->find();
+            $item_price = $vg['goods_price'] * $vg['goods_num'];
+            $goods_info[] = [
+                'goods_name'=>$vg['goods_name'],
+                'key_name'=>$vg['key_name'],
+                'goods_num'=>$vg['goods_num'],
+                'item_price'=>$item_price,
+                'goods_image'=>"https://".$_SERVER['HTTP_HOST'].$goods_spec['original_img'],
+            ];
+        }
+
+        $arr_response['goods_info'] = $goods_info;
+        $now_date = date("Y-m-d");
+        if(!$order_detail['app_time']){
+            $app_time = "立刻到店";
+        }else{
+            $app_date = date("Y-m-d",$order_detail['app_time']);
+            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order_detail['app_time']);
+        }
+
+        if($total_goods_num==1){
+            $description = $goods_arr[0]['goods_name']." 一件商品";
+        }else{
+            $description = $goods_arr[0]['goods_name']." 等".$total_goods_num."件商品";
+        }
+
+        $order_info = [
+            'order_id'=>$order_detail['order_id'],
+            'total_price'=>$order_detail['order_amount'],
+            'package_fee'=>$order_detail['package_fee'],
+            'way'=>$order_detail['way'],
+            'order_status'=>$order_detail['order_status'],
+            'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$order_detail['order_status']],
+            'order_num'=>$order_detail['order_num'],
+            'order_sn'=>$order_detail['order_sn'],
+            'add_time'=>date("Y-m-d H:i",$order_detail['add_time']),
+            'app_time'=>$app_time,
+            'user_name'=> $order_detail['consignee'],
+            'mobile'=> $order_detail['mobile'],
+            'tips' => $order_detail['tips'],
+            'total_goods_num'=>$total_goods_num,
+
+        ];
+
+        $arr_response['order_info'] = $order_info;
+        $data = [
+            'data'=>$arr_response,
+        ];
+        $this->wlog($order_info);
+        $this->success('success',$data);
+    }
+
+
+    // 订单详情(已支付)
+    public function changeOrderStatus(){
+        $data = $this->request->post();
+        $now = time();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $order_id = $data['order_id'];
+        $status = $data['status'];
+
+        $order_detail = Db::name('order')
+            ->where('user_id','=',$user_info['user_id'])
+            ->where('pay_status','=',1)
+            ->where('order_id','=',$order_id)
+            ->find();
+        if(($order_detail['order_status']==OrderE::ORDER_STATUS['PAID'])&&($status==OrderE::ORDER_STATUS['TO_BE_BACK'])){
+            $this->orderRepository->changeOrderStatus($order_detail,OrderE::ORDER_STATUS['DONE_BACK']);
+            $order_status = OrderE::ORDER_STATUS['DONE_BACK'];
+        }else{
+            switch ($status){
+                case OrderE::ORDER_STATUS['TO_BE_BACK']:  //申请取消
+                    $this->orderRepository->changeOrderStatus($order_detail,$status);
+                    $order_status = OrderE::ORDER_STATUS['TO_BE_BACK'];
+                    break;
+                case OrderE::ORDER_STATUS['TAKE']:  //撤回取消订单
+                    $this->orderRepository->changeOrderStatus($order_detail,$status);
+                    $order_status = OrderE::ORDER_STATUS['TAKE'];
+                    break;
+            }
+        }
+
+        $arr_response = [];
+        $data = [
+            'status'=>$order_status,
+            'status_tip'=>OrderE::ORDER_STATUS_TIP[$order_status],
+        ];
         $this->success('success',$data);
     }
 
