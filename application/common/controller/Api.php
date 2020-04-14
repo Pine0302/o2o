@@ -416,7 +416,7 @@ class Api
     public function getTUserInfo($openid){
         $user_info = Db::name('users')
             ->where('openid',$openid)
-            ->field('user_id,mobile,user_money')
+            ->field('user_id,mobile,user_money,openid')
             ->find();
         return $user_info;
     }

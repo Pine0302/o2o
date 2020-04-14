@@ -62,11 +62,10 @@ class Weixinpay
     //小程序支付
    public function  miniPay(){
 
-       
-       $order_id = $_REQUEST['order_id'];
+       $data = json_decode(file_get_contents("php://input"),true);
+       $order_id = $data['order_id'];
       
        $openid = $this->analysisUserJwtToken();
-     
 
        $user_info = Db::name('users')->where('openid','=',$openid)->find();
 
@@ -83,6 +82,7 @@ class Weixinpay
             ];
             echo json_encode($response);exit;
         }else{
+
             if((number_format($order_info['order_amount'],2))!='0.00'){
                 $result = $this->wxTrainPay($user_info,$order_info);
                 echo json_encode($result);exit;

@@ -21,6 +21,7 @@ use app\api\library\NoticeHandle;
 use app\common\library\OrderHandle;
 use fast\Algor;
 use fast\OpenicSf;
+use app\api\controller\Weixinpay;
 /**
  * 工作相关接口
  */
@@ -81,7 +82,7 @@ class Cash extends Api
         $charge_id = $data['charge_id'];
 
         $user_info = $this->getTUserInfo($openid);
-
+       // print_r($user_info);exit;
         $order_sn = $OrderHandleObj->createOrder("cre");
         $charge_list = config('webset.chage_money');
 
@@ -92,80 +93,27 @@ class Cash extends Api
                 return false;
             }
         });
-        $charge_detail = $charge_list_filter[1];
-        exit;
+        $charge_detail = array_values($charge_list_filter)[0];
      //生成订单
         $order_insert = [
             'order_sn'=>$order_sn,
             'user_id'=>$user_info['user_id'],
-            'type'=>$type,
-            'mobile'=>$mobile,
-            'order_status'=>0,
-            'pay_status'=>0,
-            'consignee'=>$consignee,
-            'pay_type'=>$pay_type,
-            'pay_name'=>$pay_name,
-            'goods_price'=>$goods_price,
-            'package_fee'=>$package_fee,
-            'total_amount'=>$total_price,
-            'order_amount'=>$total_price,
-            'package_fee'=>$package_fee,
-            'add_time'=>$now,
-            'user_note'=>$tips,
-            'app_time'=>$app_time,
-            'way'=>$way,
-            'store_id'=>$store_id,
-            'is_comment'=>0,
-            'shipping_status'=>0,
+            'method'=>1,
+            'pay_type'=>1,
+            'status'=>0,
+            'total_num'=>$charge_detail['total_num'],
+            'pay_num'=>$charge_detail['pay_num'],
+            'bonus_num'=>$charge_detail['bonus_num'],
+
         ];
-
-        $arr_isnert_goods_order = [];
-        $result = 0;
-        Db::startTrans();
-        try{
-            $order_id = Db::name('order')->insertGetId($order_insert);
-
-            //生成订单商品列表
-            foreach($cart_info['goodList'] as $kog=>$vog){
-                $arr_isnert_goods_order[] = [
-                    'order_id'=>$order_id,
-                    'goods_id'=>$vog['goods_id'],
-                    'goods_name'=>$vog['name'],
-                    'goods_num'=>$vog['num'],
-                    'goods_price'=>$vog['price'],
-                    'key'=>$vog['spec'],
-                    'key_name'=>$vog['spec_item'],
-                    /*'spec_key'=>$vog['spec'],
-                    'spec_key_name'=>$vog['spec_item'],*/
-                    'prom_type'=>0,
-                    'is_send' => 0,
-                ];
-            }
-            Db::name('order_goods')->insertAll($arr_isnert_goods_order);
-
-            //优惠券置位已使用
-           /* if(!empty($coupon_id)){
-                $arr_coupon_update = [
-                    'status'=>1,
-                    'use_time'=>$now,
-                ];
-                Db::name('coupon_list')->where('id','=',$coupon_id)->update($arr_coupon_update);
-            }*/
-            //删除购物车
-            $result = Db::name('cart')
-                ->where('user_id','=',$user_info['user_id'])
-                ->where('store_id','=',$store_id)
-                ->delete();
-
-            // 提交事务
-            Db::commit();
-        } catch (\Exception $e) {
-            // 回滚事务
-            Db::rollback();
-            $this->error('系统繁忙,请稍候再试');
-        }
-       // $this->wlog($result);
-        if($result>0){
+        $order_id = Db::name('cash_order')->insertGetId($order_insert);
+        if($order_id>0){
+            $WeixinpayObj = new Weixinpay();
+            $order_info = [
+                'order_sn'=>$order_insert['order_sn'],
+                'order_amount'=>$order_insert['pay_num'],
+            ];
+            $para = $WeixinpayObj->wxTrainPay($user_info,$order_info);
             $data = [
                 'order_id'=>$order_id,
             ];

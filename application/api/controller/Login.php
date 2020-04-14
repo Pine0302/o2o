@@ -125,7 +125,7 @@ class Login extends Api
         //先验证该手机号是否已被使用(除了自己)
         $checkMobile= $this->userRepository->validMobile($openid,$mobile);
         if(!empty($checkMobile)){
-            $this->error('该手机已注册');
+          //  $this->error('该手机已注册');
         }
         if(!empty($user_info['weixin_mobile'])&&($user_info['weixin_mobile']==$mobile)){
             $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
