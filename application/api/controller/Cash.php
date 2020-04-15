@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use app\common\entity\CashOrderE;
 use app\common\entity\OrderE;
 use app\common\library\wx\WXBizDataCrypt;
 use app\common\repository\OrderRepository;
@@ -98,15 +99,16 @@ class Cash extends Api
         $order_insert = [
             'order_sn'=>$order_sn,
             'user_id'=>$user_info['user_id'],
-            'method'=>1,
-            'pay_type'=>1,
-            'status'=>0,
+            'method'=>CashOrderE::METHOD['mini_charge'],
+            'pay_type'=>CashOrderE::PAY_TYPE['wechat'],
+            'status'=>CashOrderE::STATUS['unpaid'],
             'total_num'=>$charge_detail['total_num'],
             'pay_num'=>$charge_detail['pay_num'],
             'bonus_num'=>$charge_detail['bonus_num'],
-
+            'create_time'=>$now,
+            'update_time'=>$now,
         ];
-        $order_id = Db::name('cash_order')->insertGetId($order_insert);
+        $order_id = $this->orderRepository->addCashOrder($order_insert);
         if($order_id>0){
             $WeixinpayObj = new Weixinpay();
             $order_info = [

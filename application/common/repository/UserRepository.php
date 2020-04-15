@@ -67,9 +67,10 @@ class UserRepository
     }
 
     /**
-     * 给用户扣钱
+     * * 给用户扣钱
      * @param $amount
      * @param $user_id
+     * @throws \think\Exception
      */
     public function deductMoney($amount,$user_id){
         $userDb = Db::name(User::SHORT_TABLE_NAME);
@@ -78,15 +79,27 @@ class UserRepository
     }
 
 
+
     /**
-     * 给商家发钱
+     * * 给商家发钱
      * @param $order_info
+     * @param $store_sub_info
+     * @return int|string
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
      */
     public function raiseMerchMoney($order_info,$store_sub_info){
         $per = $store_sub_info['withdraw_percent']/100;
         $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
         $map = ['store_id'=>$order_info['store_id']];
         return $sellerSubDb->where($map)->inc('frozen_money',$per*$order_info['order_amount'])->inc('total_money',$order_info['order_amount'])->update();
+    }
+
+
+    public function raiseUserMoney($order_info,$user_info){
+        $amount = $order_info['total_num'];
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        return $userDb->where('user_id','=',$user_info['user_id'])->setInc('user_money',$amount);
     }
 
 

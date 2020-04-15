@@ -13,6 +13,7 @@
  */
 namespace app\common\repository;
 
+use app\common\entity\CashOrderE;
 use app\common\entity\GoodsE;
 use app\common\entity\MemberCashLogE;
 use app\common\entity\MerchCashLogE;
@@ -37,6 +38,7 @@ class OrderRepository
     }
 
     /**
+     * 支付商城订单
      * @param $order_info
      * @param $pay_type
      * @return int|string
@@ -53,6 +55,19 @@ class OrderRepository
         return Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
     }
 
+
+    public function setCashOrderPaid($order_info,$pay_type,$transaction_id=''){
+        $now = time();
+        $arr_order_update = [
+            'order_status'=>CashOrderE::ORDER_STATUS['PAID'],
+            'status'=>CashOrderE::STATUS['paid'],
+            'transaction_id'=>$transaction_id,
+            'pay_time'=>$now,
+            'pay_type'=>$pay_type,
+        ];
+        return Db::name(CashOrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
+    }
+
     /**
      * 增加用户支付记录
      * @param $order_info
@@ -66,6 +81,26 @@ class OrderRepository
             'way'=>MemberCashLogE::WAY['out'],
             'tip'=>MemberCashLogE::TIP['member_consume'],
             'cash'=>$order_info['order_amount'],
+            'order_no'=>$order_info['order_sn'],
+            'status'=>MemberCashLogE::STATUS['done'],
+            'update_time'=>time(),
+        ];
+        return Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
+    }
+
+    /**
+     * 增加用户充值记录
+     * @param $order_info
+     * @param $user_info
+     * @return int|string
+     */
+    public function addMemberChargeCashLog($order_info,$user_info){
+        $arr = [
+            'user_id'=>$user_info['user_id'],
+            'type'=>MemberCashLogE::TYPE['member_charge'],
+            'way'=>MemberCashLogE::WAY['in'],
+            'tip'=>MemberCashLogE::TIP['member_charge'],
+            'cash'=>$order_info['total_num'],
             'order_no'=>$order_info['order_sn'],
             'status'=>MemberCashLogE::STATUS['done'],
             'update_time'=>time(),
@@ -116,6 +151,18 @@ class OrderRepository
                 break;
         }
         Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
+    }
+
+    public function addCashOrder($data){
+        return  Db::name('cash_order')->insertGetId($data);
+    }
+
+    public function getCashOrderBySn($order_sn){
+        $orderDb = Db::name(CashOrderE::SHORT_TABLE_NAME);
+        $orderDb->where('order_sn','=',$order_sn);
+        $result = $orderDb->find();
+        $orderDb->removeOption();
+        return $result;
     }
 
 }

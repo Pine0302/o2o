@@ -2,6 +2,7 @@
 namespace app\pay\controller;
 
 
+use app\common\entity\CashOrderE;
 use app\common\entity\OrderE;
 use think\Request;
 use weixinpay\Weixinpay as WeixinpayClass;
@@ -241,6 +242,9 @@ EOT;
                 case 'O2O':
                     $this->afterPayO2O($order_id,$arr);
                     break;
+                case 'CRE':
+                    $this->afterPayCRE($order_id,$arr);
+                    break;
                 default:
                     $this->afterpaytea($order_id,$arr);
                     break;
@@ -283,6 +287,36 @@ EOT;
 
         //todo 给用户发消息
         //todo 给商家发消息
+        if(!empty($result)){
+            WeixinpayClass::notify();
+        }
+
+    }
+
+    public function afterpayCRE($order_id,$arr){
+
+        $order_info = $this->orderRepository->getOrderBySn($order_id);
+        $user_info = $this->userRepository->getUserById($order_info['user_id']);
+        if($order_info['status']==CashOrderE::STATUS['unpaid']){
+            Db::startTrans();
+            try{
+                //给用户增加余额
+                $this->userRepository->raiseUserMoney($order_info,$user_info);
+                //给用户增加余额充值记录
+                $this->orderRepository->addMemberChargeCashLog($order_info,$user_info);
+                //修改订单状态
+                $result = $this->orderRepository->setCashOrderPaid($order_info,CashOrderE::PAY_TYPE['wechat'],$arr['transaction_id']);
+            }catch (\Exception $e) {
+                // 回滚事务
+                Db::rollback();
+                $this->error('系统繁忙,请稍候再试');
+            }
+        }else{
+            $result = 1;
+        }
+
+        //todo 给用户发消息
+
         if(!empty($result)){
             WeixinpayClass::notify();
         }
