@@ -46,7 +46,7 @@ class OrderRepository
     public function setOrderPaid($order_info,$pay_type,$transaction_id=''){
         $now = time();
         $arr_order_update = [
-            'order_status'=>OrderE::ORDER_STATUS['PAID'],
+            'order_status'=>OrderE::ORDER_STATUS['TAKE'],
             'pay_status'=>OrderE::PAY_STATUS['YES'],
             'transaction_id'=>$transaction_id,
             'pay_time'=>$now,

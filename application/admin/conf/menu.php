@@ -165,10 +165,10 @@ return	array(
 			array('name'=>'签到记录','act'=>'signList','op'=>'User'),
 			array('name'=>'签到规则','act'=>'signRule','op'=>'User'),
 		)),*/
-        array('name' => '优惠券管理', 'child' => array(
+        /*array('name' => '优惠券管理', 'child' => array(
             array('name' => '优惠券管理','act'=>'index', 'op'=>'Coupon'),
-          /*  array('name' => '代金券订单管理','act'=>'order', 'op'=>'Coupon'),*/
-        )),
+            array('name' => '代金券订单管理','act'=>'order', 'op'=>'Coupon'),
+        )),*/
 	)),
 
 /*	'store'=>array('name'=>'门店','child'=>array(

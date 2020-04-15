@@ -32,9 +32,10 @@
             <th align="center" abbr="mobile" axis="col6" class="" style="width: 15%">
                 <div  class="">手机号码</div>
             </th>
-            <!--   <th align="center" abbr="user_money" axis="col6" class="">
-                   <div style="text-align: center; width: 60px;" class="">余额</div>
+              <th align="center" abbr="user_money" axis="col6" class="" style="width: 15%" >
+                   <div  class="">余额</div>
                </th>
+            <!--
                <th align="center" abbr="pay_points" axis="col6" class="">
                    <div style="text-align: center; width: 60px;" class="">积分</div>
                </th>-->
@@ -86,9 +87,10 @@
 
                     </div>
                 </td>
-               <!-- <td align="left" class="">
-                    <div style="text-align: center; width: 60px;">{$list.user_money}</div>
+               <td align="left" class="">
+                    <div >{$list.user_money}</div>
                 </td>
+                <!--
                 <td align="left" class="">
                     <div style="text-align: center; width: 60px;">{$list.pay_points}</div>
                 </td>-->
@@ -99,8 +101,8 @@
                 <td align="center" class="handle" style="width: 25%">
                     <div >
                 <!--        <a class="btn blue" href="{:U('Admin/user/detail',array('id'=>$list['user_id']))}"><i class="fa fa-pencil-square-o"></i>详情</a>-->
-                        <!--<a class="btn blue" href="{:U('Admin/user/account_log',array('id'=>$list['user_id']))}"><i class="fa fa-search"></i>资金</a>-->
-                        <a class="btn blue" href="{:U('Admin/user/address',array('id'=>$list['user_id']))}"><i class="fa fa-steam"></i>收货地址</a>
+                        <a class="btn blue" href="{:U('Admin/user/account_log',array('id'=>$list['user_id']))}"><i class="fa fa-search"></i>用户充值</a>
+                        <!--<a class="btn blue" href="{:U('Admin/user/address',array('id'=>$list['user_id']))}"><i class="fa fa-steam"></i>收货地址</a>-->
                     </div>
                 </td>
 

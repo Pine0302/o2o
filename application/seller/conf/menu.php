@@ -10,9 +10,9 @@ return	array(
         array('name' => '系统','child' => array(
             /*array('name'=>'商城设置','act'=>'index','op'=>'System'),*/
             array('name'=>'系统参数','act'=>'index','op'=>'Arg'),
-            array('name'=>'首页展示图','act'=>'adList','op'=>'Ad'),
+          /*  array('name'=>'首页展示图','act'=>'adList','op'=>'Ad'),
             array('name'=>'下单页展示图','act'=>'adList','op'=>'Ado'),
-            array('name'=>'小程序过渡页展示图','act'=>'adList','op'=>'Adenter'),
+            array('name'=>'小程序过渡页展示图','act'=>'adList','op'=>'Adenter'),*/
             //array('name'=>'支付方式','act'=>'index1','op'=>'System'),
             /*		array('name'=>'地区&配送','act'=>'region','op'=>'Tools'),
                     array('name'=>'短信模板','act'=>'index','op'=>'SmsTemplate'),*/
@@ -69,9 +69,9 @@ return	array(
 	'shop'=>array('name'=>'商城','child'=>array(
 				array('name' => '商品','child' => array(
 				    array('name' => '商品列表', 'act'=>'goodsList', 'op'=>'Goods'),
-                    array('name' => '商品分类', 'act'=>'categoryList', 'op'=>'Goods'),
+                   /* array('name' => '商品分类', 'act'=>'categoryList', 'op'=>'Goods'),
                     array('name' => '商品模型', 'act'=>'type_list', 'op'=>'Goods'),
-                    array('name' => '评论列表', 'act'=>'index', 'op'=>'Comment'),
+                    array('name' => '评论列表', 'act'=>'index', 'op'=>'Comment'),*/
 				 /*   array('name' => '淘宝导入', 'act'=>'index', 'op'=>'Import'),
 
 					array('name' => '库存管理', 'act'=>'stockList', 'op'=>'Goods'),
@@ -82,9 +82,9 @@ return	array(
 			)),
 			array('name' => '订单','child'=>array(
 					array('name' => '订单列表', 'act'=>'index', 'op'=>'Order'),
-					array('name' => '自取订单列表', 'act'=>'index', 'op'=>'Ordero'),
+					/*array('name' => '自取订单列表', 'act'=>'index', 'op'=>'Ordero'),
 					array('name' => '配送订单列表', 'act'=>'index', 'op'=>'Orders'),
-                    array('name' => '评论列表', 'act'=>'index', 'op'=>'Comment'),
+                    array('name' => '评论列表', 'act'=>'index', 'op'=>'Comment'),*/
 
 				/*	array('name' => '虚拟订单', 'act'=>'virtual_list', 'op'=>'Order'),
 					array('name' => '发货单', 'act'=>'delivery_list', 'op'=>'Order'),

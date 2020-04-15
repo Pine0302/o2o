@@ -34,25 +34,25 @@
                 <table cellspacing="0" cellpadding="0">
                     <thead>
                     <tr>
-                        <th class="sign" axis="col0">
-                            <div style="width: 24px;"><i class="ico-check"></i></div>
+                        <th class="sign" axis="col0" style="width: 10%">
+                            <div ><i class="ico-check"></i></div>
                         </th>
-                        <th align="left" axis="col3" class="">
-                            <div style="text-align: center; width: 120px;" class="">变动时间</div>
+                        <th align="left" axis="col3" class="" style="width: 20%" >
+                            <div class="">变动时间</div>
                         </th>
-                        <th align="left" axis="col4" class="">
-                            <div style="text-align: center; width: 100px;" class="">描述</div>
+                        <th align="left" axis="col4" class="" style="width: 20%" >
+                            <div  class="">描述</div>
                         </th>
-                        <th align="center" axis="col5" class="">
-                            <div style="text-align: center; width: 100px;" class="">用户资金</div>
+                        <th align="center" axis="col5" class="" style="width: 20%" >
+                            <div class="">用户资金</div>
                         </th>
-                        <th align="center" axis="col6" class="" hidden>
-                            <div style="text-align: center; width: 100px;" class="">冻结资金</div>
+                        <th align="center" axis="col6" class="" hidden style="width: 20%" >
+                            <div  class="">冻结资金</div>
                         </th>
-                        <th align="center" axis="col6" class="">
-                            <div style="text-align: center; width: 100px;" class="">用户积分</div>
+                        <th align="center" axis="col6" class="" style="width: 20%" hidden >
+                            <div  class="">用户积分</div>
                         </th>
-                        <th style="width:100%" axis="col7">
+                        <th style="width:5%" axis="col7">
                             <div></div>
                         </th>
                     </tr>
@@ -85,34 +85,34 @@
                     <tbody>
                     <volist name="lists" id="list">
                         <tr>
-                            <td class="sign">
-                                <div style="width: 24px;"><i class="ico-check"></i></div>
+                            <td class="sign" style="width: 5%">
+                                <div ><i class="ico-check"></i></div>
                             </td>
-                            <td align="left" class="">
-                                <div style="text-align: center; width: 120px;">{$list.change_time|date="Y-m-d H:i",###}</div>
+                            <td align="left" class=""  style="width: 20%">
+                                <div style="text-align: center">{$list.change_time|date="Y-m-d H:i",###}</div>
                             </td>
-                            <td align="left" class="">
-                                <div style="text-align: center; width: 100px;">{$list.desc}</div>
+                            <td align="left" class=""  style="width: 20%" >
+                                <div style="text-align: center;">{$list.desc}</div>
                             </td>
-                            <td align="center" class="">
-                                <div style="text-align: center; width: 100px;">
+                            <td align="center" class=""  style="width: 20%">
+                                <div style="text-align: center; ">
                                     <if condition="$list[user_money] gt 0">+</if>
                                     {$list.user_money}
                                 </div>
                             </td>
-                            <td align="center" class="" hidden>
-                                <div style="text-align: center; width: 100px;">
+                            <td align="center" class="" hidden  style="width: 20%">
+                                <div style="text-align: center;">
                                     <if condition="$list[frozen_money] gt 0">+</if>
                                     {$list.frozen_money}
                                 </div>
                             </td>
-                            <td align="center" class="">
-                                <div style="text-align: center; width: 100px;">
+                            <td align="center" class=""  style="width: 20%" hidden>
+                                <div style="text-align: center;">
                                     <if condition="$list[pay_points] gt 0">+</if>
                                     {$list.pay_points}
                                 </div>
                             </td>
-                            <td align="" class="" style="width: 100%;">
+                            <td align="" class="" style="width: 5%">
                                 <div>&nbsp;</div>
                             </td>
                         </tr>
