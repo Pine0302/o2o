@@ -277,6 +277,7 @@ class Storesub extends Base{
             $user_name = I('user_name');
             $store_phone = I('store_phone');
 			$seller_name = I('seller_name');
+            $withdraw_percent = I('withdraw_percent');
 			$image = I('image');
             $notice = I('notice');
             $type_name = I('type_name');
@@ -332,6 +333,7 @@ class Storesub extends Base{
             $store = array(
 				'store_name'=>$store_name,
 				'user_name'=>$user_name,
+				'withdraw_percent'=>$withdraw_percent,
 				'seller_name'=>$seller_name,
 				'notice'=>$notice,
 				'type_name'=>$type_name,
@@ -564,7 +566,7 @@ class Storesub extends Base{
 		$store_id = I('store_id');
 
 		if($store_id>0){
-			$store = M('store_sub')->where("store_id=$store_id")->find();
+			$store = M('store_sub')->where("store_id=$  store_id")->find();
 			$store['store_lnglat'] = $store['store_lng'].','.$store['store_lat'];
 
             $store['company_province_name'] = M('region')->field('name')->where(array('parent_id'=>0,'level'=>1,'id'=>$store['province_id']))->find();

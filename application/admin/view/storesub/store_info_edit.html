@@ -558,7 +558,16 @@
 				</dd>
 			</dl>
 
-
+			<dl class="row">
+				<dt class="tit">
+					<label for="store_phone"><em>*</em>商家提现折扣%</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="store[withdraw_percent]" id="withdraw_percent" value="{$store.withdraw_percent}" class="input-txt">
+					<span class="err"></span>
+					<p class="notic">正整数</p>
+				</dd>
+			</dl>
 			<dl class="row">
 				<dt class="tit">
 					<label for="store_name"><em>*</em>工作时间</label>
@@ -571,7 +580,7 @@
 				</dd>
 			</dl>
 
-			<dl class="row">
+			<dl class="row" style="display: none">
 				<dt class="tit">
 					<label for="store_name"><em>*</em>工作时间2</label>
 				</dt>
