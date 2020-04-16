@@ -3,6 +3,8 @@ namespace app\pay\controller;
 
 
 use app\common\entity\CashOrderE;
+use app\common\entity\MemberCashLogE;
+use app\common\entity\MerchCashLogE;
 use app\common\entity\OrderE;
 use think\Request;
 use weixinpay\Weixinpay as WeixinpayClass;
@@ -266,7 +268,7 @@ EOT;
                 $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['WEIXIN'],$arr['transaction_id']);
 
                 //增加用户支付记录
-                $this->orderRepository->addMemberCashLog($order_info,$user_info);
+                $this->orderRepository->addMemberCashLog($order_info,$user_info,MemberCashLogE::METHOD['wechat']);
                 //扣减商品库存
 
                 $this->orderRepository->deductOrderGoodsStock($order_info);

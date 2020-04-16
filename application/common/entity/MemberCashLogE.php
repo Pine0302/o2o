@@ -26,6 +26,10 @@ class MemberCashLogE
         'member_consume' => '个人消费',          //个人消费
         'company_charge_member' => '公司给个人充值',   //公司给个人充值
     ];
+    const METHOD = [
+        'wechat' => 1,      //微信支付
+        'cash' => 2,     //余额变动
+    ];
 
 }
 

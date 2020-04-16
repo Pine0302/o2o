@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use app\common\entity\MemberCashLogE;
 use app\common\entity\OrderE;
 use app\common\library\wx\WXBizDataCrypt;
 use app\common\repository\OrderRepository;
@@ -419,7 +420,7 @@ class Order extends Api
             $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY'],'');
 
             //增加用户支付记录
-            $this->orderRepository->addMemberCashLog($order_info,$user_info);
+            $this->orderRepository->addMemberCashLog($order_info,$user_info,MemberCashLogE::METHOD['cash']);
             //扣减商品库存
 
             $this->orderRepository->deductOrderGoodsStock($order_info);
@@ -577,6 +578,7 @@ class Order extends Api
         $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
 
         $arr_response['store_info'] = [
+            'store_id'=>$store_arr['store_id'],
             'store_name'=>$store_arr['store_name'],
             'pic'=>$pic,
             'store_phone'=>$store_arr['store_phone'],

@@ -4,6 +4,7 @@ namespace app\api\controller;
 
 use app\common\controller\Api;
 use app\common\entity\CashOrderE;
+use app\common\entity\MemberCashLogE;
 use app\common\entity\OrderE;
 use app\common\library\wx\WXBizDataCrypt;
 use app\common\repository\OrderRepository;
@@ -121,6 +122,37 @@ class Cash extends Api
             ];
             $this->success('success',$data);
         }
+    }
+
+    //账户记录
+    public function cashList(){
+        $data = $this->request->post();
+        $now = time();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
+        $member_cash_log = $this->orderRepository->getMemberCashLog($user_info['user_id']);
+        $response_info = [];
+        $user_data = [
+            'user_money'=>$user_info['user_money'],
+        ];
+        $cash_log = [];
+        if(!empty($member_cash_log)){
+            $cash_log = array_map(function($log){
+                $fuhao = ($log['way']==MemberCashLogE::WAY['in']) ? '+':"-";
+                $cash_log = [
+                    'tip'=>$log['tip'],
+                    'cash' => $fuhao.$log['cash'],
+                    'time' => date("Y-m-d H:i",$log['update_time'])
+                ];
+                return $cash_log;
+            },$member_cash_log);
+        }
+        $arr_response = [
+            'user_data'=>$user_data,
+            'cash_log'=>$cash_log,
+        ];
+        $this->success('success',$arr_response);
+
     }
 
 
