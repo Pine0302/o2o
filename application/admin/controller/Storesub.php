@@ -281,6 +281,7 @@ class Storesub extends Base{
 			$image = I('image');
             $notice = I('notice');
             $type_name = I('type_name');
+            $image2 = I('image2');
             $store_description = I('store_description');
             $meituan_grade = I('meituan_grade');
             $month_sale = I('month_sale');
@@ -332,6 +333,7 @@ class Storesub extends Base{
 
             $store = array(
 				'store_name'=>$store_name,
+				'image2'=>$image2,
 				'user_name'=>$user_name,
 				'withdraw_percent'=>$withdraw_percent,
 				'seller_name'=>$seller_name,
@@ -488,9 +490,12 @@ class Storesub extends Base{
 	//编辑外驻店铺
 	//编辑区县代理合伙人
 	public function store_info_edit(){
+
 		if(IS_POST){
 
 			$map =$_REQUEST;
+
+
 			$store = $map['store'];
 
 			unset($map['store']);
@@ -504,6 +509,7 @@ class Storesub extends Base{
             $store['sfid'] = $map['sfid'];
 
             $store['notice'] = $map['notice'];
+            $store['image2'] = $map['image2'];
             $store['store_description'] = $map['store_description'];
             $store['type_name'] = $map['type_name'];
             $store['meituan_grade'] = $map['meituan_grade'];
@@ -566,11 +572,12 @@ class Storesub extends Base{
 		$store_id = I('store_id');
 
 		if($store_id>0){
-			$store = M('store_sub')->where("store_id=$  store_id")->find();
+			$store = M('store_sub')->where("store_id=$store_id")->find();
 			$store['store_lnglat'] = $store['store_lng'].','.$store['store_lat'];
 
             $store['company_province_name'] = M('region')->field('name')->where(array('parent_id'=>0,'level'=>1,'id'=>$store['province_id']))->find();
             $store['company_city_name'] = M('region')->field('name')->where(array('parent_id'=>$store['province_id'],'level'=>2,'id'=>$store['city_id']))->find();
+
    /*         $store['company_district_name'] = M('region')->field('name')->where(array('parent_id'=>$store['city_id'],'level'=>3,'id'=>$store['district']))->find();*/
 			$this->assign('store',$store);
 
@@ -578,6 +585,7 @@ class Storesub extends Base{
 			$this->assign('apply',$apply);*/
 
             $storsub = M('store_sub')->field('store_id,store_name,store_phone,user_name,city_id,store_time,store_time2,store_end_time2')->where(['store_id'=>$store_id])->find();
+
             if(!empty($storsub['store_time'])){
                 $storsub['store_time'] = date("H:i:s",$storsub['store_time']);
             }

@@ -33,7 +33,11 @@ class StoreRepository
     }
 
 
-
+    public function changeStoreState($store_id,$state){
+        $storeSubDb = Db::name(StoreSub::SHORT_TABLE_NAME);
+        $result = $storeSubDb->where('store_id','=',$store_id)->update(['store_state'=>$state]);
+        return $result;
+    }
 
 
 

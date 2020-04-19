@@ -24,6 +24,7 @@ use think\Db;
 class Index extends Base {
 
     public function index(){
+
         $this->pushVersion();        
         $admin_info = getAdminInfo(session('admin_id'));
         $order_amount = M('order')->where("order_status=0 and (pay_status=1 or pay_code='cod')")->count();
@@ -31,6 +32,7 @@ class Index extends Base {
         $this->assign('admin_info',$admin_info);             
         $this->assign('menu',getMenuArr());   //view2
         return $this->fetch();
+
     }
    
     public function welcome(){

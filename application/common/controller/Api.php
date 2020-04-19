@@ -405,7 +405,7 @@ class Api
         $openid = $sess_info['openid'];
         $user_info = Db::name('users')
             ->where('openid',$openid)
-            ->field('user_id,openid,mobile,mobile_validated,weixin_mobile,coupon_status,sex')
+            ->field('user_id,openid,mobile,mobile_validated,weixin_mobile,coupon_status,sex,type,merch_login,store_id')
             ->find();
         return $user_info;
     }

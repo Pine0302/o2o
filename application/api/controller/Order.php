@@ -645,7 +645,7 @@ class Order extends Api
     }
 
 
-    // 订单详情(已支付)
+    // 改变订单状态
     public function changeOrderStatus(){
         $data = $this->request->post();
         $now = time();

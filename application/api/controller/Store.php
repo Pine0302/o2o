@@ -232,6 +232,10 @@ class Store extends Api
             ->find();
         $areaIncludeObj = new AreaInclude();
         $distance = $areaIncludeObj->distance($user_point['lat'],$user_point['lng'],$store_info['store_lat_tx'],$store_info['store_lng_tx']);
+        $image_zhizhao = explode(",",$store_info['image2']);
+        $image_zhizhao =array_map(function($image){
+            return "https://".$_SERVER['HTTP_HOST'].$image;
+        },$image_zhizhao);
         $arr = [
             'store_id'=>$store_info['store_id'],
             'name'=>$store_info['store_name'],
@@ -240,6 +244,7 @@ class Store extends Api
             'meituan_grade'=>$store_info['meituan_grade'],
             'month_sale'=>$store_info['month_sale'],
             'meituan_grade'=>$store_info['meituan_grade'],
+            'image_zhizhao'=>$image_zhizhao,
             'type_name'=>$store_info['type_name'],
             'store_state'=>$this->getStoreState($store_info),
             'mobile'=>$store_info['store_phone'],

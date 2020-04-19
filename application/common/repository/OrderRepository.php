@@ -13,6 +13,7 @@
  */
 namespace app\common\repository;
 
+use app\api\controller\Merch;
 use app\common\entity\CashOrderE;
 use app\common\entity\GoodsE;
 use app\common\entity\MemberCashLogE;
@@ -149,6 +150,15 @@ class OrderRepository
             case OrderE::ORDER_STATUS['DONE_BACK']:
                 $arr_order_update['cancel_time'] = time();
                 break;
+            case OrderE::ORDER_STATUS['TAKE']:
+                $arr_order_update['cook_time'] = time();
+                break;
+            case OrderE::ORDER_STATUS['UNDONE_BACK']:
+                $arr_order_update['finish_time'] = time();
+                break;
+            case OrderE::ORDER_STATUS['DONE']:
+                $arr_order_update['finish_time'] = time();
+                break;
         }
         Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
     }
@@ -173,5 +183,49 @@ class OrderRepository
             ->select();
         return $result;
     }
+
+    public function getTotalPaidMoneyByTime($store_id,$start_time,$end_time){
+        $orderDb = Db::name(OrderE::SHORT_TABLE_NAME);
+        $result = $orderDb
+            ->where('store_id','=',$store_id)
+            ->where('pay_time',['>',$start_time],['<',$end_time],'and')
+            ->sum('order_amount');
+        return $result;
+
+    }
+
+    public function getTotalOrderByTime($store_id,$start_time,$end_time){
+        return Db::name(OrderE::SHORT_TABLE_NAME)
+            ->where('store_id','=',$store_id)
+            ->where('pay_time',['>',$start_time],['<',$end_time],'and')
+            ->count('*');
+    }
+
+    public function getMerchCashLogByTime($store_id,$start_time,$end_time){
+        $merchCashLogDb = Db::name(MerchCashLogE::SHORT_TABLE_NAME);
+        $result = $merchCashLogDb->where('store_id','=',$store_id)
+            ->where('update_time',['>',$start_time],['<',$end_time],'and')
+            ->select();
+        return $result;
+    }
+
+    public function getMerchOrderListFilter($store_id,$start_time,$end_time,$status,$search_data){
+        $orderDb = Db::name(OrderE::SHORT_TABLE_NAME);
+        $orderDb->where('store_id','=',$store_id);
+        $orderDb->where('pay_time',['>',$start_time],['<',$end_time],'and');
+        if($status!="-1"){
+            $orderDb->where('order_status','=',$status);
+        }
+        if(!empty($search_data)){
+            $orderDb->where(function($query) use ($search_data){
+                $query->where('mobile','=',$search_data)->whereOr('order_sn','=',$search_data)->whereOr('consignee','=',$search_data);
+            });
+        }
+        $result = $orderDb->select();
+        //print_r($orderDb->getLastSql());exit;
+        return $result;
+    }
+
+
 
 }
