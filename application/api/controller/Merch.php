@@ -157,8 +157,8 @@ class Merch extends Api
         $store_id = $user_info['store_id'];
         $now = time();
 
-        $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : '';
-        $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : '';
+        $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : 0;
+        $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : $now;
         $is_today = isset($data['is_today']) ? $data['$is_today'] : 0;
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
@@ -197,10 +197,11 @@ class Merch extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getGUserInfo($openid);
         $store_id = $user_info['store_id'];
+
         $now = time();
 
-        $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : '';
-        $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : '';
+        $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : 0;
+        $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : $now;
         $is_today = isset($data['is_today']) ? $data['$is_today'] : 0;
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
@@ -366,7 +367,82 @@ class Merch extends Api
 
     }
 
+    //店铺详情
+    public function storeInfo(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
+        $store_id =  $data['store_id'];
 
+        $store_info = Db::name('store_sub')
+            ->where('is_shenhe','=',1)
+            ->where('store_id','=',$store_id)
+            ->find();
+        $image_zhizhao = explode(",",$store_info['image2']);
+        $image_zhizhao =array_map(function($image){
+            return "https://".$_SERVER['HTTP_HOST'].$image;
+        },$image_zhizhao);
+        $arr = [
+            'store_id'=>$store_info['store_id'],
+            'name'=>$store_info['store_name'],
+            'notice'=>$store_info['notice'],
+            'store_description'=>$store_info['store_description'],
+            'meituan_grade'=>$store_info['meituan_grade'],
+            'month_sale'=>$store_info['month_sale'],
+            'meituan_grade'=>$store_info['meituan_grade'],
+            'image_zhizhao'=>$image_zhizhao,
+            'type_name'=>$store_info['type_name'],
+            'store_state'=>$this->getStoreState($store_info),
+            'mobile'=>$store_info['store_phone'],
+            'address'=>$store_info['store_address'],
+            'lng'=>$store_info['store_lng_tx'],
+            'lat'=>$store_info['store_lat_tx'],
+            'store_time'=>$store_info['store_time'],
+            'store_end_time'=>$store_info['store_end_time'],
+            'store_status'=>$store_info['store_state'],
+        ];
+        $data = [
+            'data'=>$arr,
+        ];
+        $this->success('success', $data);
+    }
+
+    //获取状态
+    public function getStoreState($store_info){
+        $now = time();
+        $store_begin_time = strtotime($store_info['store_time']);
+        $store_end_time = strtotime($store_info['store_end_time']);
+        if(($now>$store_begin_time)&&($now<$store_end_time)&&($store_info['state']==1)){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
+    //商家提现
+    public function withdraw(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
+        $store_id =  $data['store_id'];
+        $cash = $data['cash'];
+        $merch_info = $this->userRepository->getMerchMoneyByUser($user_info);
+
+        if(empty($store_id)){
+            $this->error('系统繁忙，请稍后再试1');
+        }
+        if($user_info['store_id']!=$store_id){
+            $this->error('系统繁忙，请稍后再试2');
+        }
+        if($cash>$merch_info['merch_money']){
+            $this->error('可提现金额不足');
+        }
+        //给商家减钱
+        $this->userRepository->withMerchMoney($user_info,$cash);
+        //给商家增加提现记录
+        $this->userRepository->addMerchWithdrawLog($user_info,$cash);
+        $this->success("申请成功");
+    }
 
 
 

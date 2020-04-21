@@ -20,7 +20,7 @@ class OrderE
         'DONE' => 5,            //完成
         'TO_BE_BACK' => 6,      //待退单
         'DONE_BACK' => 7,       //已退单
-        'UNDONE_BACK' => 7,       //拒绝退单
+        'UNDONE_BACK' => 8,       //拒绝退单
     ];
     const PAY_STATUS = [
         'NO' => 0,  //未支付

@@ -13,8 +13,10 @@
  */
 namespace app\common\repository;
 
+use app\common\entity\MerchCashLogE;
 use app\common\entity\RiderCompany;
 use app\common\entity\SellerSub;
+use app\common\library\OrderHandle;
 use think\Db;
 use think\Model;
 use app\common\entity\User;
@@ -100,6 +102,53 @@ class UserRepository
         $amount = $order_info['total_num'];
         $userDb = Db::name(User::SHORT_TABLE_NAME);
         return $userDb->where('user_id','=',$user_info['user_id'])->setInc('user_money',$amount);
+    }
+    
+    /**
+     * * 商家提现的资金变动
+     * @param $user_info
+     * @param $cash
+     * @return int|string
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function withMerchMoney($user_info,$cash){
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$user_info['store_id']];
+        return $sellerSubDb->where($map)->inc('withdrawing_money',$cash)->dec('merch_money',$cash)->dec('total_money',$cash)->update();
+    }
+
+    /**
+     * * 通过用户获取商家金额
+     * @param $user_info
+     * @return array|false|\PDOStatement|string|Model
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getMerchMoneyByUser($user_info){
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$user_info['store_id']];
+        return $sellerSubDb->where($map)->find();
+
+
+    }
+
+    public function addMerchWithdrawLog($user_info,$cash){
+        $orderHandleObj = new OrderHandle();
+        $order_no= $orderHandleObj->createOrder("wit");
+        $arr = [
+            'store_id'=>$user_info['store_id'],
+            'type'=>MerchCashLogE::TYPE['merch_withdraw'],
+            'way'=>MerchCashLogE::WAY['out'],
+            'tip'=>MerchCashLogE::TIP['merch_withdraw'],
+            'cash'=>$cash,
+            'order_no'=>$order_no,
+            'status'=>MerchCashLogE::STATUS['withdraw'],
+            'update_time'=>time(),
+        ];
+        return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
+
     }
 
 
