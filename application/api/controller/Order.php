@@ -640,7 +640,7 @@ class Order extends Api
         $data = [
             'data'=>$arr_response,
         ];
-        $this->wlog($order_info);
+        //$this->wlog($order_info);
         $this->success('success',$data);
     }
 

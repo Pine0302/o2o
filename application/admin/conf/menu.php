@@ -200,6 +200,10 @@ return	array(
         array('name' => '门店管理','child' => array(
             array('name' => '门店列表', 'act'=>'store_list', 'op'=>'Storesub'),
         )),
+        array('name' => '提现管理','child'=>array(
+            array('name'=>'提现申请','act'=>'withdrawals','op'=>'Storesub'),
+            /*array('name'=>'提现设置','act'=>'cash','op'=>'System'),*/
+        )),
     )),
 
 /*    array('name' => '门店','child'=>array(

@@ -956,4 +956,85 @@ class Storesub extends Base{
 		return $this->fetch();
 	}
 
+
+    /**
+     * 提现申请记录
+     */
+    public function withdrawals()
+    {
+        $this->get_withdrawals_list();
+        $this->assign('withdraw_status', C('WITHDRAW_STATUS'));
+        return $this->fetch();
+    }
+
+    public function get_withdrawals_list($status = '')
+    {
+        $id = I('selected/a');
+        $user_id = I('user_id/d');
+        $realname = I('realname');
+        $bank_card = I('bank_card');
+        $create_time = urldecode(I('create_time'));
+        $create_time = $create_time ? $create_time : date('Y-m-d H:i:s', strtotime('-1 year')) . ',' . date('Y-m-d H:i:s', strtotime('+1 day'));
+        $create_time3 = explode(',', $create_time);
+        $this->assign('start_time', $create_time3[0]);
+        $this->assign('end_time', $create_time3[1]);
+        $where['w.update_time'] = array(array('gt', strtotime($create_time3[0])), array('lt', strtotime($create_time3[1])));
+
+        $status = empty($status) ? I('status') : $status;
+        if ($status !== '') {
+            $where['w.status'] = $status;
+        } else {
+            $where['w.status'] = ['lt', 2];
+    }
+        if ($id) {
+            $where['w.id'] = ['in', $id];
+        }
+        $user_id && $where['u.user_id'] = $user_id;
+        $realname && $where['w.realname'] = array('like', '%' . $realname . '%');
+        $bank_card && $where['w.bank_card'] = array('like', '%' . $bank_card . '%');
+        $export = I('export');
+        if ($export == 1) {
+            $strTable = '<table width="500" border="1">';
+            $strTable .= '<tr>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">申请人</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="100">提现金额</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="*">银行名称</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="*">银行账号</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="*">开户人姓名</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="*">申请时间</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="*">提现备注</td>';
+            $strTable .= '</tr>';
+            $remittanceList = Db::name('withdrawals')->alias('w')->field('w.*,u.nickname')->join('__USERS__ u', 'u.user_id = w.user_id', 'INNER')->where($where)->order("w.id desc")->select();
+            if (is_array($remittanceList)) {
+                foreach ($remittanceList as $k => $val) {
+                    $strTable .= '<tr>';
+                    $strTable .= '<td style="text-align:center;font-size:12px;">' . $val['nickname'] . '</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">' . $val['money'] . ' </td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">' . $val['bank_name'] . '</td>';
+                    $strTable .= '<td style="vnd.ms-excel.numberformat:@">' . $val['bank_card'] . '</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">' . $val['realname'] . '</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">' . date('Y-m-d H:i:s', $val['create_time']) . '</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">' . $val['remark'] . '</td>';
+                    $strTable .= '</tr>';
+                }
+            }
+            $strTable .= '</table>';
+            unset($remittanceList);
+            downloadExcel($strTable, 'remittance');
+            exit();
+        }
+        $where['w.status'] = ['gt', 1];
+        //print_r($where);exit;
+        $count = Db::name('merch_cash_log')->alias('w')->join('__USERS__ u', 'u.store_id = w.store_id', 'INNER')->where($where)->count();
+        $Page = new Page($count, 20);
+        $list = Db::name('merch_cash_log')->alias('w')->field('w.*,u.*')->join('__SELLER_SUB__ u', 'u.store_id = w.store_id', 'INNER')->where($where)->order("w.id desc")->limit($Page->firstRow . ',' . $Page->listRows)->select();
+        //print_r($list);exit;
+        //$this->assign('create_time',$create_time2);
+        $show = $Page->show();
+        $this->assign('show', $show);
+        $this->assign('list', $list);
+        $this->assign('pager', $Page);
+        C('TOKEN_ON', false);
+    }
+
 }

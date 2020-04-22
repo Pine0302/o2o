@@ -148,7 +148,18 @@ class UserRepository
             'update_time'=>time(),
         ];
         return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
+    }
 
+
+    /**
+     * 获取商家信息
+     * @param $store_id
+     * @return array
+     */
+    public function getSellerinfo($store_id){
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$store_id];
+        return $sellerSubDb->where($map)->find();
     }
 
 

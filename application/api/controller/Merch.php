@@ -17,6 +17,7 @@ use think\Db;
 use think\Request;
 use think\Session;
 use think\Cache;
+use app\common\util\OssUtils;
 /**
  * 工作相关接口
  */
@@ -181,11 +182,11 @@ class Merch extends Api
         $user_info = $this->getGUserInfo($openid);
         $store_id = $user_info['store_id'];
         $now = time();
-
+        $seller_info = $this->userRepository->getSellerinfo($store_id);
         $data = [
-            'total_money'=>600,
-            'available_money'=>200,
-            'frozen_money'=>400,
+            'total_money'=>$seller_info['total_money'],
+            'available_money'=>$seller_info['merch_money'],
+            'frozen_money'=>$seller_info['frozen_money'],
         ];
         $this->success('success',$data);
     }
@@ -444,6 +445,95 @@ class Merch extends Api
         $this->success("申请成功");
     }
 
+    /**
+     * sh商家扫码
+     */
+    public function scanOrder(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getTUserInfo($openid);
+        $order_sn =  $data['order_sn'];
+
+
+        $order_detail = Db::name('order')
+            ->where('order_sn','=',$order_sn)
+            ->find();
+        if($order_detail['pay_status']!=1){
+            $this->success('该订单尚未支付');
+        }
+        $arr_response = [];
+        $OssUtilsObj = new OssUtils();
+
+        $store_arr = Db::name('store_sub')->where('store_id','=',$order_detail['store_id'])->find();
+        $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
+
+        $arr_response['store_info'] = [
+            'store_id'=>$store_arr['store_id'],
+            'store_name'=>$store_arr['store_name'],
+            'pic'=>$pic,
+            'store_phone'=>$store_arr['store_phone'],
+            'lng'=>$store_arr['store_lng_tx'],
+            'lat'=>$store_arr['store_lat_tx'],
+            'store_address'=>$store_arr['store_address'],
+        ];
+        $goods_arr = Db::name("order_goods")->where('order_id','=',$order_detail['order_id'])->select();
+        $goods_info = [];
+        $total_goods_num= 0;
+        foreach($goods_arr as $kg=>$vg){
+            $total_goods_num += $vg['goods_num'];
+            $goods_spec = Db::name('goods')->where('goods_id','=',$vg['goods_id'])->field('original_img')->find();
+            $item_price = $vg['goods_price'] * $vg['goods_num'];
+            $goods_info[] = [
+                'goods_name'=>$vg['goods_name'],
+                'key_name'=>$vg['key_name'],
+                'goods_num'=>$vg['goods_num'],
+                'item_price'=>$item_price,
+                'goods_image'=>"https://".$_SERVER['HTTP_HOST'].$goods_spec['original_img'],
+            ];
+        }
+
+        $arr_response['goods_info'] = $goods_info;
+        $now_date = date("Y-m-d");
+        if(!$order_detail['app_time']){
+            $app_time = "立刻到店";
+        }else{
+            $app_date = date("Y-m-d",$order_detail['app_time']);
+            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order_detail['app_time']);
+        }
+
+        if($total_goods_num==1){
+            $description = $goods_arr[0]['goods_name']." 一件商品";
+        }else{
+            $description = $goods_arr[0]['goods_name']." 等".$total_goods_num."件商品";
+        }
+
+        $order_info = [
+            'order_id'=>$order_detail['order_id'],
+            'total_price'=>$order_detail['order_amount'],
+            'package_fee'=>$order_detail['package_fee'],
+            'way'=>$order_detail['way'],
+            'order_status'=>$order_detail['order_status'],
+            'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$order_detail['order_status']],
+            'order_num'=>$order_detail['order_num'],
+            'order_sn'=>$order_detail['order_sn'],
+            'add_time'=>date("Y-m-d H:i",$order_detail['add_time']),
+            'app_time'=>$app_time,
+            'user_name'=> $order_detail['consignee'],
+            'mobile'=> $order_detail['mobile'],
+            'tips' => $order_detail['tips'],
+            'total_goods_num'=>$total_goods_num,
+
+        ];
+
+        $arr_response['order_info'] = $order_info;
+        $data = [
+            'data'=>$arr_response,
+        ];
+        //$this->wlog($order_info);
+        $this->success('success',$data);
+
+    }
 
 
 
