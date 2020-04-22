@@ -328,11 +328,33 @@ class Merch extends Api
         $data = $this->request->post();
         $now = time();
         $openid = $this->analysisUserJwtToken();
-        $user_info = $this->getGUserInfo($openid);
         $store_id = $data['store_id'];
-        $state = $data['state'];
+        $user_info = $this->getGUserInfo($openid);
+        $store_info = Db::name('store_sub')
+            ->where('store_id','=',$store_id)
+            ->find();
+        $time_state = $this->getStoreStateByTime($store_info);
+
+        $state = $data['status'];
+        if($time_state==0){
+            if($state==1){
+                $this->error('现在是打烊时间，修改失败');
+            }
+        }
         $this->storeRepository->changeStoreState($store_id,$state);
         $this->success('修改完成');
+    }
+
+    //获取状态
+    public function getStoreStateByTime($store_info){
+        $now = time();
+        $store_begin_time = strtotime($store_info['store_time']);
+        $store_end_time = strtotime($store_info['store_end_time']);
+        if(($now>$store_begin_time)&&($now<$store_end_time)){
+            return 1;
+        }else{
+            return 0;
+        }
     }
 
     /**
@@ -374,7 +396,7 @@ class Merch extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getTUserInfo($openid);
         $store_id =  $data['store_id'];
-
+        $OssUtilsObj = new OssUtils();
         $store_info = Db::name('store_sub')
             ->where('is_shenhe','=',1)
             ->where('store_id','=',$store_id)
@@ -383,9 +405,11 @@ class Merch extends Api
         $image_zhizhao =array_map(function($image){
             return "https://".$_SERVER['HTTP_HOST'].$image;
         },$image_zhizhao);
+        $pic = $OssUtilsObj->getImage($store_info['image'],$store_info['image_oss']);
         $arr = [
             'store_id'=>$store_info['store_id'],
             'name'=>$store_info['store_name'],
+            'pic'=>$pic,
             'notice'=>$store_info['notice'],
             'store_description'=>$store_info['store_description'],
             'meituan_grade'=>$store_info['meituan_grade'],
