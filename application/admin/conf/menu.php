@@ -10,8 +10,8 @@ return	array(
 				array('name' => '系统','child' => array(
 						/*array('name'=>'商城设置','act'=>'index','op'=>'System'),*/
                     array('name'=>'系统参数','act'=>'index','op'=>'Arg'),
-                   /* array('name'=>'首页展示图','act'=>'adList','op'=>'Ad'),
-                    array('name'=>'下单页展示图','act'=>'adList','op'=>'Ado'),
+                   array('name'=>'首页展示图','act'=>'adList','op'=>'Ad'),
+                   /* array('name'=>'下单页展示图','act'=>'adList','op'=>'Ado'),
                     array('name'=>'小程序过渡页展示图','act'=>'adList','op'=>'Adenter'),*/
 						//array('name'=>'支付方式','act'=>'index1','op'=>'System'),
 				/*		array('name'=>'地区&配送','act'=>'region','op'=>'Tools'),
