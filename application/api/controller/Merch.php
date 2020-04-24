@@ -350,6 +350,9 @@ class Merch extends Api
         $now = time();
         $store_begin_time = strtotime($store_info['store_time']);
         $store_end_time = strtotime($store_info['store_end_time']);
+        if($store_end_time<$store_begin_time){
+            $store_end_time = $store_end_time + 24*60*60;
+        }
         if(($now>$store_begin_time)&&($now<$store_end_time)){
             return 1;
         }else{
@@ -437,6 +440,9 @@ class Merch extends Api
         $now = time();
         $store_begin_time = strtotime($store_info['store_time']);
         $store_end_time = strtotime($store_info['store_end_time']);
+        if($store_end_time<$store_begin_time){
+            $store_end_time = $store_end_time + 24*60*60;
+        }
         if(($now>$store_begin_time)&&($now<$store_end_time)&&($store_info['store_state']==1)){
             return 1;
         }else{

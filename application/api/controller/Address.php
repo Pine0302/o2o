@@ -44,20 +44,31 @@ class Address extends Api
         $lbs_qq_key = config('Lbs.QQ_KEY');
         $location = $latitude.",".$longitude;
 
-        $url = "http://apis.map.qq.com/ws/geocoder/v1/?location={$location}&key={$lbs_qq_key}&get_poi=1";
+        $url = "http://apis.map.qq.com/ws/geocoder/v1/?location={$location}&key={$lbs_qq_key}&get_poi=1&page_size=5&page_index=1&policy=1";
 
         $http = new Http();
         $result_user_position = $http->get($url);
         $result_user_position_arr = json_decode($result_user_position,true);
+
         $my_village = $this->getMyVillageFromPositionInfo($result_user_position_arr['result']);
         $location_areano = substr($result_user_position_arr['result']['ad_info']['city_code'],3);
         $location_area_name = $result_user_position_arr['result']['ad_info']['city'];
         $location_district_name = $result_user_position_arr['result']['ad_info']['district'];
+        $relative_pois = $result_user_position_arr['result']['pois'];
+        $relative_pois = array_map(function($pos){
+            $arr = [
+                'location' => $pos['location'],
+                'title' => $pos['title'],
+                'address' => $pos['address'],
+            ];
+            return $arr;
+        },$relative_pois);
         $data = [
             'my_village'=>$my_village,
             'location_areano'=>$location_areano,
             'location_area_name'=>$location_area_name,
             'location_district_name'=>$location_district_name,
+            'relative_pois'=>$relative_pois,
         ];
         $response = [
             'data'=>$data
@@ -220,6 +231,44 @@ class Address extends Api
     }
 
 
+
+    //获取用户定位
+    public function searchPosition(){
+
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $latitude = $data['lat'];
+        $longitude = $data['lng'];
+        $search_name = $data['search_name'];
+
+        $lbs_qq_key = config('Lbs.QQ_KEY');
+     //   $location = $latitude.",".$longitude;
+        $address = urlencode('杭州市'.$search_name);
+        $url = "https://apis.map.qq.com/ws/geocoder/v1/?address={$address}&key={$lbs_qq_key}&region=杭州";
+    //    print_r($url);exit;
+
+        $http = new Http();
+        $result_user_position = $http->get($url);
+        $result_user_position_arr = json_decode($result_user_position,true);
+        $location = [];
+        $title = [];
+        if(!empty($result_user_position_arr)){
+            $location = $result_user_position_arr['result']['location'];
+            $title = $result_user_position_arr['result']['title'];
+        }
+        $data = [
+            'location'=>$location,
+            'title'=>$title,
+        ];
+        $response = [
+            'data'=>$data
+        ];
+        $this->success('success',$response);
+
+        //验证密码
+
+    }
 
 
 
