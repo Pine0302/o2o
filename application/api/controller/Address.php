@@ -6,6 +6,7 @@ use app\common\controller\Api;
 use app\common\library\wx\WXBizDataCrypt;
 use fast\AreaInclude;
 use fast\Http;
+use Symfony\Component\Yaml\Tests\A;
 use think\cache\driver\Redis;
 use think\Db;
 use think\Session;
@@ -13,6 +14,7 @@ use think\Cache;
 use app\api\controller\Common;
 use app\api\library\NoticeHandle;
 use fast\Algor;
+use fast\Arg;
 /**
  * 工作相关接口
  */
@@ -260,6 +262,57 @@ class Address extends Api
         $data = [
             'location'=>$location,
             'title'=>$title,
+        ];
+        $response = [
+            'data'=>$data
+        ];
+        $this->success('success',$response);
+
+        //验证密码
+
+    }
+
+
+    //获取用户定位
+    public function searchGDPosition(){
+
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $latitude = $data['latitude'];
+        $longitude = $data['longitude'];
+        $search_name = $data['search_name'];
+
+        $lbs_gd_key = config('Lbs.GD_KEY');
+        //   $location = $latitude.",".$longitude;
+        $address = urlencode($search_name);
+        $url = "https://restapi.amap.com/v3/place/text?key={$lbs_gd_key}&keywords={$address}&types=&city=杭州&children=1&offset=10&page=1&extensions=base";
+         //print_r($url);exit;
+
+        $http = new Http();
+        $result_user_position = $http->get($url);
+        $result_user_position_arr = json_decode($result_user_position,true);
+        //print_r($result_user_position_arr['pois']);exit;
+        $positions = [];
+        $areaIncludeObj = new AreaInclude();
+        if(!empty($result_user_position_arr['pois'])){
+            $positions = array_map(function($poi) use ($latitude,$longitude,$areaIncludeObj){
+                $poi_position = explode(",",$poi['location']);
+                $distance = $areaIncludeObj->distance($latitude,$longitude,$poi_position[1],$poi_position[0]);
+                $distance = number_format($distance/1000,2);
+               return  [
+                    'latitude'=>$poi_position[1],
+                    'longitude'=>$poi_position[0],
+                    'distance' => $distance,
+                    'name' => $poi['name'],
+                ];
+            },$result_user_position_arr['pois']);
+            $argObj = new Arg();
+            $positions = $argObj::arraySort($positions,'distance','asc');
+        }
+
+        $data = [
+            'position'=>$positions,
         ];
         $response = [
             'data'=>$data
