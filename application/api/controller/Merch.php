@@ -492,6 +492,7 @@ class Merch extends Api
         if($order_detail['pay_status']!=1){
             $this->success('该订单尚未支付');
         }
+        $this->orderRepository->changeOrderStatus($order_detail,OrderE::ORDER_STATUS['DONE']);
         $arr_response = [];
         $OssUtilsObj = new OssUtils();
 
@@ -561,7 +562,7 @@ class Merch extends Api
         $data = [
             'data'=>$arr_response,
         ];
-        //$this->wlog($order_info);
+       //$this->wlog($order_info);
         $this->success('success',$data);
 
     }

@@ -146,7 +146,8 @@ class Controller
      * @return mixed
      */
     protected function fetch($template = '', $vars = [], $replace = [], $config = [])
-    {        
+    {
+
         $html = $this->view->fetch($template, $vars, $replace, $config);
         write_html_cache($html); // 尝试写入静态缓存
         return $html;        
