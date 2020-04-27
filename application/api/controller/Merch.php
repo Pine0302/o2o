@@ -67,8 +67,9 @@ class Merch extends Api
         $code = $data['code'];
 
         $mini_config_url = config('mini.url');
-        $appid = config('Wxpay.APPID');
-        $app_secret = config('Wxpay.APPSECRET');
+        $appid = config('Wxmerch.APPID');
+        $app_secret = config('Wxmerch.APPSECRET');
+        $app_secret = config('Wxmerch.APPSECRET');
         $login_url = $mini_config_url['wx_login']."?appid={$appid}&secret={$app_secret}&js_code={$code}&grant_type=authorization_code";
 
   //      $this->wlog($login_url);
