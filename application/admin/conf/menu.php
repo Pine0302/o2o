@@ -156,6 +156,7 @@ return	array(
             array('name'=>'会员列表','act'=>'index','op'=>'User'),
             array('name'=>'公司列表','act'=>'index','op'=>'Company'),
 			array('name'=>'骑手列表','act'=>'index','op'=>'Rider'),
+			array('name'=>'更新骑手','act'=>'index','op'=>'RiderUpdate'),
 		/*	array('name'=>'会员等级','act'=>'levelList','op'=>'User'),*/
 		)),
 		/*array('name' => '充值提现','child'=>array(

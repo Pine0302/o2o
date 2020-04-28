@@ -11,7 +11,7 @@ use app\common\logic\wechat\WechatUtil;
 use think\Db;
 class Order
 {
-    public function userAddOrder(&$order)
+    public function index(&$order)
     {
 
         // 记录订单操作日志

@@ -260,18 +260,18 @@ class Address extends Api
             $title = $result_user_position_arr['result']['title'];
         }
         $data = [
-            'location'=>$location,
-            'title'=>$title,
-        ];
-        $response = [
-            'data'=>$data
-        ];
-        $this->success('success',$response);
 
-        //验证密码
+'location'=>$location,
+'title'=>$title,
+];
+$response = [
+'data'=>$data
+];
+$this->success('success',$response);
 
-    }
+    //验证密码
 
+}
 
     //获取用户定位
     public function searchGDPosition(){

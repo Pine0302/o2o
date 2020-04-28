@@ -28,4 +28,7 @@ return [
     'user_add_order' => [
         'app\\common\\behavior\\Order',
     ],
+    'upload_rider'=> [
+        'app\\common\\behavior\\Rider',
+    ],
 ];

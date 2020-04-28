@@ -31,7 +31,10 @@ class UserRepository
     }
 
     public function getUserByMobile($mobile){
-
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        $userDb->where('mobile','=',$mobile);
+        $result = $userDb->find();
+        return $result;
     }
 
     public function getUserById($id){

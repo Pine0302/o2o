@@ -45,4 +45,50 @@ class CompanyRepository
         return $companyDb->where('id','=',$id)->find();
     }
 
+    public function getRiderCountByCondition($condition){
+        $companyRiderDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        return $companyRiderDb->where($condition)->count();
+    }
+
+    public function getCompanyByName($company_name){
+        $companyDb = Db::name(RiderCompany::SHORT_TABLE_NAME);
+        return $companyDb->where('name','=',$company_name)->find();
+    }
+
+    /**
+     * 获取绑定的骑手列表
+     * @param $condition
+     * @param $offset
+     * @param $page_size
+     * @return int|string
+     */
+    public function getRiderListByCondition($condition,$offset,$length){
+        $companyRiderDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        $companyRiderDb->alias('rcb');
+        if(!empty($condition['rider_id'])){
+            $companyRiderDb->where('rcb.rider_id','=',$condition['rider_id']);
+        }
+        if(!empty($condition['company_id'])){
+            $companyRiderDb->where('rcb.company_id','=',$condition['company_id']);
+        }
+        $companyRiderDb->join(User::TABLE_NAME.' u ','u.user_id = rcb.rider_id','inner');
+        $companyRiderDb->join(RiderCompany::TABLE_NAME.' rc ','rc.id = rcb.company_id','inner');
+        return $companyRiderDb->field('u.*,rc.name as company_name')->limit($offset,$length)->select();
+    }
+
+
+    /**
+     * 通过mobile集合过滤掉不属于某个公司的骑手
+     * @param $company_id
+     * @param $arr
+     */
+    public function setRidersNotBelongToCompanyByMobile($company_id,$arr){
+        $companyRiderDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        return $companyRiderDb
+            ->where('mobile','not in',$arr)
+            ->where('company_id','=',$company_id)
+            ->update(['status'=>2]);
+    }
+
+
 }

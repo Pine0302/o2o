@@ -42,8 +42,8 @@
                 <div class="sDiv">
                     <div class="sDiv2">
                         <select class="select" name="search_type" id="search_type">
-                            <option name="nickname" value="">会员昵称</option>
-                            <option name="search_key" value="">会员账户</option>
+                            <option name="account" value="">会员手机号</option>
+                            <!--<option name="search_key" value="">会员账户</option>-->
                         </select>
                         <input type="text" id="search_key" size="30" class="qsbox" placeholder="查询"
                                value="{$Request.param.search_key}">
@@ -190,10 +190,10 @@
         if(search_key.length > 0){
             if(search_type == 'search_key'){
                 $('#account').val(search_key);
-                $('#nickname').val('');
+
             }else{
-                $('#nickname').val(search_key);
-                $('#account').val('');
+                $('#account').val(search_key);
+
             }
         }
         cur_page = page; //当前页面 保存为全局变量

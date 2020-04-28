@@ -80,6 +80,7 @@
           <div class="fbutton">
         	<a href="{:U('Admin/Company/addEditCompany')}"><div class="add" title="新增公司"><span><i class="fa fa-plus"></i>新增公司</span></div></a>
           </div>
+
           <!-- <div class="fbutton"><div class="del" title="将选定行数据批量删除"><span><i class="fa fa-trash"></i>批量删除</span></div></div>-->
       </div>
       <div style="clear:both"></div>
@@ -106,7 +107,7 @@
                   <div style="text-align: center; width: 100%;">{$vo.update_time}</div>
                 </td>
                 <td align="center" class="handle" style="width:20%">
-                  <div style="text-align: center; width: 100%; max-width:170px;"> <a class="btn blue" target="_blank" href="{:U('Admin/User/detail',array('article_id'=>$vo['article_id']))}"><i class="fa fa-search"></i>查看员工</a>
+                  <!--<div style="text-align: center; width: 100%; max-width:170px;"> <a class="btn blue" target="_blank" href="{:U('Admin/User/detail',array('article_id'=>$vo['article_id']))}"><i class="fa fa-search"></i>查看员工</a>-->
                   <!--  <notin name="vo.article_id" value="$article_able_id"> <a class="btn red"  href="javascript:void(0)" data-url="{:U('Company/aticleHandle')}" data-id="{$vo.article_id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a> </notin>
                     <in name="vo.article_id" value="$article_able_id"> <a class="btn red"  href="javascript:;" onclick="layer.alert('系统公司不得删除!',{icon:2});"><i class="fa fa-trash-o"></i>删除</a> </in>-->
                     <a href="{:U('Company/addEditCompany',array('act'=>'edit','id'=>$vo['id']))}" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a>

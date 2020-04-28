@@ -28,9 +28,32 @@ use app\common\logic\MessageFactory;
 use app\common\model\Withdrawals;
 use app\common\model\Users;
 use think\Loader;
+use app\common\repository\CompanyRepository;
+use app\common\repository\UserRepository;
 
 class Rider extends Base
 {
+
+    /**
+     * @var CompanyRepository
+     */
+    private $companyRepository;
+
+    /**
+     * @var UserRepository;
+     */
+    private $userRepository;
+
+
+
+
+    public function __construct(CompanyRepository $companyRepository,UserRepository $userRepository)
+    {
+        parent::__construct();
+        $this->companyRepository = $companyRepository;
+        $this->userRepository = $userRepository;
+
+    }
 
     public function index()
     {
@@ -46,17 +69,41 @@ class Rider extends Base
         $condition = array();
         $nickname = I('nickname');
         $account = I('account');
-        $account ? $condition['email|mobile'] = ['like', "%$account%"] : false;
-        $nickname ? $condition['nickname'] = ['like', "%$nickname%"] : false;
+        $request_data = $_REQUEST;
+        $company_id        = empty($request_data['company_id']) ? $request_data['company_id'] : 0;
+        $company_name        = empty($request_data['company_name']) ? $request_data['company_name'] : 0;
+        $company_id ? $condition['company_id'] = $company_id : false;
 
+        if($account){
+            $user_info = $this->userRepository->getUserByMobile($account);
+            if(!empty($user_info['user_id'])){
+                $condition['rider_id'] = $user_info['user_id'];
+            }else{
+                $count = 0;
+                $userList = [];
+                $Page = new AjaxPage($count, 10);
+                $show = $Page->show();
+                $this->assign('userList', $userList);
+                /*$this->assign('level', M('user_level')->getField('level_id,level_name'));*/
+                $this->assign('page', $show);// 赋值分页输出
+                $this->assign('pager', $Page);
+                return $this->fetch();
+
+            }
+        }
+        if(!empty($company_name)){
+            $company_info = $this->companyRepository->getCompanyByName($company_name);
+            $company_id = $company_info['id'];
+        }
+        if(!empty($company_id)){
+            $condition['company_id'] = $company_id;
+        }
         $sort_order = I('order_by') . ' ' . I('sort');
-
-        $usersModel = new Users();
-        $count = $usersModel->where($condition)->count();
+        $count = $this->companyRepository->getRiderCountByCondition($condition);
         $Page = new AjaxPage($count, 10);
-        $userList = $usersModel->where($condition)->order($sort_order)->limit($Page->firstRow . ',' . $Page->listRows)->select();
-        $user_id_arr = get_arr_column($userList, 'user_id');
+        $userList = $this->companyRepository->getRiderListByCondition($condition,$Page->firstRow,$Page->listRows);
 
+        $user_id_arr = get_arr_column($userList, 'user_id');
         foreach($userList as $ku=>$vu){
             if(empty($vu['reg_time'])){
                 $userList[$ku]['reg_time_date'] = '--';
@@ -66,7 +113,7 @@ class Rider extends Base
         }
         $show = $Page->show();
         $this->assign('userList', $userList);
-        $this->assign('level', M('user_level')->getField('level_id,level_name'));
+        /*$this->assign('level', M('user_level')->getField('level_id,level_name'));*/
         $this->assign('page', $show);// 赋值分页输出
         $this->assign('pager', $Page);
         return $this->fetch();
