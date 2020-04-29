@@ -90,5 +90,31 @@ class CompanyRepository
             ->update(['status'=>2]);
     }
 
+    /*
+     * @param $company_id
+     */
+    public function getValidRiderListByCompanyId($company_id){
+        $companyRiderDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        return $companyRiderDb
+            ->where('company_id','=',$company_id)
+            ->where('status','=',1)
+            ->select();
+    }
+
+    public function setMobilebelongToCompany($mobile,$company_id,$user_info){
+        //在user表找该用户
+        $user_id = isset($user_info['user_id']) ? intval($user_info['user_id']) : 0 ;
+        print_r($user_id);
+        $arr = [
+            'rider_id'=>$user_id,
+            'mobile'=>$mobile,
+            'company_id'=>$company_id,
+            'status'=>RiderCompanyBind::STATUS['VALID'],
+            'create_time'=>time(),
+            'update_time'=>time(),
+        ];
+        $companyRiderDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        return $companyRiderDb->insert($arr);
+    }
 
 }

@@ -44,6 +44,20 @@ class Rider
             array_push($arr,$data[$i]['B']);
         }
         $result = $this->companyRepository->setRidersNotBelongToCompanyByMobile($company_id,$arr);
+        //筛选出差集
+        $origin_arr = $this->companyRepository->getValidRiderListByCompanyId($company_id);
+        $origin_mobiles = [];
+        array_map(function ($arr) use (&$origin_mobiles){
+            $origin_mobiles[] = $arr['mobile'];
+        },$origin_arr);
+        //需要插入的数据
+
+        $extra_mobiles = array_diff($arr,$origin_mobiles);
+
+        array_map(function($mobile) use ($company_id){
+            $user_info = $this->userRepository->getUserByMobile($mobile);
+            $this->companyRepository->setMobilebelongToCompany($mobile,$company_id,$user_info);
+        },$extra_mobiles);
 
 
 
