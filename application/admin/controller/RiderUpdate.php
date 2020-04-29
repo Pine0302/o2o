@@ -147,9 +147,11 @@ class RiderUpdate extends Base
             $attachment->data(array_filter($params));
             $attachment->save();
             \think\Hook::listen("upload_rider", $attachment);
-            $this->success(('Upload successful'), null, [
+            /*$this->success(('Upload successful'), null, [
                 'url' => $uploadDir . $splInfo->getSaveName()
-            ]);
+            ]);*/
+            $this->success('操作成功',U('Rider/index'));exit;
+            //$this->ajaxReturn(['status'=>1,'msg'=>'操作成功','url'=>U('Admin/Rider/index')]);
         } else {
             // 上传失败获取错误信息
             $this->error($file->getError());

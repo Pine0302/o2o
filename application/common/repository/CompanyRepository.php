@@ -104,7 +104,6 @@ class CompanyRepository
     public function setMobilebelongToCompany($mobile,$company_id,$user_info){
         //在user表找该用户
         $user_id = isset($user_info['user_id']) ? intval($user_info['user_id']) : 0 ;
-        print_r($user_id);
         $arr = [
             'rider_id'=>$user_id,
             'mobile'=>$mobile,
