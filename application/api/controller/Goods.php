@@ -94,8 +94,8 @@ class Goods extends Api
                     $type_goods_list[] = [
                         'id'=>$vg['goods_id'],
                         'image'=>$picurl,
-                        'price'=>number_format($vg['shop_price']),
-                        'other'=>number_format($vg['other_price']),
+                        'price'=>number_format($vg['shop_price'],2),
+                        'other'=>number_format($vg['other_price'],2),
                         'description'=>$vg['goods_remark'],
                         'description_simple'=>$remark_simple,
                         'name'=>$vg['goods_name'],
@@ -354,20 +354,33 @@ class Goods extends Api
         var_dump($arr_map_result);exit;
     }
 
+    // order again(已支付)
+    public function orderAgain(){
+        $data = $this->request->post();
+        $now = time();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $order_id = $data['order_id'];
+        $order_detail = Db::name('order')
+            ->where('order_id','=',$order_id)
+            ->find();
+        $goods_arr = Db::name("order_goods")->where('order_id','=',$order_detail['order_id'])->select();
+        foreach($goods_arr as $kg=>$vg){
+            $this->addToCartAgain($openid,$vg['goods_id'],$vg['goods_num'],$vg['key']);
+        }
+
+        //$this->wlog($order_info);
+        $this->success('success');
+    }
+
     //添加到购物车
-    public function addToCart(){
+    public function addToCartAgain($openid,$goods_id,$num,$spec_key){
 
         /*$stratTime = microtime(true);
         $startMemory = memory_get_usage();*/
 
         $data = $this->request->post();
-
-        $goods_id = $data['good_id'];
-        $num = $data['num'];
-        $type = $data['type'] ?? 1;
-       // $key = $data['key'] ?? "";
-        $spec_key = $data['spec_key'] ?? "";
-        $openid = $this->analysisUserJwtToken();
+        $type = 1;
         $user_info = $this->getGUserInfo($openid);
         $goods_info = Db::name('goods')->where("goods_id",'=',$goods_id)->field('goods_id,shop_price as goods_price,store_id,goods_name')->find();
 
@@ -386,7 +399,7 @@ class Goods extends Api
                 ->where('key','in',$key_str)
                 ->find();
             if(!empty($check_cart)){                            //购物车有该数据
-             /*   var_dump("有该数据");*/
+                /*   var_dump("有该数据");*/
                 $goods_num = $check_cart['goods_num'];
                 if($type==1){
                     $new_num = $goods_num + $num;
@@ -399,8 +412,8 @@ class Goods extends Api
 
                 $spec_key_price = $key_price = $spec_info['price'];
                 $map = [
-                    'key_price'=>number_format($spec_info['price']),
-                    'spec_key_price'=>number_format($spec_info['price']),
+                    'key_price'=>number_format($spec_info['price'],2),
+                    'spec_key_price'=>number_format($spec_info['price'],2),
                     'goods_price'=>$goods_info['goods_price'],
                     'goods_num'=>$new_num,
                 ];
@@ -455,9 +468,142 @@ class Goods extends Api
                     }
                 }
                 $map = [
-                    'key_price'=>$goods_info['goods_price'],
-                    'spec_key_price'=>$goods_info['goods_price'],
+                    'key_price'=>number_format($goods_info['goods_price'],2),
+                    'spec_key_price'=>number_format($goods_info['goods_price'],2),
+                    'goods_price'=>number_format($goods_info['goods_price'],2),
+                    'goods_num'=>$new_num,
+                ];
+                Db::name('cart')
+                    ->where('goods_id','=',$goods_id)
+                    ->where('user_id','=',$user_info['user_id'])
+                    ->update($map);
+                $cart_id = $check_cart['id'];
+
+            }else{                      //购物车没有该商品
+                $arr_insert = [
+                    'user_id'=>$user_info['user_id'],
+                    'goods_id'=>$goods_id,
+                    'goods_name'=>$goods_info['goods_name'],
                     'goods_price'=>$goods_info['goods_price'],
+                    'goods_num'=>$num,
+                    'spec_key_price'=>$goods_info['goods_price'],
+                    'key_price'=>$goods_info['goods_price'],
+                    'add_time'=>1,  //默认选中
+                    'prom_type'=>1,
+                    'store_id'=>$goods_info['store_id'],
+                ];
+                $cart_id = Db::name('cart')->insertGetId($arr_insert);
+            }
+        }
+
+        //清除该用户购物车数量为0的cart_id
+        $this->wipeZeroCart($user_info['user_id']);
+    }
+
+    //添加到购物车
+    public function addToCart(){
+
+        /*$stratTime = microtime(true);
+        $startMemory = memory_get_usage();*/
+
+        $data = $this->request->post();
+
+        $goods_id = $data['good_id'];
+        $num = $data['num'];
+        $type = $data['type'] ?? 1;
+       // $key = $data['key'] ?? "";
+        $spec_key = $data['spec_key'] ?? "";
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $goods_info = Db::name('goods')->where("goods_id",'=',$goods_id)->field('goods_id,shop_price as goods_price,store_id,goods_name')->find();
+
+        if(!empty($spec_key)){  //有规格
+            $spec_key_str = $this->explode2sort($spec_key);
+            $spec_info = Db::name('spec_goods_price')
+                ->where("goods_id",'=',$goods_id)
+                ->where("key",'in',$spec_key_str)
+                ->find();
+
+            $key_str = $this->explode2sortNew($spec_key);
+
+            $check_cart = Db::name('cart')
+                ->where('user_id','=',$user_info['user_id'])
+                ->where('goods_id','=',$goods_id)
+                ->where('key','in',$key_str)
+                ->find();
+            if(!empty($check_cart)){                            //购物车有该数据
+             /*   var_dump("有该数据");*/
+                $goods_num = $check_cart['goods_num'];
+                if($type==1){
+                    $new_num = $goods_num + $num;
+                }else{
+                    $new_num = $goods_num - $num;
+                    if($new_num<0){
+                        $new_num = 0;
+                    }
+                }
+
+                $spec_key_price = $key_price = $spec_info['price'];
+                $map = [
+                    'key_price'=>number_format($spec_info['price'],2),
+                    'spec_key_price'=>number_format($spec_info['price'],2),
+                    'goods_price'=>$goods_info['goods_price'],
+                    'goods_num'=>$new_num,
+                ];
+
+
+                $spec_key_price = $key_price = $spec_info['price'];
+
+                Db::name('cart')
+                    ->where('goods_id','=',$goods_id)
+                    ->where('key','in',$key_str)
+                    ->where('user_id','=',$user_info['user_id'])
+                    ->update($map);
+                $cart_id = $check_cart['id'];
+            }else{    //购物车无该数据
+                $now = time();
+
+                $arr_insert = [
+                    'user_id'=>$user_info['user_id'],
+                    'goods_id'=>$goods_id,
+                    'goods_name'=>$goods_info['goods_name'],
+                    'goods_price'=>$goods_info['goods_price'],
+                    'goods_num'=>$num,
+                    'item_id'=>$spec_info['item_id'],
+                    'spec_key'=>$spec_info['key'],
+                    'spec_key_name'=>$spec_info['key_name'],
+                    'spec_key_price'=>$spec_info['price'],
+                    'key'=>$spec_info['key'],
+                    'key_name'=>$spec_info['key_name'],
+                    'key_price'=>$spec_info['price'],
+                    'add_time'=>1,  //默认选中
+                    'prom_type'=>1,
+                    'store_id'=>$goods_info['store_id'],
+                ];
+
+                $cart_id = Db::name('cart')->insertGetId($arr_insert);
+            }
+
+        }else{  //无规格
+            //查看购物车是否有该商品,有的话数量+,没有的话插入数据
+            $check_cart = Db::name('cart')
+                ->where('user_id','=',$user_info['user_id'])
+                ->where('goods_id','=',$goods_id)
+                ->find();
+            if(!empty($check_cart)){    //购物车有该商品
+                $goods_num = $check_cart['goods_num'];
+                if($type==1){
+                    $new_num = $goods_num + $num;
+                }else{
+                    $new_num = $goods_num - $num;
+                    if($new_num<0){
+                        $new_num = 0;
+                    }
+                }
+                $map = [
+                    'key_price'=>number_format($goods_info['goods_price'],2),
+                    'spec_key_price'=>number_format($goods_info['goods_price'],2),
+                    'goods_price'=>number_format($goods_info['goods_price'],2),
                     'goods_num'=>$new_num,
                 ];
                 Db::name('cart')

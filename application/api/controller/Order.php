@@ -99,6 +99,7 @@ class Order extends Api
         foreach($cart_list as $kc=>$vc){
             $item_price = $vc['key_price'] * $vc['goods_num'] ;
             $price = $price + $item_price;
+
             $item_num = $item_num + $vc['goods_num'];
             $goodList[] = [
                 'cart_id'=>$vc['id'],
@@ -154,10 +155,10 @@ class Order extends Api
 
 
         //获取起送费和是否支达到起送金额
-        $package_info = Db::name('store_arg')->where('store_id','=',$store_id)->find();
-        $package_fee = $package_info['value'];
+        $package_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
+        $package_fee = isset($package_info['package_fee']) ? $package_info['package_fee'] : 0;
+        $package_fee = number_format($package_fee,2);
         $total_price = $price + $package_fee;
-
         if($total_price<0){
             $total_price = 0;
         }
@@ -282,8 +283,9 @@ class Order extends Api
 
         }*/
 
-        $package_info = Db::name('store_arg')->where('store_id','=',$store_id)->find();
-        $package_fee = $package_info['value'];
+        //$package_info = Db::name('store_arg')->where('store_id','=',$store_id)->find();
+        $package_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
+        $package_fee = isset($package_info['package_fee']) ? $package_info['package_fee'] : 0;
 
 
 
@@ -297,7 +299,6 @@ class Order extends Api
         $order_sn = $OrderHandleObj->createOrder("o2o");
 
         $order_num = $this->getOrderNum();
-
         if($total_price<0){
             $total_price = 0;
         }
@@ -566,7 +567,7 @@ class Order extends Api
         $user_info = $this->getGUserInfo($openid);
         $order_id = $data['order_id'];
         $order_detail = Db::name('order')
-            ->where('user_id','=',$user_info['user_id'])
+       //     ->where('user_id','=',$user_info['user_id'])
             ->where('pay_status','=',1)
             ->where('order_id','=',$order_id)
             ->find();
@@ -595,7 +596,9 @@ class Order extends Api
             $item_price = $vg['goods_price'] * $vg['goods_num'];
             $goods_info[] = [
                 'goods_name'=>$vg['goods_name'],
+                'goods_id'=>$vg['goods_id'],
                 'key_name'=>$vg['key_name'],
+                'key'=>$vg['key'],
                 'goods_num'=>$vg['goods_num'],
                 'item_price'=>$item_price,
                 'goods_image'=>"https://".$_SERVER['HTTP_HOST'].$goods_spec['original_img'],
@@ -886,14 +889,26 @@ class Order extends Api
         if(empty($result)){
             $arr = [
                 'day'=>$key,
-                'num'=>81001,
+                'num'=>1,
             ];
             Db::name('order_num')->insert($arr);
         }else{
             Db::name('order_num')->where('day','=',$key)->setInc('num',1);
         }
         $new_num = Db::name('order_num')->where('day','=',$key)->getField('num');
-        return $new_num;
+        return $this->getNum(5,$new_num);
+    }
+
+    public function getNum($length,$num){
+        $num_count = strlen($num);
+        $zero_count = $length - $num_count;
+        if($zero_count>0){
+            for($i=0;$i<$zero_count;$i++) {
+                $num = "0".$num;
+            }
+        }
+        return $num;
+
     }
 
     public function couponDec($price,$coupon_info){

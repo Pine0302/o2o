@@ -286,6 +286,7 @@ class Storesub extends Base{
             $meituan_grade = I('meituan_grade');
             $month_sale = I('month_sale');
             $average_comsume = I('average_consume');
+            $package_fee = I('package_fee');
             $image_oss ='';
             if(!empty($image)){
                 $ossLibraryObj = new Oss();
@@ -343,6 +344,7 @@ class Storesub extends Base{
 				'meituan_grade'=>$meituan_grade,
 				'month_sale'=>$month_sale,
                 'average_consume' => $average_comsume,
+                'package_fee' => $package_fee,
 				'image'=>$image,
 				'image_oss'=>$image_oss,
 				'tui_store_sub_id'=>I('tui_store_sub_id/d'),
@@ -551,6 +553,7 @@ class Storesub extends Base{
                 $store['password'] = encrypt($store['password']);
             }
             $store['average_consume']  = I('average_consume');
+            $store['package_fee']  = I('package_fee');
 
            $result =  $a = M('store_sub')->where(array('store_id'=>$store['store_id']))->save($store);
            // var_dump($result);
@@ -963,7 +966,7 @@ class Storesub extends Base{
     public function withdrawals()
     {
         $this->get_withdrawals_list();
-        $this->assign('withdraw_status', C('WITHDRAW_STATUS'));
+        $this->assign('withdraw_status', C('WITHDRAW_STATUS_O2O'));
         return $this->fetch();
     }
 
@@ -978,21 +981,21 @@ class Storesub extends Base{
         $create_time3 = explode(',', $create_time);
         $this->assign('start_time', $create_time3[0]);
         $this->assign('end_time', $create_time3[1]);
-        $where['w.update_time'] = array(array('gt', strtotime($create_time3[0])), array('lt', strtotime($create_time3[1])));
+       // $where['w.update_time'] = array(array('gt', strtotime($create_time3[0])), array('lt', strtotime($create_time3[1])));
 
         $status = empty($status) ? I('status') : $status;
         if ($status !== '') {
             $where['w.status'] = $status;
         } else {
-            $where['w.status'] = ['lt', 2];
-    }
+            //$where['w.status'] = ['lt', 2];
+        }
         if ($id) {
             $where['w.id'] = ['in', $id];
         }
         $user_id && $where['u.user_id'] = $user_id;
         $realname && $where['w.realname'] = array('like', '%' . $realname . '%');
         $bank_card && $where['w.bank_card'] = array('like', '%' . $bank_card . '%');
-        $export = I('export');
+        /*$export = I('export');
         if ($export == 1) {
             $strTable = '<table width="500" border="1">';
             $strTable .= '<tr>';
@@ -1022,10 +1025,12 @@ class Storesub extends Base{
             unset($remittanceList);
             downloadExcel($strTable, 'remittance');
             exit();
-        }
-        $where['w.status'] = ['gt', 1];
-        //print_r($where);exit;
-        $count = Db::name('merch_cash_log')->alias('w')->join('__USERS__ u', 'u.store_id = w.store_id', 'INNER')->where($where)->count();
+        }*/
+//        $where['w.status'] = ['gt', 1];
+        $where['w.type'] = ['eq', 2];
+
+
+        $count = Db::name('merch_cash_log')->alias('w')->where($where)->count();
         $Page = new Page($count, 20);
         $list = Db::name('merch_cash_log')->alias('w')->field('w.*,u.*')->join('__SELLER_SUB__ u', 'u.store_id = w.store_id', 'INNER')->where($where)->order("w.id desc")->limit($Page->firstRow . ',' . $Page->listRows)->select();
         //print_r($list);exit;
@@ -1035,6 +1040,26 @@ class Storesub extends Base{
         $this->assign('list', $list);
         $this->assign('pager', $Page);
         C('TOKEN_ON', false);
+    }
+
+    public function accept_withdraw(){
+        $data = $_REQUEST;
+        $id = $data['shenhe_id'];
+        $with_info = Db::name('merch_cash_log')->where('id','=',$id)->find();
+        Db::name('merch_cash_log')->where('id','=',$id)->update(['status'=>3,'update_time'=>time()]);
+        Db::name('seller_sub')->where('store_id','=',$with_info['store_id'])->inc('withdraw_money',$with_info['cash'])->dec('withdrawing_money',$with_info['cash'])->update();
+        $msn = array('status'=>1);
+        $this->ajaxReturn($msn);
+    }
+
+    public function deny_withdraw(){
+        $data = $_REQUEST;
+        $id = $data['shenhe_id'];
+        $with_info = Db::name('merch_cash_log')->where('id','=',$id)->find();
+        Db::name('merch_cash_log')->where('id','=',$id)->update(['status'=>4,'update_time'=>time()]);
+        Db::name('seller_sub')->where('store_id','=',$with_info['store_id'])->inc('merch_money',$with_info['cash'])->dec('withdrawing_money',$with_info['cash'])->update();
+        $msn = array('status'=>1);
+        $this->ajaxReturn($msn);
     }
 
 }

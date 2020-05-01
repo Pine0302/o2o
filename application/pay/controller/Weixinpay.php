@@ -54,15 +54,15 @@ class Weixinpay extends Controller
     */
     public function notify()
     {
-
+        error_log(var_export(123123,1),3,"/opt/app-root/src/public/log/test.txt");
         // 获取xml
         $xml=file_get_contents('php://input', 'r');
         //转成php数组 禁止引用外部xml实体
         libxml_disable_entity_loader(true);
         $arr = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
         $arr = json_decode(json_encode($arr),true);
-        error_log(var_export($arr,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-        error_log("back_success",3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+        error_log(var_export($arr,1),3,"/opt/app-root/src/public/log/test.txt");
+        error_log("back_success",3,"/opt/app-root/src/public/log/test.txt");
 
         if(($arr['result_code']=='SUCCESS')&&($arr['return_code']=='SUCCESS')){
             $this->afterpay($arr);
@@ -326,8 +326,8 @@ EOT;
     }
 
     public function afterpaytea($order_id,$arr){
-        error_log("进入afterpaytea---".json_encode($order_id),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-        error_log("进入afterpaytea---".json_encode($arr),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+        error_log("进入afterpaytea---".json_encode($order_id),3,"/opt/app-root/src/public/log/test.txt");
+        error_log("进入afterpaytea---".json_encode($arr),3,"/opt/app-root/src/public/log/test.txt");
         $now = time();
         //检测是否已支付
         $check_pay_status = Db::name("order")->where('order_sn','=',$order_id)->find();
@@ -376,8 +376,8 @@ EOT;
 
 
     public function afterpayb2p($order_id,$arr){
-        error_log("进入afterpayb2p---".json_encode($order_id),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-        error_log("进入afterpayb2p---".json_encode($arr),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+        error_log("进入afterpayb2p---".json_encode($order_id),3,"/opt/app-root/src/public/log/test.txt");
+        error_log("进入afterpayb2p---".json_encode($arr),3,"/opt/app-root/src/public/log/test.txt");
         $params_re_compaccountdetail = [
             'pay_time'=>date("Y-m-d H:i:s",time()),
             'status'=>3,
@@ -682,27 +682,27 @@ EOT;
 
 
     public function afterPayTrain($order_id,$arr){
-       error_log("进入afterpaytrain---".json_encode($order_id),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+       error_log("进入afterpaytrain---".json_encode($order_id),3,"/opt/app-root/src/public/log/test.txt");
         $order_info = Db::table('re_trainorder')->where('code','=',$order_id)->find();
         $train_info = Db::table('re_training')->where('id','=',$order_info['re_training_id'])->find();
-       //error_log(var_export($train_info,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+       //error_log(var_export($train_info,1),3,"/opt/app-root/src/public/log/test.txt");
         $user_info = Db::table('user')->where('id','=',$order_info['user_id'])->find();
-       //error_log(var_export($user_info,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+       //error_log(var_export($user_info,1),3,"/opt/app-root/src/public/log/test.txt");
         //验证支付
-     //   error_log(var_export($arr,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+     //   error_log(var_export($arr,1),3,"/opt/app-root/src/public/log/test.txt");
         $result_check_pay = $this->checkOrderBeforeHandle($order_info,$arr);
-        error_log("验证支付---".json_encode($result_check_pay),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+        error_log("验证支付---".json_encode($result_check_pay),3,"/opt/app-root/src/public/log/test.txt");
         if($result_check_pay===0){        //正常支付
-            error_log("train_info---".json_encode($train_info),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+            error_log("train_info---".json_encode($train_info),3,"/opt/app-root/src/public/log/test.txt");
             $now = time();
             $code = $order_id;
             //公司信息
             $company_info = Db::table('re_company')->where('admin_id','=',$train_info['admin_id'])->find();
-            error_log("公司信息---".json_encode($company_info),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+            error_log("公司信息---".json_encode($company_info),3,"/opt/app-root/src/public/log/test.txt");
             //上级用户信息
             $up_user_info = Db::table('user_team')->where('low_user_id','=',$user_info['id'])->find();
-            error_log("上级用户信息---".json_encode($up_user_info),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-     //       error_log(var_export($order_info['materia'],1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+            error_log("上级用户信息---".json_encode($up_user_info),3,"/opt/app-root/src/public/log/test.txt");
+     //       error_log(var_export($order_info['materia'],1),3,"/opt/app-root/src/public/log/test.txt");
             if($order_info['materia']==1){  //微信支付
                 Db::startTrans();
                 try{
@@ -712,12 +712,12 @@ EOT;
                         'status'=>2,
                         'transaction_id'=>$arr['transaction_id'],
                     ];
-                    error_log("添加re_trainorder记录---".json_encode($train_order_arr),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log("添加re_trainorder记录---".json_encode($train_order_arr),3,"/opt/app-root/src/public/log/test.txt");
                     //0.添加re_trainorder记录
                     Db::table('re_trainorder')->where('code','=',$order_id)->update($train_order_arr);
                     $result_insert_tarin_order_id = $order_info['id'];
-                    error_log("添加re_trainorder记录---".json_encode($train_order_arr),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-           //         error_log(var_export($order_id,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log("添加re_trainorder记录---".json_encode($train_order_arr),3,"/opt/app-root/src/public/log/test.txt");
+           //         error_log(var_export($order_id,1),3,"/opt/app-root/src/public/log/test.txt");
                     // 1. 扣除用户余额
                     /*     $update_user_sql = "update user set available_balance = available_balance - ".$train_info['fee']." where id = ".$user_info['id'];
                          Db::execute($update_user_sql);*/
@@ -746,7 +746,7 @@ EOT;
                     // 2.增加代理商公司余额
                     //$update_company_sql = "update re_company set account = account + ".$train_info['fee']." where id = ".$company_info['id'];
                     $update_company_sql = "update re_company set train_frozen = train_frozen + ".$train_info['fee']." where id = ".$company_info['id'];
-                    error_log("增加代理商公司余额---".json_encode($update_company_sql),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log("增加代理商公司余额---".json_encode($update_company_sql),3,"/opt/app-root/src/public/log/test.txt");
                     $result1 = Db::execute($update_company_sql);
                     //增加代理商公司余额-cash_log 记录
                  /*   $cash_log_company_train_asc = [
@@ -770,10 +770,10 @@ EOT;
 
                     // 3.增加活动推荐记录
                     if($train_info['reward_up']>0){
-                        error_log("上级佣金---".json_encode($train_info['reward_up']),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                        error_log("上级佣金---".json_encode($train_info['reward_up']),3,"/opt/app-root/src/public/log/test.txt");
                         $commonFuncObj = new commonFunc();
                         $ratio = $commonFuncObj->getPlatformRatio($company_info['admin_id']);
-                        error_log("ratio---".json_encode($ratio),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                        error_log("ratio---".json_encode($ratio),3,"/opt/app-root/src/public/log/test.txt");
                         $up_cash = 0;
                         $p_cash = 0;
                         $flag_rec = 0;//是否有推荐奖励记录  0:无 1:有
@@ -787,7 +787,7 @@ EOT;
                             $p_cash = $train_info['reward_up'] * $ratio['p_per']/100;
                         }
                         $total_cash = $up_cash + $p_cash;
-                        error_log("total_cash---".json_encode($total_cash),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                        error_log("total_cash---".json_encode($total_cash),3,"/opt/app-root/src/public/log/test.txt");
                         if($total_cash>0){
                             //3.增加活动推荐记录
                             $flag_rec = 1;
@@ -889,12 +889,12 @@ EOT;
                     //0.添加re_trainorder记录
                     Db::table('re_trainorder')->where('code','=',$order_id)->update($train_order_arr);
                     $result_insert_tarin_order_id = $order_info['id'];
-                    error_log(var_export($train_order_arr,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-                    error_log(var_export($order_id,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log(var_export($train_order_arr,1),3,"/opt/app-root/src/public/log/test.txt");
+                    error_log(var_export($order_id,1),3,"/opt/app-root/src/public/log/test.txt");
                     // 1. 扣除用户余额
                          $update_user_sql = "update user set available_balance = available_balance - ".$order_info['user_cash']." where id = ".$user_info['id'];
                          Db::execute($update_user_sql);
-                    error_log(var_export($update_user_sql,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log(var_export($update_user_sql,1),3,"/opt/app-root/src/public/log/test.txt");
                     //扣除用户余额-cash_log 记录
                          $cash_log_user_train_dec = [
                              'user_id'=>$user_info['id'],
@@ -915,7 +915,7 @@ EOT;
                              'update_at'=>date("Y-m-d H:i:s",$now),
                          ];
                          Db::table('cash_log')->insert($cash_log_user_train_dec);
-                    error_log(var_export($cash_log_user_train_dec,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+                    error_log(var_export($cash_log_user_train_dec,1),3,"/opt/app-root/src/public/log/test.txt");
                     // 2.增加代理商公司余额
                     //$update_company_sql = "update re_company set account = account + ".$order_info['total']." where id = ".$company_info['id'];
                     $update_company_sql = "update re_company set train_frozen = train_frozen + ".$order_info['total']." where id = ".$company_info['id'];
@@ -1116,18 +1116,18 @@ EOT;
      * */
     public function checkOrderBeforeHandle($order_info,$arr){
         $flag = 0;
-      //  error_log(var_export($order_info,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-    //    error_log(var_export($arr,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
-        //error_log(var_export($order_info['status'],1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+      //  error_log(var_export($order_info,1),3,"/opt/app-root/src/public/log/test.txt");
+    //    error_log(var_export($arr,1),3,"/opt/app-root/src/public/log/test.txt");
+        //error_log(var_export($order_info['status'],1),3,"/opt/app-root/src/public/log/test.txt");
         //判断该用户是否已经支付
         if($order_info['status']!=1){
             $flag = 1;
         }else{
             //判断金额是否准确
             $cash_fee_pay = $arr['cash_fee']/100;
-          //  error_log(var_export($cash_fee_pay,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+          //  error_log(var_export($cash_fee_pay,1),3,"/opt/app-root/src/public/log/test.txt");
             $train_fee = $order_info['cash'];
-            //error_log(var_export($train_fee,1),3,"/data/wwwroot/".$_SERVER['HTTP_HOST']."/public/log/test.txt");
+            //error_log(var_export($train_fee,1),3,"/opt/app-root/src/public/log/test.txt");
             if($cash_fee_pay != $train_fee){
                 $flag = 2;
              //   $flag = 0;  /***********************************测试暂定************************************************/

@@ -31,4 +31,7 @@ return [
     'upload_rider'=> [
         'app\\common\\behavior\\Rider',
     ],
+    'upload_riderCoin'=> [
+        'app\\common\\behavior\\RiderCoin',
+    ],
 ];

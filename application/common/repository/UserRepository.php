@@ -13,8 +13,10 @@
  */
 namespace app\common\repository;
 
+use app\common\entity\MemberCashLogE;
 use app\common\entity\MerchCashLogE;
 use app\common\entity\RiderCompany;
+use app\common\entity\RiderCompanyCharge;
 use app\common\entity\SellerSub;
 use app\common\library\OrderHandle;
 use think\Db;
@@ -165,6 +167,51 @@ class UserRepository
         return $sellerSubDb->where($map)->find();
     }
 
+    public function updateUserMoneyByMobile($mobile,$money,$company_id){
+        $checkRirder = $this->getUserByMobile($mobile);
+        if(!empty($checkRirder)){
+            $userDb = Db::name(User::SHORT_TABLE_NAME);
+            $userDb->where('user_id','=',$checkRirder['user_id'])->setInc('user_money',$money);
+
+            $arr = [
+                'mobile'=>$mobile,
+                'company_id'=>$company_id,
+                'status'=>RiderCompanyCharge::STATUS['done'],
+                'create_time'=>time(),
+                'update_time'=>time(),
+                'money'=>$money,
+                'rider_id'=>$checkRirder['user_id'],
+            ];
+            Db::name('rider_company_charge')->insert($arr);
+            Db::name('rider_company_bind')->where('mobile','=',$mobile)->inc('total_money',$money)->update();
+            //增加加钱记录
+            $arr = [
+                'user_id'=>$checkRirder['user_id'],
+                'type'=>MemberCashLogE::TYPE['company_charge_member'],
+                'way'=>MemberCashLogE::WAY['in'],
+                'tip'=>MemberCashLogE::TIP['company_charge_member'],
+                'cash'=>$money,
+                'order_no'=>'CHA_'.$checkRirder['user_id'].time(),
+                'status'=>MemberCashLogE::STATUS['done'],
+                'update_time'=>time(),
+            ];
+            return Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
+
+
+
+        }else{
+            $arr = [
+                'mobile'=>$mobile,
+                'company_id'=>$company_id,
+                'status'=>RiderCompanyCharge::STATUS['undone'],
+                'create_time'=>time(),
+                'update_time'=>time(),
+                'money'=>$money,
+            ];
+            Db::name('rider_company_charge')->insert($arr);
+            Db::name('rider_company_bind')->where('mobile','=',$mobile)->inc('total_money',$money)->inc('remain_money',$money)->update();
+        }
+    }
 
 
 

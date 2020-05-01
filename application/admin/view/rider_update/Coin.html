@@ -1,0 +1,74 @@
+<include file="public/layout" />
+<style>
+    td{height:40px;line-height:40px; padding-left:20px;}
+    .span_1{
+        float:left;
+        margin-left:0px;
+        height:130px;
+        line-height:130px;
+    }
+    .span_1 ul{list-style:none;padding:0px;}
+    .span_1 ul li{
+        border:1px solid #CCC;
+        height:40px;
+        padding:0px 10px;
+        margin-left:-1px;
+        margin-top:-1px;
+        line-height:40px;
+    }
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>会员管理 - 骑手发薪</h3>
+                <h5>网站系统会员管理会员信息</h5>
+            </div>
+        </div>
+    </div>
+    <form class="form-horizontal" id="user_form" action="{:U('RiderUpdate/coinAjax')}" method="post" enctype="multipart/form-data">
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">
+                    <label>请上传公司骑手薪水excel文件</label>
+                </dt>
+                <input type="file" name="file" id="file" />
+                <br />
+            </dl>
+                <button type="submit" class="btn btn-primary btn-block btn-flat">提交 </button>
+
+
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    function checkUserUpdate(){
+        var email = $('input[name="email"]').val();
+        var mobile = $('input[name="mobile"]').val();
+        var password = $('input[name="password"]').val();
+        var password2 = $('input[name="password2"]').val();
+
+        var error ='';
+        if(password != password2){
+            error += "两次密码不一样\n";
+        }
+        if(!checkEmail(email) && email != ''){
+            error += "邮箱地址有误\n";
+        }
+        if(!checkMobile(mobile) && mobile != ''){
+            error += "手机号码填写有误\n";
+        }
+        if(error){
+            layer.alert(error, {icon: 2});  //alert(error);
+            return false;
+        }
+        $('#user_form').submit();
+    }
+</script>
+</body>
+</html>
+

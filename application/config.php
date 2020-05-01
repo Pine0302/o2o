@@ -471,4 +471,10 @@ return [
     'API_MAP_TENCENT'=>'IM2BZ-CQVCP-EQ5DZ-VRDGZ-S4LK7-NWFMQ',
     'IS_SAAS' => 0,
     'SAAS_BASE_USER' => 0,
+
+    'WITHDRAW_STATUS_O2O'=>[
+        '2'=>'申请中',
+        '3'=>'审核通过',
+        '4'=>'付款失败',
+    ],
 ];

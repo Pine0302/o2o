@@ -441,7 +441,7 @@ class Goods extends Base {
         if ($data['goods_id'] > 0) {
             $goods = \app\common\model\Goods::get($data['goods_id']);
             $store_count_change_num = $data['store_count'] - $goods['store_count'];//库存变化量
-            $cart_update_data = ['market_price'=>$data['market_price'],'goods_price'=>$data['shop_price'],'member_goods_price'=>$data['shop_price']];
+            $cart_update_data = ['market_price'=>$data['market_price'],'origin_price'=>$data['origin_price'],'goods_price'=>$data['shop_price'],'member_goods_price'=>$data['shop_price']];
             db('cart')->where(['goods_id'=>$data['goods_id'],'spec_key'=>''])->save($cart_update_data);
             //编辑商品的时候需清楚缓存避免图片失效问题
             clearCache();

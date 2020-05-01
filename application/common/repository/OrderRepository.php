@@ -205,6 +205,7 @@ class OrderRepository
         $merchCashLogDb = Db::name(MerchCashLogE::SHORT_TABLE_NAME);
         $result = $merchCashLogDb->where('store_id','=',$store_id)
             ->where('update_time',['>',$start_time],['<',$end_time],'and')
+            ->order(['id'=>'desc'])
             ->select();
         return $result;
     }
@@ -221,6 +222,7 @@ class OrderRepository
                 $query->where('mobile','=',$search_data)->whereOr('order_sn','=',$search_data)->whereOr('consignee','=',$search_data);
             });
         }
+        $orderDb->order(['order_id'=>'desc']);
         $result = $orderDb->select();
         //print_r($orderDb->getLastSql());exit;
         return $result;

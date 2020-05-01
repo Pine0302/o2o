@@ -260,6 +260,17 @@
 
             <dl class="row">
                 <dt class="tit"><em>*</em>
+                    <label>商品原价</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" value="{$goods.origin_price}"   name="origin_price" class="t_mane"
+                           onKeyUp="this.value=this.value.replace(/[^\d.]/g,'')" onpaste="this.value=this.value.replace(/[^\d.]/g,'')"/>
+                    <span class="err" id="err_origin_price"></span>
+                </dd>
+            </dl>
+
+            <dl class="row">
+                <dt class="tit"><em>*</em>
                     <label>其他平台价格</label>
                 </dt>
                 <dd class="opt">

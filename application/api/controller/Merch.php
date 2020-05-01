@@ -90,6 +90,7 @@ class Merch extends Api
             $this->cacheUser($user_data);
             $auth_code = $this->signUserJwtToken($user_data);     //获取token
             $user_info = $this->registerUser($result['openid']);            //插入用户openid
+
             $data = ['auth_code'=>$auth_code,'merch_login'=>$user_info['merch_login'],'store_id'=>$user_info['store_id']];
             $bizobj = ['data'=>$data];
             $this->success('成功', $bizobj);
@@ -151,6 +152,17 @@ class Merch extends Api
         }
     }
 
+    /**
+     * 商家登出
+     */
+    public function loginOut(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+        $this->userRepository->updateUserByFilter(['merch_login'=>0],['user_id'=>$user_info['user_id']]);
+        $this->success('success');
+    }
+
     //规定时间的商家营业统计
     public function staticsByTime(){
         $data = $this->request->post();
@@ -162,9 +174,13 @@ class Merch extends Api
         $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : 0;
         $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : $now;
         $is_today = isset($data['is_today']) ? $data['$is_today'] : 0;
+
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
             $end_time = $now+1;
+        }
+        if($start_time==$end_time){
+            $end_time = $end_time + 24*60*60;
         }
         $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
         $total_num = $this->orderRepository->getTotalOrderByTime($store_id,$start_time,$end_time);
@@ -216,13 +232,39 @@ class Merch extends Api
                 'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
                 'tip'=>$cash['tip'],
                 'time'=>date("Y-m-d H:i",$cash['update_time']),
+                'date'=>date("Y-m-d",$cash['update_time']),
                 'order_no'=>$cash['order_no'],
                 'cash' => $fuhao.$cash['cash'],
             ];
             return $cash_res;
         },$cash_list);
+
+        $date_list = [];
+        array_map(function($cash)use(&$date_list){
+            if(!in_array($cash['date'],$date_list)){
+                $date_list[] = $cash['date'];
+            }
+        },$cash_list);
+
+
+        $date_cash = array_map(function($date) use($cash_list){
+            $arr = [];
+            $is_today = 0;
+            if($date == date("Y-m-d")){
+                $is_today = 1;
+            }
+            array_map(function($cash) use (&$arr,$date,$is_today){
+                if($cash['date']==$date){
+                    $arr[$date]['cash_list'][] = $cash;
+                    $arr[$date]['is_today'] = $is_today;
+                }
+            },$cash_list);
+
+            return $arr;
+        },$date_list);
+
         $data = [
-            'cahs_list'=>$cash_list,
+            'cahs_list'=>$date_cash,
         ];
         $this->success('success',$data);
     }
@@ -238,6 +280,9 @@ class Merch extends Api
         $now = time();
         $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : '';
         $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : '';
+        if($end_time==$start_time){
+            $end_time = $start_time + 24*60*60;
+        }
         $is_today = isset($data['is_today']) ? $data['$is_today'] : 0;
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
@@ -245,6 +290,7 @@ class Merch extends Api
         }
 
         $order_list = $this->orderRepository->getMerchOrderListFilter($store_id,$start_time,$end_time,$status,$search_data);
+
         $now_date = date("Y-m-d");
         $order_list = array_map(function($order) use($now_date){
             if(!$order['app_time']){
@@ -270,11 +316,37 @@ class Merch extends Api
                 'user_name'=> $order['consignee'],
                 'mobile'=> $order['mobile'],
                 'tips' => $order['tips'],
+                'pay_date' => date("Y-m-d",$order['pay_time']),
             ];
             return $order_res;
         },$order_list);
+
+        //获取所有的date
+        $date_list = [];
+        array_map(function($order)use(&$date_list){
+            if(!in_array($order['pay_date'],$date_list)){
+                $date_list[] = $order['pay_date'];
+            }
+        },$order_list);
+
+
+       $date_order = array_map(function($date) use($order_list){
+            $arr = [];
+            $is_today = 0;
+            if($date == date("Y-m-d")){
+                $is_today = 1;
+            }
+            array_map(function($order) use (&$arr,$date,$is_today){
+                if($order['pay_date']==$date){
+                    $arr[$date]['orders'] = $order;
+                    $arr[$date]['is_today'] = $is_today;
+                }
+            },$order_list);
+            return $arr;
+        },$date_list);
+
         $data = [
-            'order_list'=>$order_list,
+            'order_list'=>$date_order,
         ];
         $this->success('success',$data);
     }
