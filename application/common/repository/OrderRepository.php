@@ -38,6 +38,7 @@ class OrderRepository
         return $result;
     }
 
+
     /**
      * 支付商城订单
      * @param $order_info
@@ -60,12 +61,13 @@ class OrderRepository
     public function setCashOrderPaid($order_info,$pay_type,$transaction_id=''){
         $now = time();
         $arr_order_update = [
-            'order_status'=>CashOrderE::ORDER_STATUS['PAID'],
+            //'order_status'=>CashOrderE::ORDER_STATUS['PAID'],
             'status'=>CashOrderE::STATUS['paid'],
             'transaction_id'=>$transaction_id,
             'pay_time'=>$now,
             'pay_type'=>$pay_type,
         ];
+        error_log("afterpayCRE--arr_order_update-".json_encode($arr_order_update),3,"/opt/app-root/src/public/log/test.txt");
         return Db::name(CashOrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
     }
 

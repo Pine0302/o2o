@@ -297,22 +297,25 @@ EOT;
 
     public function afterpayCRE($order_id,$arr){
 
-        $order_info = $this->orderRepository->getOrderBySn($order_id);
+        $order_info = $this->orderRepository->getCashOrderBySn($order_id);
         $user_info = $this->userRepository->getUserById($order_info['user_id']);
         if($order_info['status']==CashOrderE::STATUS['unpaid']){
-            Db::startTrans();
-            try{
+        //    Db::startTrans();
+          //  try{
                 //给用户增加余额
-                $this->userRepository->raiseUserMoney($order_info,$user_info);
+                $result1 = $this->userRepository->raiseUserMoney($order_info,$user_info);
+          //  error_log("afterpayCRE--1-".json_encode($result1),3,"/opt/app-root/src/public/log/test.txt");
                 //给用户增加余额充值记录
-                $this->orderRepository->addMemberChargeCashLog($order_info,$user_info);
+                $result2 = $this->orderRepository->addMemberChargeCashLog($order_info,$user_info);
+         //   error_log("afterpayCRE--2-".json_encode($result2),3,"/opt/app-root/src/public/log/test.txt");
                 //修改订单状态
-                $result = $this->orderRepository->setCashOrderPaid($order_info,CashOrderE::PAY_TYPE['wechat'],$arr['transaction_id']);
-            }catch (\Exception $e) {
+                $result3 = $this->orderRepository->setCashOrderPaid($order_info,CashOrderE::PAY_TYPE['wechat'],$arr['transaction_id']);
+       //     error_log("afterpayCRE--3-".json_encode($result3),3,"/opt/app-root/src/public/log/test.txt");
+            //}catch (\Exception $e) {
                 // 回滚事务
-                Db::rollback();
-                $this->error('系统繁忙,请稍候再试');
-            }
+              //  Db::rollback();
+               // $this->error('系统繁忙,请稍候再试');
+           // }
         }else{
             $result = 1;
         }

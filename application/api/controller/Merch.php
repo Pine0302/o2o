@@ -280,9 +280,8 @@ class Merch extends Api
         $now = time();
         $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : '';
         $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : '';
-        if($end_time==$start_time){
-            $end_time = $start_time + 24*60*60;
-        }
+        $end_time = $end_time + 24*60*60;
+
         $is_today = isset($data['is_today']) ? $data['$is_today'] : 0;
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
@@ -338,7 +337,7 @@ class Merch extends Api
             }
             array_map(function($order) use (&$arr,$date,$is_today){
                 if($order['pay_date']==$date){
-                    $arr[$date]['orders'] = $order;
+                    $arr[$date]['orders'][] = $order;
                     $arr[$date]['is_today'] = $is_today;
                 }
             },$order_list);
@@ -361,11 +360,10 @@ class Merch extends Api
         $status = $data['status'];
         //todo  判断该商家是否有修改权限
         $order_detail = Db::name('order')
-            ->where('user_id','=',$user_info['user_id'])
+         //   ->where('user_id','=',$user_info['user_id'])
             ->where('pay_status','=',1)
             ->where('order_id','=',$order_id)
             ->find();
-
         switch ($status){
             case OrderE::ORDER_STATUS['DONE_BACK']:  //同意取消
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
