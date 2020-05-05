@@ -2245,8 +2245,10 @@ class Query
 
         // 生成UPDATE SQL语句
         $sql = $this->builder->update($data, $options);
+
         // 获取参数绑定
         $bind = $this->getBind();
+
         if ($options['fetch_sql']) {
             // 获取实际执行的SQL语句
             return $this->connection->getRealSql($sql, $bind);

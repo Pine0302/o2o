@@ -180,8 +180,9 @@ class OrderRepository
     public function getMemberCashLog($user_id){
         $memberCashLogDb = Db::name(MemberCashLogE::SHORT_TABLE_NAME);
         $result = $memberCashLogDb->where('user_id','=',$user_id)
-            ->where('method','=',MemberCashLogE::METHOD['cash'])
+          //  ->where('method','=',MemberCashLogE::METHOD['cash'])
             ->where('status','=',MemberCashLogE::STATUS['done'])
+            ->order(['id'=>'desc'])
             ->select();
         return $result;
     }

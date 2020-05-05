@@ -76,7 +76,7 @@ class Goods extends Api
             ->where('g.store_id','=',$store_id)
             ->where('g.is_on_sale',1)
             ->field("g.goods_id,g.original_img,g.other_price,g.goods_remark,g.goods_name,g.shop_price,g.store_count,c.name as cat_name,c.id as cat_id,g.sort")
-            ->order('c.sort_order asc,g.sort asc')
+            ->order('c.sort_order asc,g.sort asc,g.goods_id desc')
             ->select();
         $all_goods = [];
         foreach($type_list as $kt=>$vt){
@@ -262,7 +262,7 @@ class Goods extends Api
             $sepc_info_price[] = [
                 'item_spec'=> $vs['key'],
                 //'price'=> intval($vs['price']),
-                'price'=> number_format($vs['price']),
+                'price'=> number_format($vs['price'],2),
             ];
         }
 

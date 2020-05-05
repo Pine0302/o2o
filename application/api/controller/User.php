@@ -60,6 +60,20 @@ class User extends Api
             $response = [
                 'data'=>$valid_info,
             ];
+            //绑定用户
+           $this->userRepository->updateUserByFilter(['rider_auth'=>1,'rider_company_id'=>$valid_info['company_id']],['user_id'=>$user_info['user_id']]);
+
+            if($valid_info['remain_money']>0){
+                //给用户发钱
+                $rider_charge_list = $this->userRepository->getRiderChargeList($user_info['mobile'],$valid_info['company_id']);
+                array_map(function($charge) use($user_info) {
+                    $this->userRepository->chargeRiderWhileValid($charge,$user_info['user_id']);
+                },$rider_charge_list);
+              //  $this->userRepository->incUserMoney($valid_info['remain_money'],$user_info['user_id']);
+                //给用户增加收益记录
+            }
+
+
             $this->success('success', $response);
         }else{
             $this->error('暂无数据');

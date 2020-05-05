@@ -378,6 +378,9 @@ class Merch extends Api
                 $order_status = OrderE::ORDER_STATUS['TAKE'];
                 break;
             case OrderE::ORDER_STATUS['DONE']:  //订单已完成
+                if($order_detail['store_id']!=$user_info['store_id']){
+                    $this->error('您没有扫码权限');
+                }
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
                 $order_status = OrderE::ORDER_STATUS['DONE'];
                 break;
@@ -554,13 +557,17 @@ class Merch extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getTUserInfo($openid);
         $order_sn =  $data['order_sn'];
-
+        //print_r($user_info);exit;
 
         $order_detail = Db::name('order')
             ->where('order_sn','=',$order_sn)
             ->find();
         if($order_detail['pay_status']!=1){
             $this->success('该订单尚未支付');
+        }
+
+        if($order_detail['store_id']!=$user_info['store_id']){
+            $this->error('您没有扫码权限');
         }
         $this->orderRepository->changeOrderStatus($order_detail,OrderE::ORDER_STATUS['DONE']);
         $arr_response = [];

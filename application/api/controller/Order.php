@@ -88,7 +88,7 @@ class Order extends Api
             ->join('tp_goods g','g.goods_id = c.goods_id')
             ->where('c.user_id','=',$user_info['user_id'])
             ->where('c.store_id','=',$store_id)
-            ->field('c.*,g.cat_id')
+            ->field('c.*,g.cat_id,g.original_img')
             ->select();
 
 
@@ -158,6 +158,9 @@ class Order extends Api
         $package_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
         $package_fee = isset($package_info['package_fee']) ? $package_info['package_fee'] : 0;
         $package_fee = number_format($package_fee,2);
+        if($type==1){
+            $package_fee = 0;
+        }
         $total_price = $price + $package_fee;
         if($total_price<0){
             $total_price = 0;
@@ -287,9 +290,11 @@ class Order extends Api
         $package_info = Db::name('store_sub')->where('store_id','=',$store_id)->find();
         $package_fee = isset($package_info['package_fee']) ? $package_info['package_fee'] : 0;
 
+        if($type==1){
+            $package_fee = 0;
+        }
 
-
-        $mobile = '';
+        //$mobile = '';
         $pay_name = ($pay_type==1) ? "微信小程序支付":"余额支付";
 
         $goods_price = $cart_info['price'];
@@ -900,13 +905,13 @@ class Order extends Api
     }
 
     public function getNum($length,$num){
-        $num_count = strlen($num);
+        /*$num_count = strlen($num);
         $zero_count = $length - $num_count;
         if($zero_count>0){
             for($i=0;$i<$zero_count;$i++) {
                 $num = "0".$num;
             }
-        }
+        }*/
         return $num;
 
     }
@@ -1130,7 +1135,7 @@ class Order extends Api
     //   预约配送单40分钟之前提示语音三次自动取消
     public function hasNewOrder1(){
 
-        $data = $this->request->request();
+        /*$data = $this->request->request();
         $now = time();
         $min_time = $now -45;
         $store_id = $data['store_id'];
@@ -1182,7 +1187,7 @@ class Order extends Api
             'has_app_send_order'=>$has_app_send_order,
             'app_send_order_num'=>$app_send_order_num,
             'app_self_order_num'=>$app_self_order_num,
-        ];
+        ];*/
 
 
    /*     $data = [
@@ -1193,7 +1198,7 @@ class Order extends Api
             'app_self_order_num'=>81002,
         ];*/
 
-        $this->success("success",$data);
+        $this->success("success",[]);
     }
 
 

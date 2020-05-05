@@ -75,6 +75,26 @@ class Crondjob extends Api
         print_r($order_list);exit;
     }
 
+    //把7天前的订单金额转入我的可用余额
+    public function batchHandleOrders(){
+        error_log(var_export(['test'=>111],1),3,"/opt/app-root/src/test.txt");
+        $now = time();
+        $serven_days_ago = $now - 7*24*60*60;
+        $list = Db::name('merch_cash_log')
+            ->where('type','=',1)
+            ->where('status','=',0)
+            ->where('update_time',"<",$serven_days_ago)
+            ->select();
+        array_map(function($log){
+            $this->updateHandleOrder($log);
+        },$list);
+        print_r($list);exit;
+    }
+
+    public function updateHandleOrder($merch_cash_log){
+        //把商户记录里面的冻结金额转换成可用金额
+        $this->userRepository->updateMerchMoneyToAvailable($merch_cash_log);
+    }
 
 
 

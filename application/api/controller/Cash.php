@@ -130,7 +130,9 @@ class Cash extends Api
         $now = time();
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getTUserInfo($openid);
+        //print_r($user_info);exit;
         $member_cash_log = $this->orderRepository->getMemberCashLog($user_info['user_id']);
+
         $response_info = [];
         $user_data = [
             'user_money'=>$user_info['user_money'],

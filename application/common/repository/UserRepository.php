@@ -64,11 +64,12 @@ class UserRepository
     public function validRiderCompany($mobile){
         $riderCompanyBindDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
         $riderCompanyBindDb->alias('rcb');
-        $riderCompanyBindDb->field('rcb.mobile,rc.name as company_name');
+        $riderCompanyBindDb->field('rcb.mobile,rc.name as company_name,rcb.total_money,rcb.remain_money,rcb.company_id');
         $riderCompanyBindDb->join(RiderCompany::TABLE_NAME." rc ",'rc.id = rcb.company_id');
         $riderCompanyBindDb->where("rcb.mobile",'=',$mobile);
         $riderCompanyBindDb->where("rcb.status","=",1);
         $result = $riderCompanyBindDb->find();
+
         $riderCompanyBindDb->removeOption();
         return $result;
     }
@@ -85,6 +86,17 @@ class UserRepository
         $userDb->where($map)->setDec('user_money',$amount);
     }
 
+    /**
+     * 给用户发钱
+     * @param $amount
+     * @param $user_id
+     * @throws \think\Exception
+     */
+    public function incUserMoney($amount, $user_id){
+        $userDb = Db::name(User::SHORT_TABLE_NAME);
+        $map = ['user_id'=>$user_id];
+        $userDb->where($map)->setInc('user_money',$amount);
+    }
 
 
     /**
@@ -119,8 +131,12 @@ class UserRepository
      */
     public function withMerchMoney($user_info,$cash){
         $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
-        $map = ['store_id'=>$user_info['store_id']];
-        return $sellerSubDb->where($map)->inc('withdrawing_money',$cash)->dec('merch_money',$cash)->dec('total_money',$cash)->update();
+        $sellerSubDb->removeOption();
+        return $sellerSubDb->where(['store_id'=>$user_info['store_id']])
+            ->inc('withdrawing_money',$cash)
+            ->dec('merch_money',$cash)
+            ->dec('total_money',$cash)
+            ->update();
     }
 
     /**
@@ -214,5 +230,61 @@ class UserRepository
     }
 
 
+     public function getRiderChargeList($mobile,$company_id){
+         $list = Db::name('rider_company_charge')
+            ->where('mobile','=',$mobile)
+            ->where('company_id','=',$company_id)
+            ->where('status','=',2)
+            ->select();
+        return $list;
+     }
+
+    public function chargeRiderWhileValid($charge,$user_id){
+        //给用户加钱
+        $this->incUserMoney($charge['money'],$user_id);
+        //给用户增加收益记录
+        $arr = [
+            'user_id'=>$user_id,
+            'type'=>MemberCashLogE::TYPE['company_charge_member'],
+            'way'=>MemberCashLogE::WAY['in'],
+            'tip'=>MemberCashLogE::TIP['company_charge_member'],
+            'cash'=>$charge['money'],
+            'order_no'=>'CHA_'.$user_id.time(),
+            'status'=>MemberCashLogE::STATUS['done'],
+            'update_time'=>time(),
+        ];
+         Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
+        //减少骑手-商家绑定表中的余额
+        $result1 = Db::name('rider_company_bind')
+            ->where('company_id','=',$charge['company_id'])
+            ->where('mobile','=',$charge['mobile'])
+            ->dec('remain_money',$charge['money'])
+            ->update();
+
+        //将rider_company_charge表状态设为已支付
+        $result2 = Db::name('rider_company_charge')
+            ->where('id','=',$charge['id'])
+            ->update(['status'=>RiderCompanyCharge::STATUS['done'],'update_time'=>time(),'rider_id'=>$user_id]);
+    }
+
+
+    /**
+     * @param $merch_cash_log
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function updateMerchMoneyToAvailable($merch_cash_log){
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$merch_cash_log['store_id']];
+        $sellerSubDb->where($map)
+            ->dec('frozen_money',$merch_cash_log['cash'])
+            ->inc('merch_money',$merch_cash_log['cash'])
+            ->update();
+
+        $arr = ['status'=>MerchCashLogE::STATUS['done'],'update_time'=>time()];
+        $map = ['id'=>$merch_cash_log['id']];
+        Db::name('merch_cash_log')->where($map)->update($arr);
+
+    }
 
 }

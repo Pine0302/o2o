@@ -255,6 +255,7 @@ class Store extends Api
             'store_end_time'=>$store_info['store_end_time'],
             'distance'=>number_format($distance/1000,2),
             'store_status'=>$store_info['store_state'],
+            'logo' => $this->getImage($store_info['image'],$store_info['image_oss']),
         ];
         $data = [
             'data'=>$arr,

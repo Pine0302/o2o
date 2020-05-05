@@ -460,6 +460,7 @@ class Ueditor extends Base
            );
         
         $upload_max_filesize = @ini_get('file_uploads') ? ini_get('upload_max_filesize') :'unknown';
+
         if (true !== $result || !$file) {
             $state = "ERROR 图片过大, 最大不能超过: $upload_max_filesize";
         } else {
