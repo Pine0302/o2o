@@ -13,6 +13,7 @@ class MemberCashLogE
         'member_charge' => 1,           //个人充值
         'member_consume' => 2,          //个人消费
         'company_charge_member' => 3,   //公司给个人充值
+        'order_retreat' => 4,   //订单退款
     ];
     const WAY = [
         'in' => 1,      //资金流入
@@ -25,6 +26,7 @@ class MemberCashLogE
         'member_charge' => '个人充值',           //个人充值
         'member_consume' => '个人消费',          //个人消费
         'company_charge_member' => '公司给个人充值',   //公司给个人充值
+        'order_retreat' => '商家退款',   //公司给个人充值
     ];
     const METHOD = [
         'wechat' => 1,      //微信支付

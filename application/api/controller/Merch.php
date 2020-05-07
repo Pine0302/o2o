@@ -367,6 +367,7 @@ class Merch extends Api
         switch ($status){
             case OrderE::ORDER_STATUS['DONE_BACK']:  //同意取消
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
+                $this->orderRepository->retreatUserMoney($order_detail);
                 $order_status = OrderE::ORDER_STATUS['DONE_BACK'];
                 break;
             case OrderE::ORDER_STATUS['UNDONE_BACK']:  //拒绝取消订单

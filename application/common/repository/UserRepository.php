@@ -135,7 +135,7 @@ class UserRepository
         return $sellerSubDb->where(['store_id'=>$user_info['store_id']])
             ->inc('withdrawing_money',$cash)
             ->dec('merch_money',$cash)
-            ->dec('total_money',$cash)
+            //->dec('total_money',$cash)
             ->update();
     }
 

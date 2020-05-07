@@ -109,7 +109,8 @@ class Order extends Api
                 'num'=>$vc['goods_num'],
                 'price'=>$vc['key_price'],
                 'total_price'=>$item_price,
-                'cat_id'=>$vc['cat_id']
+                'cat_id'=>$vc['cat_id'],
+                'goods_image'=>'https://'.$_SERVER['HTTP_HOST'].$vc['original_img'],
             ];
         }
 
@@ -485,6 +486,7 @@ class Order extends Api
             $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
 
             $arr_response[$ko]['store_info'] = [
+                'store_id'=>$store_arr['store_id'],
                 'store_name'=>$store_arr['store_name'],
                 'pic'=>$pic,
                 'store_phone'=>$store_arr['store_phone'],
@@ -520,6 +522,7 @@ class Order extends Api
 
             $order_info = [
                 'order_id'=>$vo['order_id'],
+                'type'=>$vo['type'],
                 //    'shipping_price'=>$vo['shipping_price'],
                 // 'coupon_price'=>$vo['coupon_price'],
                 //  'goods_price'=>$vo['goods_price'],

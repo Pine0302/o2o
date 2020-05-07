@@ -165,6 +165,42 @@ class OrderRepository
         Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);
     }
 
+    /**
+     * 商家同意退单之后给骑手退钱
+     * @param $order_detail
+     */
+    public function retreatUserMoney($order_detail){
+        $user_id = $order_detail['user_id'];
+        $cash = $order_detail['order_amount'];
+        Db::startTrans();
+        try {
+            //给用户加钱
+            $userRepository = new UserRepository();
+            $userRepository->incUserMoney($cash,$user_id);
+            //给用户增加加钱记录
+            $arr = [
+                'user_id'=>$user_id,
+                'type'=>MemberCashLogE::TYPE['order_retreat'],
+                'way'=>MemberCashLogE::WAY['in'],
+                'tip'=>MemberCashLogE::TIP['order_retreat'],
+                'cash'=>$cash,
+                'order_no'=>$order_detail['order_sn'],
+                'status'=>MemberCashLogE::STATUS['done'],
+                'update_time'=>time(),
+                'method'=>MemberCashLogE::METHOD['cash']
+            ];
+            Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
+            //减少商家的销售额
+            $result = Db::name('seller_sub')->where('store_id','=',$order_detail['store_id'])->setDec('total_money',$cash);
+            // 提交事务
+            Db::commit();
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+        }
+        return $result;
+    }
+
     public function addCashOrder($data){
         return  Db::name('cash_order')->insertGetId($data);
     }
