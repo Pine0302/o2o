@@ -145,4 +145,38 @@ class Crondjob extends Api
 
     }
 
+    public function flushDBs(){
+        Db::table('cart')->query('truncate tp_article_bak');
+        Db::table('cart')->query('truncate tp_goods');
+        Db::table('cart')->query('truncate tp_goods_activity');
+        Db::table('cart')->query('truncate tp_goods_attr');
+        Db::table('cart')->query('truncate tp_goods_attribute');
+        Db::table('cart')->query('truncate tp_goods_category');
+        Db::table('cart')->query('truncate tp_goods_images');
+        Db::table('cart')->query('truncate tp_goods_plus');
+        Db::table('cart')->query('truncate tp_goods_type');
+        Db::table('cart')->query('truncate tp_goods_visit');
+        Db::table('cart')->query('truncate tp_goods_images');
+        Db::table('cart')->query('truncate tp_member_cash_log');
+        Db::table('cart')->query('truncate tp_merch_cash_log');
+        Db::table('cart')->query('truncate tp_order');
+        Db::table('cart')->query('truncate tp_order_action');
+        Db::table('cart')->query('truncate tp_order_goods');
+        Db::table('cart')->query('truncate tp_order_num');
+        Db::table('cart')->query('truncate tp_plus_attr');
+        Db::table('cart')->query('truncate tp_recharge');
+        Db::table('cart')->query('truncate tp_rider_company');
+        Db::table('cart')->query('truncate tp_rider_company_bind');
+        Db::table('cart')->query('truncate tp_rider_company_charge');
+        Db::table('cart')->query('truncate tp_seller_sub');
+        Db::table('cart')->query('truncate tp_store_sub');
+        Db::table('cart')->query('truncate tp_store_sub_extend');
+        Db::table('cart')->query('truncate tp_users');
+        Db::table('cart')->query('truncate tp_withdrawals');
+        Db::table('cart')->query('truncate tp_spec_goods_price');
+        Db::table('cart')->query('truncate tp_spec_image');
+        Db::table('cart')->query('truncate tp_spec_item');
+
+    }
+
 }
