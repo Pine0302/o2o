@@ -306,6 +306,7 @@ class Merch extends Api
                 'total_price'=>$order['order_amount'],
                 'package_fee'=>$order['package_fee'],
                 'way'=>$order['way'],
+                'type'=>$order['type'],
                 'order_status'=>$order['order_status'],
                 'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$order['order_status']],
                 'order_num'=>$order['order_num'],
@@ -368,6 +369,8 @@ class Merch extends Api
             case OrderE::ORDER_STATUS['DONE_BACK']:  //同意取消
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
                 $this->orderRepository->retreatUserMoney($order_detail);
+                $this->userRepository->retreatMerchMoney($order_detail);
+                $this->userRepository->addMerchReateatLog($order_detail);
                 $order_status = OrderE::ORDER_STATUS['DONE_BACK'];
                 break;
             case OrderE::ORDER_STATUS['UNDONE_BACK']:  //拒绝取消订单
@@ -376,6 +379,7 @@ class Merch extends Api
                 break;
             case OrderE::ORDER_STATUS['TAKE']:  //商家接单
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
+
                 $order_status = OrderE::ORDER_STATUS['TAKE'];
                 break;
             case OrderE::ORDER_STATUS['DONE']:  //订单已完成

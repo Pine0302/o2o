@@ -114,6 +114,44 @@ class UserRepository
         return $sellerSubDb->where($map)->inc('frozen_money',$per*$order_info['order_amount'])->inc('total_money',$order_info['order_amount'])->update();
     }
 
+    /**
+     * * 商家给用户退款
+     * @param $order_info
+     * @param $store_sub_info
+     * @return int|string
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function retreatMerchMoney($order_info){
+        $store_sub_info = Db::name('store_sub')->where('store_id','=',$order_info['store_id'])->find();
+        $per = $store_sub_info['withdraw_percent']/100;
+        $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
+        $map = ['store_id'=>$order_info['store_id']];
+        return $sellerSubDb->where($map)->dec('frozen_money',$per*$order_info['order_amount'])->dec('total_money',$order_info['order_amount'])->update();
+    }
+
+    /**
+     * 增加商家退款记录
+     * @param $user_info
+     * @param $cash
+     * @return int|string
+     */
+    public function addMerchReateatLog($order_info){
+
+        $order_no= $order_info['order_sn'];
+        $arr = [
+            'store_id'=>$order_info['store_id'],
+            'type'=>MerchCashLogE::TYPE['merch_retreat'],
+            'way'=>MerchCashLogE::WAY['out'],
+            'tip'=>MerchCashLogE::TIP['merch_retreat'],
+            'cash'=>$order_info['order_amount'],
+            'order_no'=>$order_no,
+            'status'=>MerchCashLogE::STATUS['merch_retreat'],
+            'update_time'=>time(),
+        ];
+        return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
+    }
+
 
     public function raiseUserMoney($order_info,$user_info){
         $amount = $order_info['total_num'];

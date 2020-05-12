@@ -12,6 +12,7 @@ class MerchCashLogE
     const TYPE = [
         'merch_order' => 1,           //商家订单成交增加记录
         'merch_withdraw' => 2,          //商家提现减少记录
+        'merch_retreat' => 3,          //商家提现减少记录
 
     ];
     const WAY = [
@@ -24,10 +25,12 @@ class MerchCashLogE
         'withdraw'=>2,//提现中
         'withdraw_done'=>3,//提现到账
         'withdraw_undone'=>4,//提现失败被拒
+        'merch_retreat'=>5,//提现失败被拒
     ];
     const TIP = [
         'merch_order' => '订单收益',           //商家订单成交增加余额
         'merch_withdraw' => '提现',          //商家提现减少余额
+        'merch_retreat' => '退款',          //商家提现减少余额
     ];
 
     const STATUS_CH = [
@@ -36,6 +39,7 @@ class MerchCashLogE
         '2'=>'提现中',//提现中
         '3'=>'提现到账',//提现到账
         '4'=>'提现失败',//提现失败被拒
+        '5'=>'已退款',//提现失败被拒
     ];
 
 }

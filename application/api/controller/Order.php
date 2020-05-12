@@ -248,7 +248,21 @@ class Order extends Api
             $way = 2;
         }*/
 
-        $app_time = isset($data['app_time']) ? strtotime($data['app_time']):$now ; //预约时间
+        $app_time = isset($data['app_time']) ? $data['app_time']:0 ; //预约时间
+
+        if(!empty($data['app_time'])){
+            $app_time_arr = explode(" ",$app_time);
+            if(mb_substr($app_time_arr[0],0,1)=="今"){
+                $date = date("Y-m-d")." ".$app_time_arr[1];
+
+                $app_time = strtotime($date);
+            }else{
+                $date = date("Y-m-d")." ".$app_time_arr[1];
+                $app_time = strtotime($date);
+                $app_time = $app_time+24*60*60;
+            }
+        }
+
         $mobile = isset($data['mobile']) ? $data['mobile']:'' ; //手机号
         $consignee = isset($data['consignee']) ? $data['consignee']:'' ; //取餐人
         $tips = isset($data['tips']) ? $data['tips']:'' ; //备注

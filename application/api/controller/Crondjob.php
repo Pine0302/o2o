@@ -79,7 +79,7 @@ class Crondjob extends Api
     public function batchHandleOrders(){
         error_log(var_export(['test'=>111],1),3,"/opt/app-root/src/test.txt");
         $now = time();
-        $serven_days_ago = $now - 7*24*60*60;
+        $serven_days_ago = $now - 1*24*60*60;
         $list = Db::name('merch_cash_log')
             ->where('type','=',1)
             ->where('status','=',0)
