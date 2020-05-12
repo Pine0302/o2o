@@ -228,6 +228,7 @@ class OrderRepository
         $result = $orderDb
             ->where('store_id','=',$store_id)
             ->where('pay_time',['>',$start_time],['<',$end_time],'and')
+            ->where('order_status','neq',OrderE::ORDER_STATUS['DONE_BACK'])
             ->sum('order_amount');
         return $result;
 
