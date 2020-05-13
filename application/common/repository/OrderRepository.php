@@ -21,6 +21,7 @@ use app\common\entity\MerchCashLogE;
 use app\common\entity\OrderE;
 use app\common\entity\OrderGoodsE;
 use app\common\entity\RiderCompany;
+use app\common\library\OrderHandle;
 use think\Db;
 use think\Model;
 use app\common\entity\User;
@@ -45,13 +46,14 @@ class OrderRepository
      * @param $pay_type
      * @return int|string
      */
-    public function setOrderPaid($order_info,$pay_type,$transaction_id=''){
+    public function setOrderPaid($order_info,$pay_type,$transaction_id='',$order_num=''){
         $now = time();
         $arr_order_update = [
             'order_status'=>OrderE::ORDER_STATUS['TAKE'],
             'pay_status'=>OrderE::PAY_STATUS['YES'],
             'transaction_id'=>$transaction_id,
             'pay_time'=>$now,
+            'order_num'=>$order_num,
             'pay_type'=>$pay_type,
         ];
         return Db::name(OrderE::SHORT_TABLE_NAME)->where('order_sn','=',$order_info['order_sn'])->update($arr_order_update);

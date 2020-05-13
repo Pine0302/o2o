@@ -12,6 +12,46 @@ use think\Db;
 
 class OrderHandle
 {
+
+
+    //生成codeNum
+    public function getOrderNum($store_id){
+        $key = date("Y-m-d");
+        $result = Db::name('order_num')
+            ->where('day','=',$key)
+            ->where('store_id','=',$store_id)
+            ->find();
+        if(empty($result)){
+            $arr = [
+                'day'=>$key,
+                'num'=>1,
+                'store_id'=>$store_id,
+            ];
+            Db::name('order_num')->insert($arr);
+        }else{
+            Db::name('order_num')
+                ->where('day','=',$key)
+                ->where('store_id','=',$store_id)
+                ->setInc('num',1);
+        }
+        $new_num = Db::name('order_num')
+            ->where('day','=',$key)
+            ->where('store_id','=',$store_id)
+            ->getField('num');
+        return $this->getNum(5,$new_num);
+    }
+
+    public function getNum($length,$num){
+        /*$num_count = strlen($num);
+        $zero_count = $length - $num_count;
+        if($zero_count>0){
+            for($i=0;$i<$zero_count;$i++) {
+                $num = "0".$num;
+            }
+        }*/
+        return $num;
+
+    }
     /**
      * 查看
      * prefix  b2p:公司支付到平台

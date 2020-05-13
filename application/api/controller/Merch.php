@@ -184,6 +184,8 @@ class Merch extends Api
         }
         $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
         $total_num = $this->orderRepository->getTotalOrderByTime($store_id,$start_time,$end_time);
+        $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
+        $total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         $data = [
             'total_money'=>$total_money,
             'total_num'=>$total_num,
@@ -200,8 +202,11 @@ class Merch extends Api
         $store_id = $user_info['store_id'];
         $now = time();
         $seller_info = $this->userRepository->getSellerinfo($store_id);
+        $start_time = strtotime(date("Y-m-d"))-1;
+        $end_time = $now+1;
+        $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
         $data = [
-            'total_money'=>$seller_info['total_money'],
+            'total_money'=>$total_money,
             'available_money'=>$seller_info['merch_money'],
             'frozen_money'=>$seller_info['frozen_money'],
         ];
@@ -225,8 +230,13 @@ class Merch extends Api
             $start_time = strtotime(date("Y-m-d"))-1;
             $end_time = $now+1;
         }
+        $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
+        $store_percent = $store_info['withdraw_percent']/100;
         $cash_list = $this->orderRepository->getMerchCashLogByTime($store_id,$start_time,$end_time);
-        $cash_list = array_map(function($cash){
+        $cash_list = array_map(function($cash) use ($store_percent){
+            if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
+                $cash['cash'] = number_format($store_percent * $cash['cash'],2);
+            }
             $fuhao = ($cash['way']==1) ? "+" : "-";
             $cash_res = [
                 'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
@@ -299,6 +309,9 @@ class Merch extends Api
                 $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
                 $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order['app_time']);
             }
+            if($order['order_status']==OrderE::ORDER_STATUS['UNDONE_BACK']){
+                $order['order_status'] = OrderE::ORDER_STATUS['TAKE'];
+            }
             $fuhao = ($order['way']==1) ? "+" : "-";
             $order_res = [
                 'order_id'=>$order['order_id'],
@@ -315,7 +328,7 @@ class Merch extends Api
                 'app_time'=>$app_time,
                 'user_name'=> $order['consignee'],
                 'mobile'=> $order['mobile'],
-                'tips' => $order['tips'],
+                'tips' => $order['user_note'],
                 'pay_date' => date("Y-m-d",$order['pay_time']),
             ];
             return $order_res;

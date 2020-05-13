@@ -261,11 +261,13 @@ EOT;
         $store_sub_info = $this->storeRepository->getStoreSubByStoreId($order_info['store_id']);
 
         if($order_info['pay_status']==OrderE::PAY_STATUS['NO']){
+            $orderHandle = new OrderHandle();
+            $order_num = $orderHandle->getOrderNum($order_info['store_id']);
             Db::startTrans();
             try{
 
                 //把订单设定为已支付
-                $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['WEIXIN'],$arr['transaction_id']);
+                $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['WEIXIN'],$arr['transaction_id'],$order_num);
 
                 //增加用户支付记录
                 $this->orderRepository->addMemberCashLog($order_info,$user_info,MemberCashLogE::METHOD['wechat']);

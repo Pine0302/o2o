@@ -318,14 +318,14 @@ class Order extends Api
 
         $order_sn = $OrderHandleObj->createOrder("o2o");
 
-        $order_num = $this->getOrderNum();
+       // $order_num = $this->getOrderNum($store_id);
         if($total_price<0){
             $total_price = 0;
         }
      //生成订单
         $order_insert = [
             'order_sn'=>$order_sn,
-            'order_num'=>$order_num,
+            //'order_num'=>$order_num,
             'user_id'=>$user_info['user_id'],
             'type'=>$type,
             'mobile'=>$mobile,
@@ -431,14 +431,15 @@ class Order extends Api
     public function moneyPay($user_info,$order_info){
 
         $store_sub_info = $this->storeRepository->getStoreSubByStoreId($order_info['store_id']);
-
+        $orderHandle = new OrderHandle();
+        $order_num = $orderHandle->getOrderNum($order_info['store_id']);
 
         Db::startTrans();
         try{
             //给用户扣钱
             $this->userRepository->deductMoney($order_info['order_amount'],$user_info['user_id']);
             //把订单设定为已支付
-            $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY'],'');
+            $this->orderRepository->setOrderPaid($order_info,OrderE::PAY_TYPE['MONEY'],'',$order_num);
 
             //增加用户支付记录
             $this->orderRepository->addMemberCashLog($order_info,$user_info,MemberCashLogE::METHOD['cash']);
@@ -488,7 +489,7 @@ class Order extends Api
 
         $order_list = Db::name('order')
             ->where('user_id','=',$user_info['user_id'])
-            ->where('pay_status','=',1)
+            //->where('pay_status','=',1)
             //  ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
             ->order('pay_time desc')
             ->select();
@@ -527,7 +528,14 @@ class Order extends Api
             $arr_response[$ko]['goods_info'] = $goods_info;
             $now_date = date("Y-m-d");
             $app_date = date("Y-m-d",$vo['app_time']);
-            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            if(!$vo['app_time']){
+                $app_time = "立刻到店";
+            }else{
+                $app_date = date("Y-m-d",$vo['app_time']);
+                $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+                $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$vo['app_time']);
+            }
+
             if($total_goods_num==1){
                 $description = $goods_arr[0]['goods_name']." 一件商品";
             }else{
@@ -548,7 +556,7 @@ class Order extends Api
                 'order_num'=>$vo['order_num'],
                 'order_sn'=>$vo['order_sn'],
                 'add_time'=>date("Y-m-d H:i",$vo['add_time']),
-                'app_time'=>date("Y-m-d ".$check_is_tomorrow." H:i",$vo['app_time']),
+                'app_time'=>$app_time,
                 'user_name'=> $vo['consignee'],
                 //   'address'=> $vo['address'],
                 //    'address_num'=> $vo['address_num'],
@@ -648,6 +656,7 @@ class Order extends Api
             'total_price'=>$order_detail['order_amount'],
             'package_fee'=>$order_detail['package_fee'],
             'way'=>$order_detail['way'],
+            'type'=>$order_detail['type'],
             'order_status'=>$order_detail['order_status'],
             'order_status_tip'=>OrderE::ORDER_STATUS_TIP[$order_detail['order_status']],
             'order_num'=>$order_detail['order_num'],
@@ -656,7 +665,7 @@ class Order extends Api
             'app_time'=>$app_time,
             'user_name'=> $order_detail['consignee'],
             'mobile'=> $order_detail['mobile'],
-            'tips' => $order_detail['tips'],
+            'tips' => $order_detail['user_note'],
             'total_goods_num'=>$total_goods_num,
 
         ];
@@ -905,19 +914,29 @@ class Order extends Api
     }*/
 
     //生成codeNum
-    public function getOrderNum(){
+    public function getOrderNum($store_id){
         $key = date("Y-m-d");
-        $result = Db::name('order_num')->where('day','=',$key)->find();
+        $result = Db::name('order_num')
+            ->where('day','=',$key)
+            ->where('store_id','=',$store_id)
+            ->find();
         if(empty($result)){
             $arr = [
                 'day'=>$key,
                 'num'=>1,
+                'store_id'=>$store_id,
             ];
             Db::name('order_num')->insert($arr);
         }else{
-            Db::name('order_num')->where('day','=',$key)->setInc('num',1);
+            Db::name('order_num')
+                ->where('day','=',$key)
+                ->where('store_id','=',$store_id)
+                ->setInc('num',1);
         }
-        $new_num = Db::name('order_num')->where('day','=',$key)->getField('num');
+        $new_num = Db::name('order_num')
+            ->where('day','=',$key)
+            ->where('store_id','=',$store_id)
+            ->getField('num');
         return $this->getNum(5,$new_num);
     }
 
