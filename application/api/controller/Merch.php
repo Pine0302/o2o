@@ -57,6 +57,12 @@ class Merch extends Api
         $this->storeRepository = $storeRepository;
     }
 
+    public function calcShowCash($cash){
+        $cash_fen = $cash * 100;
+        $cash_fen_zheng = ceil($cash_fen);
+        return number_format($cash_fen_zheng/100,2);
+    }
+
     /**
      * 商家授权
      */
@@ -185,7 +191,10 @@ class Merch extends Api
         $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
         $total_num = $this->orderRepository->getTotalOrderByTime($store_id,$start_time,$end_time);
         $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
-        $total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
+        $total_money_real = $total_money/100*$store_info['withdraw_percent'];
+        $total_money = $this->calcShowCash($total_money_real);
+        //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
+        //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         $data = [
             'total_money'=>$total_money,
             'total_num'=>$total_num,
@@ -229,13 +238,17 @@ class Merch extends Api
         if($is_today){
             $start_time = strtotime(date("Y-m-d"))-1;
             $end_time = $now+1;
+        }else{
+            $end_time += 24*60*60;
         }
+
         $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
         $store_percent = $store_info['withdraw_percent']/100;
         $cash_list = $this->orderRepository->getMerchCashLogByTime($store_id,$start_time,$end_time);
         $cash_list = array_map(function($cash) use ($store_percent){
             if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
                 $cash['cash'] = number_format($store_percent * $cash['cash'],2);
+                //$cash['cash'] = $this->calcShowCash($cash['cash']);
             }
             $fuhao = ($cash['way']==1) ? "+" : "-";
             $cash_res = [
@@ -245,6 +258,7 @@ class Merch extends Api
                 'date'=>date("Y-m-d",$cash['update_time']),
                 'order_no'=>$cash['order_no'],
                 'cash' => $fuhao.$cash['cash'],
+                'way' => $cash['way'],
             ];
             return $cash_res;
         },$cash_list);
@@ -263,13 +277,21 @@ class Merch extends Api
             if($date == date("Y-m-d")){
                 $is_today = 1;
             }
-            array_map(function($cash) use (&$arr,$date,$is_today){
+            $today_total = 0;
+
+            array_map(function($cash) use (&$arr,$date,$is_today,&$today_total){
+
                 if($cash['date']==$date){
                     $arr[$date]['cash_list'][] = $cash;
                     $arr[$date]['is_today'] = $is_today;
+                    if($cash['way']==1){
+                        $today_total += $cash['cash'];
+                    }else{
+                        $today_total -= $cash['cash'];
+                    }
                 }
             },$cash_list);
-
+            $arr[$date]['today_total'] = $today_total;
             return $arr;
         },$date_list);
 
@@ -660,6 +682,71 @@ class Merch extends Api
        //$this->wlog($order_info);
         $this->success('success',$data);
 
+    }
+
+
+    /**
+     * 提现猎列表
+     */
+    public function withdrawList(){
+        $data = $this->request->post();
+        $openid = $this->analysisUserJwtToken();
+        $user_info = $this->getGUserInfo($openid);
+
+        $store_id = $user_info['store_id'];
+
+        $now = time();
+
+        $start_time = isset($data['start_time']) ? strtotime($data['start_time']) : 0;
+        $end_time = isset($data['end_time']) ? strtotime($data['end_time']) : $now;
+        $end_time += 24*60*60;
+
+        $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
+        $store_percent = $store_info['withdraw_percent']/100;
+        $cash_list = $this->orderRepository->getMerchWithdrawCashLogByTime($store_id,$start_time,$end_time);
+
+        $cash_list = array_map(function($cash) use ($store_percent){
+
+            $fuhao = ($cash['way']==1) ? "+" : "-";
+            $cash_res = [
+                'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
+                'tip'=>$cash['tip'],
+                'time'=>date("Y-m-d H:i",$cash['update_time']),
+                'date'=>date("Y-m-d",$cash['update_time']),
+                'order_no'=>$cash['order_no'],
+                'cash' => $fuhao.$cash['cash'],
+            ];
+            return $cash_res;
+        },$cash_list);
+
+        $date_list = [];
+        array_map(function($cash)use(&$date_list){
+            if(!in_array($cash['date'],$date_list)){
+                $date_list[] = $cash['date'];
+            }
+        },$cash_list);
+
+        $date_cash = array_map(function($date) use($cash_list){
+            $arr = [];
+            $is_today = 0;
+            if($date == date("Y-m-d")){
+                $is_today = 1;
+            }
+            array_map(function($cash) use (&$arr,$date,$is_today){
+                if($cash['date']==$date){
+                    $arr[$date]['cash_list'][] = $cash;
+                    $arr[$date]['is_today'] = $is_today;
+                }
+            },$cash_list);
+
+            return $arr;
+        },$date_list);
+
+        $data = [
+            'cahs_list'=>$date_cash,
+        ];
+        $this->success('success',$data);
+        $this->success("申请成功");
     }
 
 

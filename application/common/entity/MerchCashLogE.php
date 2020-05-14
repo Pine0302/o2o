@@ -12,7 +12,7 @@ class MerchCashLogE
     const TYPE = [
         'merch_order' => 1,           //商家订单成交增加记录
         'merch_withdraw' => 2,          //商家提现减少记录
-        'merch_retreat' => 3,          //商家提现减少记录
+        'merch_retreat' => 3,          //商家退款减少记录
 
     ];
     const WAY = [
@@ -30,14 +30,14 @@ class MerchCashLogE
     const TIP = [
         'merch_order' => '订单收益',           //商家订单成交增加余额
         'merch_withdraw' => '提现',          //商家提现减少余额
-        'merch_retreat' => '退款',          //商家提现减少余额
+        'merch_retreat' => '退款',          //商家退款减少余额
     ];
 
     const STATUS_CH = [
         '0'=>'冻结中',//冻结中
         '1' => '已到帐',  //冻结结束已到账
-        '2'=>'提现中',//提现中
-        '3'=>'提现到账',//提现到账
+        '2'=>'待处理',//提现中
+        '3'=>'已完成',//提现到账
         '4'=>'提现失败',//提现失败被拒
         '5'=>'已退款',//提现失败被拒
     ];

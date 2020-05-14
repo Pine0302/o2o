@@ -245,7 +245,9 @@ class OrderRepository
 
     public function getMerchCashLogByTime($store_id,$start_time,$end_time){
         $merchCashLogDb = Db::name(MerchCashLogE::SHORT_TABLE_NAME);
-        $result = $merchCashLogDb->where('store_id','=',$store_id)
+        $result = $merchCashLogDb
+            ->where('store_id','=',$store_id)
+            ->where('type','neq',MerchCashLogE::TYPE['merch_withdraw'])
             ->where('update_time',['>',$start_time],['<',$end_time],'and')
             ->order(['id'=>'desc'])
             ->select();
@@ -267,6 +269,17 @@ class OrderRepository
         $orderDb->order(['order_id'=>'desc']);
         $result = $orderDb->select();
         //print_r($orderDb->getLastSql());exit;
+        return $result;
+    }
+
+    public function getMerchWithdrawCashLogByTime($store_id,$start_time,$end_time){
+        $merchCashLogDb = Db::name(MerchCashLogE::SHORT_TABLE_NAME);
+        $result = $merchCashLogDb
+            ->where('store_id','=',$store_id)
+            ->where('type','=',MerchCashLogE::TYPE['merch_withdraw'])
+            ->where('update_time',['>',$start_time],['<',$end_time],'and')
+            ->order(['id'=>'desc'])
+            ->select();
         return $result;
     }
 
