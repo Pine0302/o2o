@@ -72,6 +72,10 @@ class Crondjob extends Api
             ->where('pay_status','=',OrderE::PAY_STATUS['YES'])
             ->where('order_status','=',OrderE::ORDER_STATUS['TAKE'])
             ->select();
+        $order_list = array_map(function($order){
+            $order['pay_time'] = date("Y-m-d H:i",$order['pay_time']);
+            return $order;
+        },$order_list);
         print_r($order_list);exit;
     }
 
