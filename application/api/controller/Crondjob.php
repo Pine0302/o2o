@@ -64,8 +64,14 @@ class Crondjob extends Api
     * */
     public function handleOrder()
     {
+        $is_handel = $_REQUEST['is_handel'] ?? 0;
+        if($is_handel==1){
+            $day = 0;
+        }else{
+            $day = 1;
+        }
         $now = time();
-        $deadline = $now - 24*60*60;
+        $deadline = $now - $day*24*60*60;
         $order_list = Db::name('order')
             ->where('pay_time','<',$deadline)
             ->where('app_time','<',$deadline)
@@ -74,21 +80,29 @@ class Crondjob extends Api
             ->select();
         $order_list = array_map(function($order){
             $order['pay_time'] = date("Y-m-d H:i",$order['pay_time']);
-            return $order;
+            $this->orderRepository->changeOrderStatus($order,OrderE::ORDER_STATUS['DONE']);
         },$order_list);
-        print_r($order_list);exit;
+
     }
 
     //把7天前的订单金额转入我的可用余额
     public function batchHandleOrders(){
+        $is_handel = $_REQUEST['is_handel'] ?? 0;
+        if($is_handel==1){
+            $day = 0;
+        }else{
+            $day = 1;
+        }
+
         error_log(var_export(['test'=>111],1),3,"/opt/app-root/src/test.txt");
         $now = time();
-        $serven_days_ago = $now - 1*24*60*60;
+        $one_days_ago = $now - $day*24*60*60;
         $list = Db::name('merch_cash_log')
             ->where('type','=',1)
             ->where('status','=',0)
-            ->where('update_time',"<",$serven_days_ago)
+            ->where('update_time',"<",$one_days_ago)
             ->select();
+
         array_map(function($log){
             $this->updateHandleOrder($log);
         },$list);
@@ -97,7 +111,10 @@ class Crondjob extends Api
 
     public function updateHandleOrder($merch_cash_log){
         //把商户记录里面的冻结金额转换成可用金额
-        $this->userRepository->updateMerchMoneyToAvailable($merch_cash_log);
+        $order_info = $this->orderRepository->getOrderBySn($merch_cash_log['order_no']);
+        if($order_info['order_status']==OrderE::ORDER_STATUS['DONE']){
+            $this->userRepository->updateMerchMoneyToAvailable($merch_cash_log);
+        }
     }
 
 

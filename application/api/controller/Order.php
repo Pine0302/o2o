@@ -489,7 +489,7 @@ class Order extends Api
 
         $order_list = Db::name('order')
             ->where('user_id','=',$user_info['user_id'])
-            //->where('pay_status','=',1)
+            ->where('pay_status','=',1)
             //  ->where('pay_time',['>',$today_begin],['<',$today_end],'and')
             ->order('pay_time desc')
             ->select();

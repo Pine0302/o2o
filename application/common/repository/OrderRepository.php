@@ -132,16 +132,22 @@ class OrderRepository
      * @param $store_sub_info
      */
     public function addMerchCashLog($order_info,$store_sub_info){
+
         $per = $store_sub_info['withdraw_percent']/100;
+        $orderHandleObj = new OrderHandle();
+        $cash = $orderHandleObj->calcShowCash($order_info['order_amount']*$per);
+
         $arr = [
             'store_id'=>$store_sub_info['store_id'],
             'type'=>MerchCashLogE::TYPE['merch_order'],
             'way'=>MerchCashLogE::WAY['in'],
             'tip'=>MerchCashLogE::TIP['merch_order'],
-            'cash'=>$per * $order_info['order_amount'],
+            'cash'=>$cash,
+            'ori_cash'=>$order_info['order_amount'],
             'order_no'=>$order_info['order_sn'],
             'status'=>MerchCashLogE::STATUS['frozening'],
             'update_time'=>time(),
+            'create_time'=>time(),
         ];
         return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
     }
@@ -233,7 +239,6 @@ class OrderRepository
             ->where('order_status','neq',OrderE::ORDER_STATUS['DONE_BACK'])
             ->sum('order_amount');
         return $result;
-
     }
 
     public function getTotalOrderByTime($store_id,$start_time,$end_time){

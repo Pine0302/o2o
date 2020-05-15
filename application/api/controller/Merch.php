@@ -254,8 +254,8 @@ class Merch extends Api
             $cash_res = [
                 'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
                 'tip'=>$cash['tip'],
-                'time'=>date("Y-m-d H:i",$cash['update_time']),
-                'date'=>date("Y-m-d",$cash['update_time']),
+                'time'=>date("Y-m-d H:i",$cash['create_time']),
+                'date'=>date("Y-m-d",$cash['create_time']),
                 'order_no'=>$cash['order_no'],
                 'cash' => $fuhao.$cash['cash'],
                 'way' => $cash['way'],

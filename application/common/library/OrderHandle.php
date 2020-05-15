@@ -13,6 +13,11 @@ use think\Db;
 class OrderHandle
 {
 
+    public function calcShowCash($cash){
+        $cash_fen = $cash * 100;
+        $cash_fen_zheng = ceil($cash_fen);
+        return number_format($cash_fen_zheng/100,2);
+    }
 
     //生成codeNum
     public function getOrderNum($store_id){
