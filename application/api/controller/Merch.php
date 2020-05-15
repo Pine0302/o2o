@@ -7,6 +7,7 @@ namespace app\api\controller;
 use app\common\controller\Api;
 use app\common\entity\MerchCashLogE;
 use app\common\entity\OrderE;
+use app\common\library\OrderHandle;
 use app\common\library\wx\WXBizDataCrypt;
 use app\common\repository\OrderRepository;
 use app\common\repository\StoreRepository;
@@ -59,7 +60,9 @@ class Merch extends Api
 
     public function calcShowCash($cash){
         $cash_fen = $cash * 100;
+
         $cash_fen_zheng = ceil($cash_fen);
+        //print_r($cash_fen_zheng);
         return number_format($cash_fen_zheng/100,2);
     }
 
@@ -192,7 +195,8 @@ class Merch extends Api
         $total_num = $this->orderRepository->getTotalOrderByTime($store_id,$start_time,$end_time);
         $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
         $total_money_real = $total_money/100*$store_info['withdraw_percent'];
-        $total_money = $this->calcShowCash($total_money_real);
+        $orderHandelObj = new OrderHandle();
+        $total_money = $orderHandelObj->calcShowCash($total_money_real);
         //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         $data = [
@@ -246,10 +250,10 @@ class Merch extends Api
         $store_percent = $store_info['withdraw_percent']/100;
         $cash_list = $this->orderRepository->getMerchCashLogByTime($store_id,$start_time,$end_time);
         $cash_list = array_map(function($cash) use ($store_percent){
-            if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
+           /* if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
                 $cash['cash'] = number_format($store_percent * $cash['cash'],2);
                 //$cash['cash'] = $this->calcShowCash($cash['cash']);
-            }
+            }*/
             $fuhao = ($cash['way']==1) ? "+" : "-";
             $cash_res = [
                 'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
@@ -393,6 +397,7 @@ class Merch extends Api
         $openid = $this->analysisUserJwtToken();
         $user_info = $this->getGUserInfo($openid);
         $order_id = $data['order_id'];
+
         $status = $data['status'];
         //todo  判断该商家是否有修改权限
         $order_detail = Db::name('order')
@@ -400,12 +405,13 @@ class Merch extends Api
             ->where('pay_status','=',1)
             ->where('order_id','=',$order_id)
             ->find();
+        $store_info = $this->storeRepository->getStoreSubByStoreId($order_detail['store_id']);
         switch ($status){
             case OrderE::ORDER_STATUS['DONE_BACK']:  //同意取消
                 $this->orderRepository->changeOrderStatus($order_detail,$status);
                 $this->orderRepository->retreatUserMoney($order_detail);
                 $this->userRepository->retreatMerchMoney($order_detail);
-                $this->userRepository->addMerchReateatLog($order_detail);
+                $this->userRepository->addMerchReateatLog($order_detail,$store_info);
                 $order_status = OrderE::ORDER_STATUS['DONE_BACK'];
                 break;
             case OrderE::ORDER_STATUS['UNDONE_BACK']:  //拒绝取消订单
@@ -711,8 +717,8 @@ class Merch extends Api
             $cash_res = [
                 'status_ch'=>MerchCashLogE::STATUS_CH[$cash['status']],
                 'tip'=>$cash['tip'],
-                'time'=>date("Y-m-d H:i",$cash['update_time']),
-                'date'=>date("Y-m-d",$cash['update_time']),
+                'time'=>date("Y-m-d H:i",$cash['create_time']),
+                'date'=>date("Y-m-d",$cash['create_time']),
                 'order_no'=>$cash['order_no'],
                 'cash' => $fuhao.$cash['cash'],
             ];

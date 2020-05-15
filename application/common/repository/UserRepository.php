@@ -109,9 +109,15 @@ class UserRepository
      */
     public function raiseMerchMoney($order_info,$store_sub_info){
         $per = $store_sub_info['withdraw_percent']/100;
+        $orderhandleObj = new OrderHandle();
+        $real_money = $orderhandleObj ->calcShowCash($per*$order_info['order_amount']);
         $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
         $map = ['store_id'=>$order_info['store_id']];
-        return $sellerSubDb->where($map)->inc('frozen_money',$per*$order_info['order_amount'])->inc('total_money',$order_info['order_amount'])->update();
+        return $sellerSubDb->where($map)
+            ->inc('frozen_money',$real_money)
+            ->inc('total_real_money',$real_money)
+            ->inc('total_money',$order_info['order_amount'])
+            ->update();
     }
 
     /**
@@ -125,9 +131,14 @@ class UserRepository
     public function retreatMerchMoney($order_info){
         $store_sub_info = Db::name('store_sub')->where('store_id','=',$order_info['store_id'])->find();
         $per = $store_sub_info['withdraw_percent']/100;
+        $orderHandelObj = new OrderHandle();
+        $real_money = $orderHandelObj->calcShowCash($per*$order_info['order_amount']);
         $sellerSubDb = Db::name(SellerSub::SHORT_TABLE_NAME);
         $map = ['store_id'=>$order_info['store_id']];
-        return $sellerSubDb->where($map)->dec('frozen_money',$per*$order_info['order_amount'])->dec('total_money',$order_info['order_amount'])->update();
+        return $sellerSubDb->where($map)
+            ->dec('frozen_money',$real_money)
+            ->dec('total_real_money',$real_money)
+            ->dec('total_money',$order_info['order_amount'])->update();
     }
 
     /**
@@ -136,18 +147,22 @@ class UserRepository
      * @param $cash
      * @return int|string
      */
-    public function addMerchReateatLog($order_info){
-
+    public function addMerchReateatLog($order_info,$store_info){
+        $real_amount = $order_info['order_amount'] * $store_info['withdraw_percent']/100;
+        $orderHandleObj = new OrderHandle();
+        $cash_real = $orderHandleObj->calcShowCash($real_amount);
         $order_no= $order_info['order_sn'];
         $arr = [
             'store_id'=>$order_info['store_id'],
             'type'=>MerchCashLogE::TYPE['merch_retreat'],
             'way'=>MerchCashLogE::WAY['out'],
             'tip'=>MerchCashLogE::TIP['merch_retreat'],
-            'cash'=>$order_info['order_amount'],
+            'cash'=>$cash_real,
+            'ori_cash'=>$order_info['order_amount'],
             'order_no'=>$order_no,
             'status'=>MerchCashLogE::STATUS['merch_retreat'],
             'update_time'=>time(),
+            'create_time'=>$order_info['pay_time'],
         ];
         return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
     }
@@ -173,7 +188,7 @@ class UserRepository
         return $sellerSubDb->where(['store_id'=>$user_info['store_id']])
             ->inc('withdrawing_money',$cash)
             ->dec('merch_money',$cash)
-            //->dec('total_money',$cash)
+            ->dec('total_real_money',$cash)
             ->update();
     }
 
@@ -205,6 +220,7 @@ class UserRepository
             'order_no'=>$order_no,
             'status'=>MerchCashLogE::STATUS['withdraw'],
             'update_time'=>time(),
+            'create_time'=>time(),
         ];
         return Db::name(MerchCashLogE::SHORT_TABLE_NAME)->insert($arr);
     }

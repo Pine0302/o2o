@@ -197,9 +197,9 @@ class OrderRepository
                 'update_time'=>time(),
                 'method'=>MemberCashLogE::METHOD['cash']
             ];
-            Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
+            $result = Db::name(MemberCashLogE::SHORT_TABLE_NAME)->insert($arr);
             //减少商家的销售额
-            $result = Db::name('seller_sub')->where('store_id','=',$order_detail['store_id'])->setDec('total_money',$cash);
+            //$result = Db::name('seller_sub')->where('store_id','=',$order_detail['store_id'])->setDec('total_money',$cash);
             // 提交事务
             Db::commit();
         } catch (\Exception $e) {

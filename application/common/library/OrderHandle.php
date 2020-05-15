@@ -15,7 +15,12 @@ class OrderHandle
 
     public function calcShowCash($cash){
         $cash_fen = $cash * 100;
-        $cash_fen_zheng = ceil($cash_fen);
+        $str_cash_fen = strval($cash_fen);
+        if(strpos($str_cash_fen,".")){
+            $cash_fen_zheng = ceil($cash_fen);
+        }else{
+            $cash_fen_zheng = $cash_fen;
+        }
         return number_format($cash_fen_zheng/100,2);
     }
 
