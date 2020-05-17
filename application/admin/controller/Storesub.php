@@ -555,6 +555,20 @@ class Storesub extends Base{
             $store['average_consume']  = I('average_consume');
             $store['package_fee']  = I('package_fee');
 
+
+            $image = $map['image'];
+            $image_oss ='';
+            if(!empty($image)){
+                $ossLibraryObj = new Oss();
+                $pos = strripos($image,'/',0);
+                $file_name = mb_substr($image,$pos+1);
+                $file_path = mb_substr($image,1,$pos);
+                $server_path = "/opt/app-root/src/";
+                $image_oss = $ossLibraryObj->uploadPicToOs($server_path,$file_path,$file_name);
+            }
+
+            $store['image'] = $image;
+            $store['image_oss'] = $image_oss;
            $result =  $a = M('store_sub')->where(array('store_id'=>$store['store_id']))->save($store);
            // var_dump($result);
            // var_dump($store);
@@ -1032,7 +1046,13 @@ class Storesub extends Base{
 
         $count = Db::name('merch_cash_log')->alias('w')->where($where)->count();
         $Page = new Page($count, 20);
-        $list = Db::name('merch_cash_log')->alias('w')->field('w.*,u.*')->join('__SELLER_SUB__ u', 'u.store_id = w.store_id', 'INNER')->where($where)->order("w.id desc")->limit($Page->firstRow . ',' . $Page->listRows)->select();
+        $list = Db::name('merch_cash_log')
+            ->alias('w')
+            ->field('w.*,u.*,s.store_name')
+            ->join('__SELLER_SUB__ u', 'u.store_id = w.store_id', 'INNER')
+            ->join('__STORE_SUB__ s', 's.store_id = w.store_id', 'INNER')
+            ->where($where)->order("w.id desc")
+            ->limit($Page->firstRow . ',' . $Page->listRows)->select();
         //print_r($list);exit;
         //$this->assign('create_time',$create_time2);
         $show = $Page->show();

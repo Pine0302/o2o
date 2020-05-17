@@ -174,8 +174,8 @@ class Weixinpay
 
         $weixinPay = new WeixinpayClass();
         $order = [
-            // 'total_fee'=>$order_info['order_amount'] * 100,
-            'total_fee'=>1,
+             'total_fee'=>$order_info['order_amount'] * 100,
+            //'total_fee'=>1,
             'out_trade_no'=>$code,
             'product_id'=>$user_info['user_id'],
             'openId'=>$user_info['openid'],

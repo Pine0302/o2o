@@ -55,6 +55,15 @@ class CompanyRepository
         return $companyDb->where('name','=',$company_name)->find();
     }
 
+    public function getCompanyByRiderId($id){
+        $riderCompanyBindDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        return $riderCompanyBindDb
+            ->alias('rcb')
+            ->join('tp_rider_company rc','rc.id = rcb.company_id','left')
+            ->where('rcb.rider_id','=',$id)
+            ->field('rc.*')
+            ->find();
+    }
     /**
      * 获取绑定的骑手列表
      * @param $condition
@@ -71,9 +80,14 @@ class CompanyRepository
         if(!empty($condition['company_id'])){
             $companyRiderDb->where('rcb.company_id','=',$condition['company_id']);
         }
-        $companyRiderDb->join(User::TABLE_NAME.' u ','u.user_id = rcb.rider_id','inner');
+        $companyRiderDb->join(User::TABLE_NAME.' u ','u.user_id = rcb.rider_id','left');
         $companyRiderDb->join(RiderCompany::TABLE_NAME.' rc ','rc.id = rcb.company_id','inner');
-        return $companyRiderDb->field('u.*,rc.name as company_name')->limit($offset,$length)->select();
+
+        $result =  $companyRiderDb
+            ->field('rc.name as company_name,rcb.*,u.user_money')
+            ->limit($offset,$length)
+            ->select();
+        return $result;
     }
 
 

@@ -6,8 +6,8 @@
     <div class="fixed-bar">
         <div class="item-title">
             <div class="subject">
-                <h3>会员管理</h3>
-                <h5>网站系统会员索引与管理</h5>
+                <h3>骑手管理</h3>
+                <h5><网站系统>骑手</网站系统>索引与管理</h5>
             </div>
         </div>
     </div>
@@ -18,14 +18,14 @@
             <span title="收起提示" id="explanationZoom" style="display: block;"></span>
         </div>
         <ul>
-            <li>会员列表管理, 可以给会员群发站内信、邮件等.</li>
-            <li>分销系统可以查看会员上下级信息.</li>
+            <li>骑手列表管理, <可以给>骑手</可以给>群发站内信、邮件等.</li>
+            <li><分销系统可以查看>骑手</分销系统可以查看>上下级信息.</li>
         </ul>
     </div>
     <div class="flexigrid">
         <div class="mDiv">
             <div class="ftitle">
-                <h3>会员列表</h3>
+                <h3>骑手列表</h3>
                 <h5>(共<span id="user_count"></span>条记录)</h5>
             </div>
             <div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
@@ -33,7 +33,7 @@
                 <input type="hidden" name="order_by" value="user_id">
                 <input type="hidden" name="sort" value="desc">
                 <input type="hidden" name="account" value="" id="account" />
-                <input type="hidden" name="nickname" value="" id="nickname" />
+                <input type="hidden" name="companmy_name" value="" id="companmy_name" />
                 <input type="hidden" name="user_ids" value="" id="user_ids" />
                 <!--分销时查看下级人数都有哪些-->
                 <input type="hidden" name="first_leader" value="{$_GET['first_leader']}">
@@ -42,8 +42,9 @@
                 <div class="sDiv">
                     <div class="sDiv2">
                         <select class="select" name="search_type" id="search_type">
-                            <option name="account" value="">会员手机号</option>
-                            <!--<option name="search_key" value="">会员账户</option>-->
+
+                            <option name="search_key" value="">公司名称/骑手手机号</option>
+
                         </select>
                         <input type="text" id="search_key" size="30" class="qsbox" placeholder="查询"
                                value="{$Request.param.search_key}">
@@ -57,15 +58,15 @@
             <div class="tDiv2">
                 <div class="fbutton">
                     <!--<a href="{:U('User/add_user')}">
-                        <div class="add" title="添加会员">
-                            <span><i class="fa fa-plus"></i>添加会员</span>
+                        <div class="add" title="添加骑手">
+                            <span><i class="fa fa-plus"></i>添加骑手</span>
                         </div>
                     </a>
                 </div>
                 <div class="fbutton">
                     <a href="javascript:;" onclick="exportUser()">
-                        <div class="add" title="导出会员">
-                            <span><i class="fa fa-share"></i>导出会员</span>
+                        <div class="add" title="导出骑手">
+                            <span><i class="fa fa-share"></i>导出骑手</span>
                         </div>
                     </a>
                 </div>
@@ -190,10 +191,10 @@
         if(search_key.length > 0){
             if(search_type == 'search_key'){
                 $('#account').val(search_key);
-
+                //$('#companmy_name').val('');
             }else{
+                //$('#companmy_name').val(search_key);
                 $('#account').val(search_key);
-
             }
         }
         cur_page = page; //当前页面 保存为全局变量
@@ -228,7 +229,7 @@
                 content: url
             });
         }else{
-            layer.msg('请选择会员',{icon:2});
+            layer.msg('请选择骑手',{icon:2});
         }
     }
 

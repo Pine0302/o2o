@@ -16,14 +16,38 @@
 namespace app\admin\controller;
 
 use app\admin\logic\GoodsLogic;
+use app\common\entity\MerchCashLogE;
+use app\common\entity\OrderE;
 use app\common\model\Order;
 use think\Db;
 use think\Page;
+use app\common\repository\CompanyRepository;
+use app\common\repository\UserRepository;
+
 
 class Report extends Base
 {
-	public function _initialize(){
+
+    /**
+     * @var CompanyRepository
+     */
+    private $companyRepository;
+
+    /**
+     * @var UserRepository;
+     */
+    private $userRepository;
+
+    public function __construct(CompanyRepository $companyRepository,UserRepository $userRepository)
+    {
+        parent::__construct();
+        $this->companyRepository = $companyRepository;
+        $this->userRepository = $userRepository;
+    }
+
+    public function _initialize(){
         parent::_initialize();
+
 	}
 	
 	public function index(){
@@ -39,8 +63,7 @@ class Report extends Base
 		}
 		$this->assign('today',$today);
         $select_year = $this->select_year;
-      /*  var_dump($this->begin);
-        var_dump($this->end);exit;*/
+
         if(!empty($this->begin)&&(!empty($this->end))){
             $res = Db::name("order".$select_year)
                 ->field(" COUNT(*) as tnum,sum(total_amount) as amount, FROM_UNIXTIME(add_time,'%Y-%m-%d') as gap ")
@@ -70,9 +93,24 @@ class Report extends Base
 			$amount_arr[] = $tmp_amount;			
 			$sign_arr[] = $tmp_sign;
 			$date = date('Y-m-d',$i);
-			$list[] = array('day'=>$date,'order_num'=>$tmp_num,'amount'=>$tmp_amount,'sign'=>$tmp_sign,'end'=>date('Y-m-d',$i+24*60*60));
+
+			$start_time = $i;
+			$end_time = $i + 24*60*60;
+			$info = $this->saleOrderCount('',$start_time,$end_time);
+			//print_r($info);
+
+
+			$list[] = array(
+			    'day'=>$date,
+                'order_num'=>$info['total_count'],
+                'amount'=>$info['total_amount'],
+                'merch_amount'=>$info['total_merch'],
+                'platfrom_amount'=>$info['total_platform'],
+                'sign'=>$tmp_sign,
+                'end'=>date('Y-m-d',$i+24*60*60));
 			$day[] = $date;
 		}
+
 		!empty($list) && rsort($list);
 		$this->assign('list',$list);
 		$result = array('order'=>$order_arr,'amount'=>$amount_arr,'sign'=>$sign_arr,'time'=>$day);
@@ -185,9 +223,10 @@ class Report extends Base
         return $this->fetch();
     }
 
-    public function saleOrder(){
+    public function saleOrder_bak(){
         $end_time = $this->begin+24*60*60;
         $order_where = "o.add_time>$this->begin and o.add_time<$end_time";  //交易成功的有效订单
+
         $order_count = Db::name('order')->alias('o')->where($order_where)->whereIn('order_status','1,2,4')->count();
         $Page = new Page($order_count,20);
         $order_list = Db::name('order')->alias('o')
@@ -199,6 +238,133 @@ class Report extends Base
         $this->assign('page',$Page);
         return $this->fetch();
     }
+
+    public function saleOrder(){
+
+        $end_time = $this->begin+24*60*60;
+        if($_REQUEST['start_time']&&($_REQUEST['end_time'])){
+            $this->begin = strtotime($_REQUEST['start_time']);
+            $end_time = strtotime($_REQUEST['end_time']);
+        }
+        $order_where = "c.create_time>$this->begin and c.create_time<$end_time";  //交易成功的有效订单
+        $store_id = '';
+        if(!empty($_REQUEST['store_name'])){
+            $store_name = $_REQUEST['store_name'];
+            $order_where .=" and ss.store_name = '$store_name' ";
+            $store_info = Db::name('store_sub')->where('store_name','=',$store_name)->find();
+            $store_id = $store_info['store_id'];
+        }
+
+
+        $order_count = Db::name('merch_cash_log')
+            ->alias('c')
+            ->join('tp_order o', 'o.order_sn = c.order_no', 'INNER')
+            ->join('tp_store_sub ss','ss.store_id = o.store_id','left')
+            ->where($order_where)
+            ->whereIn('c.type','1,3')
+            ->count();
+        $Page = new Page($order_count,20);
+
+
+        $cash_list = Db::name('merch_cash_log')
+            ->alias('c')
+            ->join('tp_order o', 'o.order_sn = c.order_no', 'INNER')
+            ->field('o.order_id,o.order_sn,o.goods_price,o.shipping_price,o.total_amount,o.order_status,o.add_time,u.user_id,u.nickname,c.*,o.mobile,o.package_fee,ss.store_name')
+            ->join('users u','u.user_id = o.user_id','left')
+            ->join('tp_store_sub ss','ss.store_id = o.store_id','left')
+            ->where($order_where)
+            ->whereIn('c.type','1,3')
+            ->order(['c.id'=>'desc'])
+            ->limit($Page->firstRow,$Page->listRows)
+            ->select();
+
+
+        $cash_list = array_map(function($cash){
+            if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
+                $fuhao = "-";
+            }else{
+                $fuhao = '';
+            }
+            $cash['platform_profit'] = $fuhao.($cash['ori_cash'] - $cash['cash']);
+            $cash['cash'] = $fuhao.($cash['cash']);
+            $cash['order_status_ch'] = OrderE::ORDER_STATUS_TIP[$cash['order_status']];
+            $cash['cash_status_ch'] = MerchCashLogE::STATUS_CH[$cash['status']];
+            //获取商户公司
+            $company_info= $this->companyRepository->getCompanyByRiderId($cash['user_id']);
+            if(!empty($company_info)){
+                $cash['company_name'] = $company_info['name'];
+            }else{
+                $cash['company_name'] = '-';
+            }
+            return $cash;
+        },$cash_list);
+
+
+        $start_time = $this->begin;
+        $end_time = $end_time;
+        $info = $this->saleOrderCount($store_id,$start_time,$end_time);
+
+        $this->assign('total_amount',$info['total_amount']);
+        $this->assign('total_count',$info['total_count']);
+        $this->assign('total_merch',$info['total_merch']);
+        $this->assign('total_platform',$info['total_platform']);
+        $this->assign('order_list',$cash_list);
+        $this->assign('store_name',$store_name);
+        $this->assign('page',$Page);
+        return $this->fetch();
+    }
+
+    public function saleOrderCount($store_id="",$start_time,$end_time){
+
+
+        $order_where = "c.create_time>$start_time and c.create_time<$end_time";  //交易成功的有效订单
+
+        if(!empty($store_id)){
+
+            $order_where .=" and ss.store_id = '$store_id' ";
+        }
+
+        $cash_total_list = Db::name('merch_cash_log')
+            ->alias('c')
+            ->join('tp_order o', 'o.order_sn = c.order_no', 'INNER')
+            ->field('o.order_id,o.order_sn,o.goods_price,o.shipping_price,o.total_amount,o.order_status,o.add_time,u.user_id,u.nickname,c.*,o.mobile,o.package_fee,ss.store_name')
+            ->join('users u','u.user_id = o.user_id','left')
+            ->join('tp_store_sub ss','ss.store_id = o.store_id','left')
+            ->where($order_where)
+            ->whereIn('c.type','1,3')
+            ->order(['c.id'=>'desc'])
+            ->select();
+
+        $total_amount = 0;
+        $total_count = 0;
+        $total_merch = 0;
+
+        $cash_total_list = array_map(function($cash) use(&$total_amount,&$total_merch,&$total_count){
+            if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
+                $fuhao = "-";
+                $total_amount -= $cash['ori_cash'];
+                $total_merch -= $cash['cash'];
+                $total_count--;
+            }else{
+                $fuhao = '';
+                $total_amount += $cash['ori_cash'];
+                $total_merch += $cash['cash'];
+                $total_count++;
+            }
+        },$cash_total_list);
+
+        $arr = [
+            'total_amount'=>$total_amount,
+            'total_count'=>$total_count,
+            'total_merch'=>$total_merch,
+            'total_platform'=>$total_amount-$total_merch,
+        ];
+        return $arr;
+
+    }
+
+
+
 
     /**
      * 销售明细列表

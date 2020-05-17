@@ -5,6 +5,7 @@ namespace app\api\controller;
 use app\common\controller\Api;
 use app\common\entity\MemberCashLogE;
 use app\common\entity\OrderE;
+use app\common\library\Dater;
 use app\common\library\wx\WXBizDataCrypt;
 use app\common\repository\OrderRepository;
 use app\common\repository\StoreRepository;
@@ -22,6 +23,7 @@ use app\api\library\NoticeHandle;
 use app\common\library\OrderHandle;
 use fast\Algor;
 use fast\OpenicSf;
+use fast\Date;
 /**
  * 工作相关接口
  */
@@ -496,6 +498,7 @@ class Order extends Api
 
         $arr_response = [];
         $OssUtilsObj = new OssUtils();
+        $dateObj = new Date();
         foreach($order_list as $ko=>$vo){
             $store_arr = Db::name('store_sub')->where('store_id','=',$vo['store_id'])->find();
             $pic = $OssUtilsObj->getImage($store_arr['image'],$store_arr['image_oss']);
@@ -532,7 +535,7 @@ class Order extends Api
                 $app_time = "立刻到店";
             }else{
                 $app_date = date("Y-m-d",$vo['app_time']);
-                $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+                $check_is_tomorrow = $dateObj->checkIsTomorrow($app_date,$now_date);
                 $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$vo['app_time']);
             }
 
@@ -640,8 +643,9 @@ class Order extends Api
         if(!$order_detail['app_time']){
             $app_time = "立刻到店";
         }else{
+            $dateObj = new Date();
             $app_date = date("Y-m-d",$order_detail['app_time']);
-            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            $check_is_tomorrow = $dateObj->checkIsTomorrow($app_date,$now_date);
             $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order_detail['app_time']);
         }
 

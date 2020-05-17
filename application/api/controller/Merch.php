@@ -19,6 +19,7 @@ use think\Request;
 use think\Session;
 use think\Cache;
 use app\common\util\OssUtils;
+use fast\Date;
 /**
  * 工作相关接口
  */
@@ -191,12 +192,17 @@ class Merch extends Api
         if($start_time==$end_time){
             $end_time = $end_time + 24*60*60;
         }
-        $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
+
+      /*  $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);*/
+
+
         $total_num = $this->orderRepository->getTotalOrderByTime($store_id,$start_time,$end_time);
-        $store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
+        /*$store_info = $this->storeRepository->getStoreSubByStoreId($store_id);
         $total_money_real = $total_money/100*$store_info['withdraw_percent'];
         $orderHandelObj = new OrderHandle();
-        $total_money = $orderHandelObj->calcShowCash($total_money_real);
+        $total_money = $orderHandelObj->calcShowCash($total_money_real);*/
+
+        $total_money = $this->getTodayRealIncome($store_id);
         //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         //$total_money = number_format($total_money/100*$store_info['withdraw_percent'],2);
         $data = [
@@ -205,6 +211,23 @@ class Merch extends Api
         ];
         $this->success('success',$data);
     }
+
+    public function getTodayRealIncome($store_id){
+        $now = time();
+        $start_time = strtotime(date("Y-m-d"));
+        $end_time = $now+1;
+        $cash_list = $this->orderRepository->getMerchCashLogByTime($store_id,$start_time,$end_time);
+        $today_total = 0;
+        array_map(function($cash) use (&$today_total){
+                if($cash['way']==1){
+                    $today_total += $cash['cash'];
+                }else{
+                    $today_total -= $cash['cash'];
+                }
+        },$cash_list);
+        return $today_total;
+    }
+
 
     //商家的总收入,可提现金额,待确认金额
     //todo 还没做
@@ -218,6 +241,7 @@ class Merch extends Api
         $start_time = strtotime(date("Y-m-d"))-1;
         $end_time = $now+1;
         $total_money = $this->orderRepository->getTotalPaidMoneyByTime($store_id,$start_time,$end_time);
+        //$total_money = $this->getTodayRealIncome($store_id);
         $data = [
             'total_money'=>$total_money,
             'available_money'=>$seller_info['merch_money'],
@@ -288,11 +312,7 @@ class Merch extends Api
                 if($cash['date']==$date){
                     $arr[$date]['cash_list'][] = $cash;
                     $arr[$date]['is_today'] = $is_today;
-                    if($cash['way']==1){
-                        $today_total += $cash['cash'];
-                    }else{
-                        $today_total -= $cash['cash'];
-                    }
+                    $today_total += $cash['cash'];
                 }
             },$cash_list);
             $arr[$date]['today_total'] = $today_total;
@@ -325,14 +345,14 @@ class Merch extends Api
         }
 
         $order_list = $this->orderRepository->getMerchOrderListFilter($store_id,$start_time,$end_time,$status,$search_data);
-
+        $dateObj = new Date();
         $now_date = date("Y-m-d");
-        $order_list = array_map(function($order) use($now_date){
+        $order_list = array_map(function($order) use($now_date,$dateObj){
             if(!$order['app_time']){
                 $app_time = "立刻到店";
             }else{
                 $app_date = date("Y-m-d",$order['app_time']);
-                $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+                $check_is_tomorrow = $dateObj->checkIsTomorrow($app_date,$now_date);
                 $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order['app_time']);
             }
             if($order['order_status']==OrderE::ORDER_STATUS['UNDONE_BACK']){
@@ -652,8 +672,9 @@ class Merch extends Api
         if(!$order_detail['app_time']){
             $app_time = "立刻到店";
         }else{
+            $dateObj = new Date();
             $app_date = date("Y-m-d",$order_detail['app_time']);
-            $check_is_tomorrow = ($now_date==$app_date) ? '' : "(明天)";
+            $check_is_tomorrow = $dateObj->checkIsTomorrow($app_date,$now_date);
             $app_time = date("Y-m-d ".$check_is_tomorrow." H:i",$order_detail['app_time']);
         }
 

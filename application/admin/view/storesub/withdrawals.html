@@ -73,9 +73,9 @@
                                 <input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);">
                             </div>
                         </th>-->
-                        <th align="center" abbr="article_title" axis="col3" class="" style="width:10%;text-align: left">
+                        <!--<th align="center" abbr="article_title" axis="col3" class="" style="width:10%;text-align: left">
                             <div style="text-align: center; width: 100%;" class="">申请ID</div>
-                        </th>
+                        </th>-->
                         <th align="center" abbr="ac_id" axis="col4" class="" style="width:10%;text-align: left">
                             <div style="text-align: center; width: 100%;" class="">商家id</div>
                         </th>
@@ -167,12 +167,12 @@
                                     {$v.id}
                                 </div>
                             </td>
-                            <td align="center" class="" style="width:25%;text-align: left">
+                           <!-- <td align="center" class="" style="width:25%;text-align: left">
                                 <div style="text-align: center; width: 50px;">{$v.store_id}</div>
-                            </td>
+                            </td>-->
                             <td align="center" class="" style="width:25%;text-align: left">
-                                <div style="text-align: center; width: 100px;">
-                                    {$v.seller_name}
+                                <div style="text-align: center; width: 100%;">
+                                    {$v.store_name}
                                    <!-- <a class="open" href="{:U('Admin/user/detail',array('id'=>$v[user_id]))}" target="blank">
                                         <i class="fa fa-external-link " title="新窗口打开"></i>
                                     </a>-->

@@ -55,6 +55,7 @@ class User extends Api
             $this->error('用户尚未认证手机号',null);
         }
         $valid_info = $this->userRepository->validRiderCompany($user_info['mobile']);
+
         $response =[];
         if(!empty($valid_info)){
             $response = [
@@ -62,6 +63,7 @@ class User extends Api
             ];
             //绑定用户
            $this->userRepository->updateUserByFilter(['rider_auth'=>1,'rider_company_id'=>$valid_info['company_id']],['user_id'=>$user_info['user_id']]);
+           $this->userRepository->bindRiderToCompany($user_info['user_id'],$user_info['mobile'],$valid_info['company_id']);
 
             if($valid_info['remain_money']>0){
                 //给用户发钱

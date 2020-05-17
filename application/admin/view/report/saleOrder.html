@@ -29,19 +29,34 @@
 				<h5>(共{$page->totalRows}条记录)</h5>
 			</div>
 			<div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
-			<!--<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder')}" onSubmit="return check_form();">-->
-				<!--<div class="sDiv">-->
-					<!--<div class="sDiv2" style="margin-right: 10px;">-->
-                        <!--<input type="text" size="30" name="user_name" value="" placeholder="用户名称" class="qsbox">-->
-					<!--</div>-->
-                    <!--<div class="sDiv2" style="margin-right: 10px;">-->
-						<!--<input type="text" size="30" name="store_name" value="" placeholder="店铺名称" class="qsbox">-->
-					<!--</div>-->
-					<!--<div class="sDiv2">-->
-						<!--<input class="btn" value="搜索" type="submit">-->
-					<!--</div>-->
-				<!--</div>-->
-			<!--</form>-->
+			<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder')}">
+				<div class="sDiv">
+					<!--<div class="sDiv2" style="margin-right: 10px;">
+                        <input type="text" size="30" name="user_name" value="" placeholder="用户名称" class="qsbox">
+					</div>-->
+                    <div class="sDiv2" style="margin-right: 10px;">
+						<input type="text" size="30" name="store_name" value="{$store_name}" placeholder="店铺名称" class="qsbox">
+					</div>
+					<div class="sDiv2" style="margin-right: 10px;">
+						<input type="text" size="30" name="start_time" id="start_time" value="{$start_time}" placeholder="起始时间" class="qsbox">
+						<input type="button" class="btn" value="起始时间">
+					</div>
+					<div class="sDiv2" style="margin-right: 10px;">
+						<input type="text" size="30" name="end_time" id="end_time" value="{$end_time}" placeholder="截止时间" class="qsbox">
+						<input type="button" class="btn" value="截止时间">
+					</div>
+					<div class="sDiv2">
+						<input class="btn" value="搜索" type="button" onclick="return check_form();">
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<div class="explanation"  style="height: 80px;">
+			总销售额:{$total_amount} <br>
+			总单数:{$total_count}<br>
+			商家盈利:{$total_merch}<br>
+			平台抽成:{$total_platform}<br>
 		</div>
 
 		<div class="bDiv" style="height: auto;">
@@ -60,16 +75,34 @@
                                 <div style="text-align: center; width: 200px;" class="">主单号</div>
                             </th>-->
 						<th align="center" abbr="ac_id" axis="col4" class=""  style="width:12%;text-align: left">
-							<div  class="">用户名</div>
+							<div  class="">用户手机号</div>
 						</th>
 						<th align="center" abbr="article_show" axis="col5" class=""  style="width:15%;text-align: left">
 							<div  class="">商品总价</div>
 						</th>
 						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
-							<div  class="">物流价格</div>
+							<div  class="">餐盒费</div>
 						</th>
 						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
 							<div  class="">订单总价</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">商家收入</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">平台利润</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">商户名称</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">骑手公司</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">订单状态</div>
+						</th>
+						<th align="center" abbr="article_time" axis="col6" class=""  style="width:15%;text-align: left">
+							<div  class="">收益状态</div>
 						</th>
 						<th align="center" abbr="article_time" axis="col6" class=""  style="width:18%;text-align: left">
 							<div  class="">下单日期</div>
@@ -91,17 +124,36 @@
 								<div style="text-align: center; width: 200px;">{$order.master_order_sn}</div>
 							</td>-->
                             <td align="left" class="" style="width:12%;">
-                                <div >{$order.nickname}</div>
+                                <div >{$order.mobile}</div>
                             </td>
 							<td align="center" class="" style="width:15%;">
 								<div >{$order.goods_price}</div>
 							</td>
                             <td align="center" class="" style="width:15%;">
-								<div >{$order.shipping_price}</div>
+								<div >{$order.package_fee}</div>
 							</td>
                             <td align="center" class="" style="width:15%;">
 								<div >{$order.total_amount}</div>
 							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.cash}</div>
+							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.platform_profit}</div>
+							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.store_name}</div>
+							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.company_name}</div>
+							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.order_status_ch}</div>
+							</td>
+							<td align="center" class="" style="width:15%;">
+								<div >{$order.cash_status_ch}</div>
+							</td>
+
 							<td align="center" class="" style="width:18%;">
 								<div >{$order.add_time|date="Y-m-d H:i",###}</div>
 							</td>
@@ -131,11 +183,13 @@
 	});
 
 	function check_form(){
-		if(1==2){
-			layer.alert('请选择完整的时间间隔', {icon: 2});
-			return false;
-		}
-		return true;
+        var start_time = $.trim($('#start_time').val());
+        var end_time =  $.trim($('#end_time').val());
+        if(start_time == '' || end_time == ''){
+            layer.alert('请选择完整的时间间隔', {icon: 2});
+            return false;
+        }
+        $('#search-form').submit();
 	}
 </script>
 </body>

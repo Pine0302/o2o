@@ -253,7 +253,7 @@ class OrderRepository
         $result = $merchCashLogDb
             ->where('store_id','=',$store_id)
             ->where('type','neq',MerchCashLogE::TYPE['merch_withdraw'])
-            ->where('update_time',['>',$start_time],['<',$end_time],'and')
+            ->where('create_time',['>',$start_time],['<',$end_time],'and')
             ->order(['id'=>'desc'])
             ->select();
         return $result;

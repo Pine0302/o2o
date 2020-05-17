@@ -51,6 +51,19 @@ class UserRepository
         $userDb->removeOption();
     }
 
+
+    public function bindRiderToCompany($user_id,$mobile,$company_id){
+        $riderCompanyBindDb = Db::name(RiderCompanyBind::SHORT_TABLE_NAME);
+        $riderCompanyBindDb
+            ->where('company_id','=',$company_id)
+            ->where('mobile','=',$mobile)
+            ->update([
+                'rider_id'=>$user_id,
+                'status'=>1,
+                'update_time'=>time(),
+            ]);
+    }
+
     public function validMobile($openid,$mobile){
         $userDb = Db::name(User::SHORT_TABLE_NAME);
         $userDb->where('mobile','=',$mobile);

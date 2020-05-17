@@ -75,21 +75,40 @@ class Rider extends Base
         $company_id ? $condition['company_id'] = $company_id : false;
 
         if($account){
-            $user_info = $this->userRepository->getUserByMobile($account);
-            if(!empty($user_info['user_id'])){
-                $condition['rider_id'] = $user_info['user_id'];
+            if(preg_match("/^1[34578]\d{9}$/", $account)){
+                $user_info = $this->userRepository->getUserByMobile($account);
+                if(!empty($user_info['user_id'])){
+                    $condition['rider_id'] = $user_info['user_id'];
+                }else{
+                    $count = 0;
+                    $userList = [];
+                    $Page = new AjaxPage($count, 10);
+                    $show = $Page->show();
+                    $this->assign('userList', $userList);
+                    /*$this->assign('level', M('user_level')->getField('level_id,level_name'));*/
+                    $this->assign('page', $show);// 赋值分页输出
+                    $this->assign('pager', $Page);
+                    return $this->fetch();
+
+                }
             }else{
-                $count = 0;
-                $userList = [];
-                $Page = new AjaxPage($count, 10);
-                $show = $Page->show();
-                $this->assign('userList', $userList);
-                /*$this->assign('level', M('user_level')->getField('level_id,level_name'));*/
-                $this->assign('page', $show);// 赋值分页输出
-                $this->assign('pager', $Page);
-                return $this->fetch();
+                $company_info = $this->companyRepository->getCompanyByName($account);
+                if(!$company_info){
+                    $count = 0;
+                    $userList = [];
+                    $Page = new AjaxPage($count, 10);
+                    $show = $Page->show();
+                    $this->assign('userList', $userList);
+                    /*$this->assign('level', M('user_level')->getField('level_id,level_name'));*/
+                    $this->assign('page', $show);// 赋值分页输出
+                    $this->assign('pager', $Page);
+                    return $this->fetch();
+                }else{
+                    $condition['company_id'] = $company_info['id'];
+                }
 
             }
+
         }
         if(!empty($company_name)){
             $company_info = $this->companyRepository->getCompanyByName($company_name);

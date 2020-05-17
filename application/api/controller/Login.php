@@ -103,7 +103,11 @@ class Login extends Api
         if(!empty($result['purePhoneNumber'])){
             $user_info = $this->getGUserInfo($openid);
             if(!empty($user_info['user_id'])){
-                Db::name('users')->where('user_id','=',$user_info['user_id'])->update(['weixin_mobile'=>$result['purePhoneNumber']]);
+                Db::name('users')->where('user_id','=',$user_info['user_id'])
+                    ->update([
+                        'weixin_mobile'=>$result['purePhoneNumber'],
+                        'mobile'=>$result['purePhoneNumber'],
+                    ]);
             }
         }else{
             $this->error('lostkey',null,10);exit;
@@ -119,32 +123,30 @@ class Login extends Api
     public function mobileLogin(){
         $data = $this->request->post();
         $openid = $this->analysisUserJwtToken();
-        $user_info = $this->getGUserInfo($openid);
+        $user_info = $this->getTUserInfo($openid);
+
         $mobile = $data['mobile'];
 
         //先验证该手机号是否已被使用(除了自己)
         $checkMobile= $this->userRepository->validMobile($openid,$mobile);
+
         if(!empty($checkMobile)){
           //  $this->error('该手机已注册');
         }
         if(!empty($user_info['weixin_mobile'])&&($user_info['weixin_mobile']==$mobile)){
             $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
             $user_info['mobile'] = $mobile;
-
             $valid_info = $this->userRepository->validRiderCompany($user_info['mobile']);
-
             if(!empty($valid_info)){
                 //绑定用户
                 $this->userRepository->updateUserByFilter(['rider_auth'=>1,'rider_company_id'=>$valid_info['company_id']],['user_id'=>$user_info['user_id']]);
-
+                $this->userRepository->bindRiderToCompany($user_info['user_id'],$user_info['mobile'],$valid_info['company_id']);
                 if($valid_info['remain_money']>0){
                     //给用户发钱
                     $rider_charge_list = $this->userRepository->getRiderChargeList($user_info['mobile'],$valid_info['company_id']);
                     array_map(function($charge) use($user_info) {
                         $this->userRepository->chargeRiderWhileValid($charge,$user_info['user_id']);
                     },$rider_charge_list);
-                    //  $this->userRepository->incUserMoney($valid_info['remain_money'],$user_info['user_id']);
-                    //给用户增加收益记录
                 }
             }
             $this->success('登录成功');
@@ -157,13 +159,30 @@ class Login extends Api
 
             if($code==$sms_code){
                 //给用户登录身份
-                $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
+             //   $this->userRepository->updateUserByFilter(['mobile'=>$mobile,'is_login'=>1],['openid'=>$openid]);
+                $valid_info = $this->userRepository->validRiderCompany($mobile);
+                $this->userRepository->updateUserByFilter([
+                    'rider_auth'=>1,
+                    'rider_company_id'=>$valid_info['company_id'],
+                    'mobile'=>$mobile,
+                ],['user_id'=>$user_info['user_id']]);
+                $this->userRepository->bindRiderToCompany($user_info['user_id'],$mobile,$valid_info['company_id']);
+                if($valid_info['remain_money']>0){
+                    //给用户发钱
+                    $rider_charge_list = $this->userRepository->getRiderChargeList($mobile,$valid_info['company_id']);
+                    array_map(function($charge) use($user_info) {
+                        $this->userRepository->chargeRiderWhileValid($charge,$user_info['user_id']);
+                    },$rider_charge_list);
+                }
+
+
+
+
                 $this->success('登录成功');
             }else{
                 $this->error('短信验证码错误');
             }
         }
-
     }
 
     //退出登录

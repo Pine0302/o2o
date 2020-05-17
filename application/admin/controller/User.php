@@ -87,6 +87,52 @@ class User extends Base
         return $this->fetch();
     }
 
+
+
+    public function recharge_rider()
+    {
+        $timegap = urldecode(I('timegap'));
+        $mobile = I('mobile');
+        $company_name = I('name');
+        $map = array();
+        if ($timegap) {
+            $gap = explode(',', $timegap);
+            $begin = $gap[0];
+            $end = $gap[1];
+            $map['rcc.create_time'] = array('between', array(strtotime($begin), strtotime($end)));
+            $this->assign('begin', $begin);
+            $this->assign('end', $end);
+        }
+        if ($mobile) {
+            $map['rcc.mobile'] = array('like', "%$mobile%");
+            $this->assign('mobile', $mobile);
+        }
+        if ($company_name) {
+            $map['rc.name'] = array('like', "%$company_name%");
+            $this->assign('name', $company_name);
+        }
+        $count = M('rider_company_charge')
+            ->alias('rcc')
+            ->field('rcc.*,rc.name')
+            ->join('tp_rider_company rc', 'rc.id = rcc.company_id', 'LEFT')
+            ->where($map)
+            ->count();
+        $page = new Page($count);
+        $lists = M('rider_company_charge')
+            ->alias('rcc')
+            ->field('rcc.*,rc.name')
+            ->join('tp_rider_company rc', 'rc.id = rcc.company_id', 'LEFT')
+            ->where($map)
+            ->order('rcc.create_time desc')
+            ->limit($page->firstRow . ',' . $page->listRows)
+            ->select();
+        //$lists = Db::name('rider_company_charge')->join()->where($map)->order('create_time desc')->limit($page->firstRow . ',' . $page->listRows)->select();
+        $this->assign('page', $page->show());
+        $this->assign('pager', $page);
+        $this->assign('lists', $lists);
+        return $this->fetch();
+    }
+
     /**
      * 会员详细信息查看
      */
