@@ -28,8 +28,10 @@
 				<h3>销售明细列表</h3>
 				<h5>(共{$page->totalRows}条记录)</h5>
 			</div>
+			<input type="hidden" id ="exprot_action" value="{:U('Report/saleOrder',array('is_export'=>1))}" />
+			<input type="hidden" id ="search_action" value="{:U('Report/saleOrder',array('is_export'=>0))}" />
 			<div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
-			<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder',array('is_export'=>1))}">
+			<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder',array('is_export'=>0))}">
 				<div class="sDiv">
 					<!--<div class="sDiv2" style="margin-right: 10px;">
                         <input type="text" size="30" name="user_name" value="" placeholder="用户名称" class="qsbox">
@@ -208,6 +210,8 @@
             layer.alert('请选择完整的时间间隔', {icon: 2});
             return false;
         }
+		var search_action = $("#search_action").val();
+		document.getElementById("search-form").action=search_action;
         $('#search-form').submit();
 	}
 
@@ -219,6 +223,8 @@
         if(selected_ids != ''){
             $('input[name="order_ids"]').val(selected_ids.substring(0,selected_ids.length-1));
         }
+        var export_action = $("#exprot_action").val();
+		document.getElementById("search-form").action=export_action;
         $('#search-form').submit();
     }
 
