@@ -29,7 +29,7 @@
 				<h5>(共{$page->totalRows}条记录)</h5>
 			</div>
 			<div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
-			<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder')}">
+			<form class="navbar-form form-inline" id="search-form" method="post" action="{:U('Report/saleOrder',array('is_export'=>1))}">
 				<div class="sDiv">
 					<!--<div class="sDiv2" style="margin-right: 10px;">
                         <input type="text" size="30" name="user_name" value="" placeholder="用户名称" class="qsbox">
@@ -59,6 +59,25 @@
 			平台抽成:{$total_platform}<br>
 		</div>
 
+		<div class="tDiv">
+			<div class="tDiv2">
+				<div class="fbutton">
+					<a href="javascript:exportReport()">
+						<div class="add" title="导出列表所有数据">
+							<span><i class="fa fa-plus"></i>导出数据</span>
+						</div>
+					</a>
+				</div>
+				<div class="fbutton">
+					<!--<a href="/index.php?m=Admin&c=Order&a=add_order">
+                          <div class="add" title="添加订单">
+                            <span><i class="fa fa-plus"></i>添加订单</span>
+                          </div>
+                      </a> -->
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
 		<div class="bDiv" style="height: auto;">
 			<div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
 				<table>
@@ -191,6 +210,18 @@
         }
         $('#search-form').submit();
 	}
+
+    function exportReport(){
+        var selected_ids = '';
+        $('.trSelected' , '#flexigrid').each(function(i){
+            selected_ids += $(this).data('order-id')+',';
+        });
+        if(selected_ids != ''){
+            $('input[name="order_ids"]').val(selected_ids.substring(0,selected_ids.length-1));
+        }
+        $('#search-form').submit();
+    }
+
 </script>
 </body>
 </html>

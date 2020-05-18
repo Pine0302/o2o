@@ -254,7 +254,85 @@ class Report extends Base
             $store_info = Db::name('store_sub')->where('store_name','=',$store_name)->find();
             $store_id = $store_info['store_id'];
         }
+        $is_export = isset($_REQUEST['is_export']) ? $_REQUEST['is_export'] : 0;
 
+        if($is_export == 1){
+
+            $cash_total_list = Db::name('merch_cash_log')
+                ->alias('c')
+                ->join('tp_order o', 'o.order_sn = c.order_no', 'INNER')
+                ->field('o.order_id,o.order_sn,o.goods_price,o.shipping_price,o.total_amount,o.order_status,o.add_time,u.user_id,u.nickname,c.*,o.mobile,o.package_fee,ss.store_name')
+                ->join('users u','u.user_id = o.user_id','left')
+                ->join('tp_store_sub ss','ss.store_id = o.store_id','left')
+                ->where($order_where)
+                ->whereIn('c.type','1,3')
+                ->order(['c.id'=>'desc'])
+                ->select();
+
+
+            $cash_total_list = array_map(function($cash){
+                if($cash['type']==MerchCashLogE::TYPE['merch_retreat']){
+                    $fuhao = "-";
+                }else{
+                    $fuhao = '';
+                }
+                $cash['platform_profit'] = $fuhao.($cash['ori_cash'] - $cash['cash']);
+                $cash['cash'] = $fuhao.($cash['cash']);
+                $cash['order_status_ch'] = OrderE::ORDER_STATUS_TIP[$cash['order_status']];
+                $cash['cash_status_ch'] = MerchCashLogE::STATUS_CH[$cash['status']];
+                //获取商户公司
+                $company_info= $this->companyRepository->getCompanyByRiderId($cash['user_id']);
+                if(!empty($company_info)){
+                    $cash['company_name'] = $company_info['name'];
+                }else{
+                    $cash['company_name'] = '-';
+                }
+                $cash['add_time'] = date("Y-m-d H:i:s",$cash['add_time']);
+                return $cash;
+            },$cash_total_list);
+
+
+
+
+            $strTable ='<table width="500" border="1">';
+            $strTable .= '<tr>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">id</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">订单编号</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">商品总价</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">餐盒费</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">订单总价</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">商家收入</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">平台利润</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">商户名称</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;width:120px;">骑手公司</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="100">订单状态</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="100">收益状态</td>';
+            $strTable .= '<td style="text-align:center;font-size:12px;" width="100">下单日期</td>';
+            $strTable .= '</tr>';
+            if(is_array($cash_total_list)){
+                //$region	= get_region_list();
+                foreach($cash_total_list as $k=>$val){
+                    $strTable .= '<tr>';
+                    $strTable .= '<td style="text-align:center;font-size:12px;">&nbsp;'.$val['order_id'].'</td>';
+                    $strTable .= '<td style="text-align:center;font-size:12px;">&nbsp;'.$val['order_sn'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['goods_price'].' </td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['package_fee'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'."{$val['total_amount']}".' </td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['cash'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['platform_profit'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['store_name'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['company_name'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['order_status_ch'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['cash_status_ch'].'</td>';
+                    $strTable .= '<td style="text-align:left;font-size:12px;">'.$val['add_time'].'</td>';
+                    $strTable .= '</tr>';
+                }
+            }
+            $strTable .='</table>';
+            unset($cash_total_list);
+            downloadExcel($strTable,'cash');
+            exit();
+        }
 
         $order_count = Db::name('merch_cash_log')
             ->alias('c')
