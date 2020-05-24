@@ -37,9 +37,9 @@
     <th align="center" abbr="article_time" axis="col6" style="width: 10%;text-align: left">
       <div class="" onClick="sort('store_count');" >库存</div>
     </th>
-    <!-- <th align="center" abbr="article_time" axis="col6" class="">
+   <th align="center" abbr="article_time" axis="col6" class="" style="width: 15%;text-align: left">
        <div style="text-align: center; width: 50px;" class="" onClick="sort('sort');">排序</div>
-     </th>                 -->
+     </th>
 
   </tr>
   </thead>
@@ -118,10 +118,16 @@
                   {$list.store_count}
                 </div>
                 </td>   -->
-                <td align="center" axis="col0"  style="width: 10%">
+                <td align="center" axis="col0"  style="width: 15%">
                 <div >
                   <input type="text" onKeyUp="this.value=this.value.replace(/[^\d]/g,'')" onpaste="this.value=this.value.replace(/[^\d]/g,'')" onblur="changeTableVal('goods','goods_id','{$list.goods_id}','store_count',this)" size="4" value="{$list.store_count}" />
                 </div>
+                </td>
+
+                <td align="center" axis="col0" style="width: 10%">
+                  <div >
+                    <input type="text" onKeyUp="this.value=this.value.replace(/[^\d]/g,'')" onpaste="this.value=this.value.replace(/[^\d]/g,'')" onblur="changeTableVal('goods','goods_id','{$list.goods_id}','sort',this)" size="4" value="{$list.sort}" />
+                  </div>
                 </td>
 
               </tr>
