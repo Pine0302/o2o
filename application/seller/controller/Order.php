@@ -128,6 +128,15 @@ class Order extends Base {
             ->limit($Page->firstRow,$Page->listRows)
             ->order($sort_order)
             ->select();
+        $orderList = array_map(function($order){
+            $user_info = Db::name('users')->where('user_id','=',$order['user_id'])->find();
+            if(!empty($user_info['mobile'])){
+                $order['user_mobile'] = $user_info['mobile'];
+            }else{
+                $order['user_mobile'] = '-';
+            }
+            return $order;
+        },$orderList);
         $this->assign('orderList',$orderList);
         $this->assign('page',$show);// 赋值分页输出
         $this->assign('pager',$Page);
