@@ -21,6 +21,7 @@ use app\common\entity\MerchCashLogE;
 use app\common\entity\OrderE;
 use app\common\entity\OrderGoodsE;
 use app\common\entity\RiderCompany;
+use app\common\entity\RiderCompanyCharge;
 use app\common\library\OrderHandle;
 use think\Db;
 use think\Model;
@@ -284,6 +285,15 @@ class OrderRepository
             ->where('type','=',MerchCashLogE::TYPE['merch_withdraw'])
             ->where('update_time',['>',$start_time],['<',$end_time],'and')
             ->order(['id'=>'desc'])
+            ->select();
+        return $result;
+    }
+
+    //获取未完成的充值列表
+    public function getUnFinishRiderCompanyChargeList(){
+        $chargeLogDb = Db::name(RiderCompanyCharge::SHORT_TABLE_NAME);
+        $result = $chargeLogDb
+            ->where('status','=',RiderCompanyCharge::STATUS['undone'])
             ->select();
         return $result;
     }

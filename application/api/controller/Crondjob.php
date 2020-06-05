@@ -117,6 +117,18 @@ class Crondjob extends Api
         }
     }
 
+    //每分钟定时把未成功充值的骑手充值掉
+    public function handelRiderCompanyCharge(){
+        $charge_list = $this->orderRepository->getUnFinishRiderCompanyChargeList();
+        array_map(function($charge){
+            $mobile = $charge['mobile'];
+            $getMobileUser = $this->userRepository->getUserByMobile($mobile);
+            if(!empty($getMobileUser['user_id'])){
+                $this->userRepository->chargeRiderWhileValid($charge,$getMobileUser['user_id']);
+            }
+        },$charge_list);
+
+    }
 
 
 
