@@ -347,7 +347,7 @@ class Report extends Base
         $cash_list = Db::name('merch_cash_log')
             ->alias('c')
             ->join('tp_order o', 'o.order_sn = c.order_no', 'INNER')
-            ->field('o.order_id,o.order_sn,o.goods_price,o.shipping_price,o.total_amount,o.order_status,o.add_time,u.user_id,u.nickname,c.*,o.mobile,o.package_fee,ss.store_name')
+            ->field('c.*,o.order_id,o.order_sn,o.goods_price,o.shipping_price,o.total_amount,o.order_status,o.add_time,o.user_id as user_id,u.nickname,o.mobile,o.package_fee,ss.store_name')
             ->join('users u','u.user_id = o.user_id','left')
             ->join('tp_store_sub ss','ss.store_id = o.store_id','left')
             ->where($order_where)
@@ -372,12 +372,10 @@ class Report extends Base
             if(!empty($company_info)){
                 $cash['company_name'] = $company_info['name'];
             }else{
-                $cash['company_name'] = '-';
+                $cash['company_name'] = '--';
             }
             return $cash;
         },$cash_list);
-
-
         $start_time = $this->begin;
         $end_time = $end_time;
         $info = $this->saleOrderCount($store_id,$start_time,$end_time);
