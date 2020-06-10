@@ -83,25 +83,27 @@ class Store extends Api
                 $lnglat_tx = unserialize($vd['lnglat_tx']);
                 $distance = $areaIncludeObj->distance($user_point['lat'],$user_point['lng'],$vd['store_lat_tx'],$vd['store_lng_tx']);
                 $distance = number_format($distance/1000,2);
-                $arr[] = [
-                    'store_id'=>$vd['store_id'],
-                    'name'=>$vd['store_name'],
-                    'store_state'=>$this->getStoreState($vd),
-                    'mobile'=>$vd['store_phone'],
-                    'address'=>$vd['store_address'],
-                    'lng'=>$vd['store_lng_tx'],
-                    'lat'=>$vd['store_lat_tx'],
-                    'store_time'=>$vd['store_time'],
-                    'store_time2'=>$vd['store_time2'],
-                    'store_end_time'=>$vd['store_end_time'],
-                    'store_end_time2'=>$vd['store_end_time2'],
-                    'distance'=>$distance,
-                    'month_sale'=>$vd['month_sale'],
-                    'average_consume'=>$vd['average_consume'],
-                    'meituan_grade'=>$vd['meituan_grade'],
-                    'notice'=>$vd['notice'],
-                    'logo' => $this->getImage($vd['image'],$vd['image_oss']),
-                ];
+                if($distance<50.1){
+                    $arr[] = [
+                        'store_id'=>$vd['store_id'],
+                        'name'=>$vd['store_name'],
+                        'store_state'=>$this->getStoreState($vd),
+                        'mobile'=>$vd['store_phone'],
+                        'address'=>$vd['store_address'],
+                        'lng'=>$vd['store_lng_tx'],
+                        'lat'=>$vd['store_lat_tx'],
+                        'store_time'=>$vd['store_time'],
+                        'store_time2'=>$vd['store_time2'],
+                        'store_end_time'=>$vd['store_end_time'],
+                        'store_end_time2'=>$vd['store_end_time2'],
+                        'distance'=>$distance,
+                        'month_sale'=>$vd['month_sale'],
+                        'average_consume'=>$vd['average_consume'],
+                        'meituan_grade'=>$vd['meituan_grade'],
+                        'notice'=>$vd['notice'],
+                        'logo' => $this->getImage($vd['image'],$vd['image_oss']),
+                    ];
+                }
             }
         }
         return $arr;
@@ -399,21 +401,23 @@ class Store extends Api
                 //获取两点之间的距离
                 $distance = $areaIncludeObj->distance($data['lng'],$data['lat'],$vd['store_lng_tx'],$vd['store_lat_tx']);
                 $distance = number_format($distance,2);
-                $arr[] = [
-                    'store_id'=>$vd['store_id'],
-                    'name'=>$vd['store_name'],
-                    'store_state'=>$this->getStoreState($vd),
-                    'mobile'=>$vd['store_phone'],
-                    'address'=>$vd['store_address'],
-                    'lng'=>$vd['store_lng_tx'],
-                    'lat'=>$vd['store_lat_tx'],
-                    'store_time'=>$vd['store_time'],
-                    'store_end_time'=>$vd['store_end_time'],
-                    'distance'=>$distance,
-                    'city_id'=>$vd['city_id'],
-                    'city_name'=>$vd['city_name'],
-                    'store_status'=>$vd['store_state'],
-                ];
+                if($distance<50.1){
+                    $arr[] = [
+                        'store_id'=>$vd['store_id'],
+                        'name'=>$vd['store_name'],
+                        'store_state'=>$this->getStoreState($vd),
+                        'mobile'=>$vd['store_phone'],
+                        'address'=>$vd['store_address'],
+                        'lng'=>$vd['store_lng_tx'],
+                        'lat'=>$vd['store_lat_tx'],
+                        'store_time'=>$vd['store_time'],
+                        'store_end_time'=>$vd['store_end_time'],
+                        'distance'=>$distance,
+                        'city_id'=>$vd['city_id'],
+                        'city_name'=>$vd['city_name'],
+                        'store_status'=>$vd['store_state'],
+                    ];
+                }
                 //   }
             }
         }
@@ -425,6 +429,7 @@ class Store extends Api
 
     //获取状态
     public function getStoreState($store_info){
+        return 1;
         $now = time();
         $store_begin_time = strtotime($store_info['store_time']);
         $store_end_time = strtotime($store_info['store_end_time']);
